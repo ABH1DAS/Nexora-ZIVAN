@@ -15,10 +15,14 @@ export const hospitalService: HospitalService = {
           return rows.map((r) => ({
             id: r.id,
             name: r.name,
+            category: (r.id.startsWith("govt") ? "government" : "private") as "government" | "private",
             type: r.type,
-            distanceKm: r.distance_km ?? 2.0,
-            address: r.address ?? "",
+            distanceKm: r.distance_km ?? 2.4,
+            estimatedTravelTime: `${Math.round((r.distance_km ?? 2.4) * 3)}–${Math.round((r.distance_km ?? 2.4) * 4)} mins`,
+            address: r.address ?? "Sector 24, Health City",
             open: r.open ?? true,
+            specializations: r.specializations ?? ["Emergency / Trauma", "General Physician"],
+            icuStatus: (r.available_icu_beds && r.available_icu_beds > 0 ? "Available" : "Limited") as "Available" | "Limited",
           }));
         }
       } catch (err) {

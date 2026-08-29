@@ -34,29 +34,39 @@ function requestToNotifications(requests: AmbulanceRequest[]): Notification[] {
           : req.status === "arrived" || req.status === "declined"
           ? "info"
           : "status";
-      const titles: Record<AmbulanceRequest["status"], string> = {
-        searching: "🚨 New SOS Request",
-        accepted: "✅ Request Accepted",
-        en_route: "🚑 Ambulance En Route",
-        arrived: "📍 Ambulance Arrived",
-        declined: "❌ Request Declined",
-        cancelled: "↩ Request Cancelled",
+      const getTitle = (s: AmbulanceRequest["status"]) => {
+        if (s === "PENDING" || s === "searching") return "🚨 New SOS Emergency Dispatch";
+        if (s === "REQUEST RECEIVED") return "📋 ER Desk Request Acknowledged";
+        if (s === "HOSPITAL ACCEPTED" || s === "accepted") return "✅ Hospital ER Accepted";
+        if (s === "AMBULANCE ASSIGNED") return "🚑 Paramedic & Ambulance Assigned";
+        if (s === "AMBULANCE EN ROUTE" || s === "en_route") return "⚡ Ambulance Navigating to Patient";
+        if (s === "AMBULANCE ARRIVED" || s === "arrived") return "📍 Ambulance Arrived at Scene";
+        if (s === "PATIENT PICKED UP") return "🏥 Patient Onboard & En Route to ER";
+        if (s === "ARRIVED AT HOSPITAL") return "🏁 Patient Admitted to Emergency Room";
+        if (s === "declined") return "❌ Request Declined";
+        return "↩ Request Updated";
       };
-      const bodies: Record<AmbulanceRequest["status"], string> = {
-        searching: `${req.patientName} requires immediate assistance at ${req.locationLabel}.`,
-        accepted: `Request for ${req.patientName} accepted by ${req.acceptedBy ?? "staff"}. ETA ${req.etaMinutes ?? "—"} min.`,
-        en_route: `Ambulance is en route to ${req.patientName} at ${req.locationLabel}.`,
-        arrived: `Ambulance arrived at ${req.locationLabel} for ${req.patientName}.`,
-        declined: `Request for ${req.patientName} was declined.`,
-        cancelled: `Request ${req.id} was cancelled.`,
+
+      const getBody = (r: AmbulanceRequest) => {
+        if (r.status === "PENDING" || r.status === "searching") {
+          return `${r.patientName} triggered priority SOS dispatch at ${r.locationLabel}.`;
+        }
+        if (r.status === "HOSPITAL ACCEPTED" || r.status === "accepted") {
+          return `Request for ${r.patientName} accepted by ${r.acceptedBy ?? "ER Desk"}. ETA: ${r.etaMinutes ?? 8} min.`;
+        }
+        if (r.status === "AMBULANCE ASSIGNED") {
+          return `${r.driverName ?? "Paramedic"} (${r.vehicleNumber ?? "DL-01-EV-4892"}) assigned for ${r.patientName}.`;
+        }
+        return `Emergency status for ${r.patientName} updated to ${r.status}.`;
       };
+
       return {
         id: `${req.id}-${req.status}`,
-        title: titles[req.status],
-        body: bodies[req.status],
+        title: getTitle(req.status),
+        body: getBody(req),
         type,
         time: new Date(req.updatedAt),
-        read: req.status !== "searching",
+        read: req.status !== "searching" && req.status !== "PENDING",
       };
     });
 }

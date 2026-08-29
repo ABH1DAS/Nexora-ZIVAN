@@ -32,15 +32,12 @@ function PriorityBadge({ priority }: { priority: AmbulanceRequest["priority"] })
 }
 
 function StatusDot({ status }: { status: AmbulanceRequest["status"] }) {
-  const colors: Record<AmbulanceRequest["status"], string> = {
-    searching: "bg-amber-400 animate-pulse",
-    accepted: "bg-sky-400",
-    en_route: "bg-sky-500 animate-pulse",
-    arrived: "bg-emerald-500",
-    declined: "bg-rose-400",
-    cancelled: "bg-slate-300",
-  };
-  return <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", colors[status])} />;
+  const isPulsing = ["searching", "PENDING", "REQUEST RECEIVED", "AMBULANCE EN ROUTE", "en_route"].includes(status);
+  const isGreen = ["arrived", "AMBULANCE ARRIVED", "HELP ARRIVED", "ARRIVED AT HOSPITAL"].includes(status);
+  const isRed = ["declined", "cancelled"].includes(status);
+  const color = isRed ? "bg-rose-400" : isGreen ? "bg-emerald-500" : "bg-teal-500";
+
+  return <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", color, isPulsing && "animate-pulse")} />;
 }
 
 export default function EmergenciesPage() {
