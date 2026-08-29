@@ -378,3 +378,249 @@ export async function fetchStaffByEmail(
   if (error) return null;
   return data as SupabaseHospitalStaff;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  PATIENT DATA SCHEMAS & HELPERS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export interface SupabaseHealthProfile {
+  patient_id: string;
+  full_name: string;
+  blood_group: string;
+  date_of_birth?: string;
+  gender?: string;
+  allergies: string[];
+  medications: string[];
+  medical_history: string[];
+  organ_donor: boolean;
+  doctor_name?: string;
+  doctor_phone?: string;
+  emergency_notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface SupabaseEmergencyContact {
+  id?: string;
+  patient_id: string;
+  name: string;
+  phone: string;
+  relationship: string;
+  priority: "Primary" | "Secondary";
+  created_at?: string;
+}
+
+export interface SupabaseDailyMetrics {
+  id?: string;
+  patient_id: string;
+  metric_date: string;
+  heart_rate: number;
+  resting_hr?: number;
+  spo2: number;
+  steps: number;
+  step_goal: number;
+  active_minutes: number;
+  calories_burned: number;
+  sleep_hours: number;
+  sleep_score: number;
+  water_liters: number;
+  water_goal: number;
+}
+
+export interface SupabaseWaterLog {
+  id?: string;
+  patient_id: string;
+  amount_ml: number;
+  note?: string;
+  logged_at: string;
+}
+
+export interface SupabaseConnectedDevice {
+  id: string;
+  patient_id: string;
+  name: string;
+  brand: string;
+  model: string;
+  connected: boolean;
+  battery_percent: number;
+  last_sync_at?: string;
+}
+
+export interface SupabaseChallenge {
+  id: string;
+  title: string;
+  category: string;
+  total_target: number;
+  unit: string;
+  description?: string;
+  badge_reward?: string;
+  points_reward?: number;
+}
+
+export interface SupabaseUserChallenge {
+  id?: string;
+  patient_id: string;
+  challenge_id: string;
+  progress: number;
+  completed: boolean;
+  streak_days: number;
+  updated_at?: string;
+}
+
+export interface SupabaseReward {
+  id: string;
+  title: string;
+  category: string;
+  points_cost: number;
+  description?: string;
+  discount_code?: string;
+  partner_name?: string;
+  active?: boolean;
+}
+
+// 1. Health Profile
+export async function fetchHealthProfile(patientId = "demo-user"): Promise<SupabaseHealthProfile | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("health_profiles")
+    .select("*")
+    .eq("patient_id", patientId)
+    .single();
+  if (error) return null;
+  return data as SupabaseHealthProfile;
+}
+
+export async function saveHealthProfile(profile: SupabaseHealthProfile): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase
+    .from("health_profiles")
+    .upsert({ ...profile, updated_at: new Date().toISOString() });
+  return !error;
+}
+
+// 2. Emergency Contacts
+export async function fetchEmergencyContacts(patientId = "demo-user"): Promise<SupabaseEmergencyContact[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("emergency_contacts")
+    .select("*")
+    .eq("patient_id", patientId)
+    .order("priority", { ascending: true });
+  if (error) return [];
+  return (data as SupabaseEmergencyContact[]) ?? [];
+}
+
+export async function addEmergencyContact(contact: SupabaseEmergencyContact): Promise<SupabaseEmergencyContact | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("emergency_contacts")
+    .insert([contact])
+    .select()
+    .single();
+  if (error) return null;
+  return data as SupabaseEmergencyContact;
+}
+
+export async function removeEmergencyContact(contactId: string): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase.from("emergency_contacts").delete().eq("id", contactId);
+  return !error;
+}
+
+// 3. Daily Vitals Metrics
+export async function fetchDailyMetrics(patientId = "demo-user", date = new Date().toISOString().split("T")[0]): Promise<SupabaseDailyMetrics | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("daily_metrics")
+    .select("*")
+    .eq("patient_id", patientId)
+    .eq("metric_date", date)
+    .single();
+  if (error) return null;
+  return data as SupabaseDailyMetrics;
+}
+
+export async function saveDailyMetrics(metrics: Partial<SupabaseDailyMetrics>): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase.from("daily_metrics").upsert(metrics);
+  return !error;
+}
+
+// 4. Water Logs
+export async function fetchWaterLogs(patientId = "demo-user"): Promise<SupabaseWaterLog[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("water_logs")
+    .select("*")
+    .eq("patient_id", patientId)
+    .order("logged_at", { ascending: false })
+    .limit(20);
+  if (error) return [];
+  return (data as SupabaseWaterLog[]) ?? [];
+}
+
+export async function logWaterIntake(patientId: string, amountMl: number, note?: string): Promise<SupabaseWaterLog | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("water_logs")
+    .insert([{ patient_id: patientId, amount_ml: amountMl, note, logged_at: new Date().toISOString() }])
+    .select()
+    .single();
+  if (error) return null;
+  return data as SupabaseWaterLog;
+}
+
+// 5. Connected Devices
+export async function fetchConnectedDevices(patientId = "demo-user"): Promise<SupabaseConnectedDevice[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("connected_devices")
+    .select("*")
+    .eq("patient_id", patientId);
+  if (error) return [];
+  return (data as SupabaseConnectedDevice[]) ?? [];
+}
+
+export async function updateConnectedDevice(device: SupabaseConnectedDevice): Promise<boolean> {
+  if (!supabase) return false;
+  const { error } = await supabase.from("connected_devices").upsert(device);
+  return !error;
+}
+
+// 6. Challenges & User Progress
+export async function fetchChallenges(): Promise<SupabaseChallenge[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase.from("challenges").select("*");
+  if (error) return [];
+  return (data as SupabaseChallenge[]) ?? [];
+}
+
+export async function fetchUserChallenges(patientId = "demo-user"): Promise<SupabaseUserChallenge[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("user_challenges")
+    .select("*")
+    .eq("patient_id", patientId);
+  if (error) return [];
+  return (data as SupabaseUserChallenge[]) ?? [];
+}
+
+// 7. Rewards
+export async function fetchRewards(): Promise<SupabaseReward[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase.from("rewards").select("*");
+  if (error) return [];
+  return (data as SupabaseReward[]) ?? [];
+}
+
+// 8. Patient SOS List
+export async function fetchPatientEmergencies(patientId = "demo-user"): Promise<SupabaseEmergencyRecord[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("emergencies")
+    .select("*")
+    .eq("patient_id", patientId)
+    .order("created_at", { ascending: false });
+  if (error) return [];
+  return (data as SupabaseEmergencyRecord[]) ?? [];
+}
