@@ -46,7 +46,9 @@ export function GoogleAmbulanceMap({
   const [distanceText, setDistanceText] = useState("4.2 km");
   const [mapType, setMapType] = useState<"roadmap" | "satellite" | "hybrid">("roadmap");
 
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const apiKey =
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
+    "AIzaSyCdU5-QL9eWfz71iJE4INZYwqkF1SzM8l0";
 
   useEffect(() => {
     if (!apiKey) {
