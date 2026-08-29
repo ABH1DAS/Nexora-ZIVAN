@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4faf7;
+  --background: #eaf2ef;
   --foreground: #0f1f1c;
   --muted: #4e6660;
-  --card: rgba(255, 255, 255, 0.95);
-  --card-solid: #ffffff;
-  --border: #d4e8e1;
+  --card: rgba(228, 239, 235, 0.95);
+  --card-solid: #e2ece8;
+  --border: transparent;
   --primary: #0d8f7a;
   --primary-dark: #0a6b5c;
   --primary-soft: #c8ece4;
@@ -18,9 +18,9 @@
   --warning: #d97706;
   --success: #059669;
   --score: #0d8f7a;
-  --glass: rgba(255, 255, 255, 0.75);
-  --shadow: 0 20px 50px rgba(13, 143, 122, 0.12);
-  --shadow-sm: 0 10px 30px rgba(15, 61, 53, 0.08);
+  --glass: rgba(230, 241, 237, 0.75);
+  --shadow: 0 20px 50px rgba(13, 143, 122, 0.16);
+  --shadow-sm: 0 12px 34px rgba(15, 61, 53, 0.12);
   --radius: 1.5rem;
   --radius-sm: 1rem;
   --radius-lg: 2rem;
@@ -98,7 +98,7 @@ h4,
   background: var(--glass);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255, 255, 255, 0.65);
   box-shadow: var(--shadow-sm);
 }
 
@@ -110,10 +110,10 @@ h4,
 
 .bg-atmosphere {
   background:
-    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(26, 155, 181, 0.18), transparent 55%),
-    radial-gradient(ellipse 70% 45% at 95% 5%, rgba(13, 143, 122, 0.16), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(217, 53, 74, 0.06), transparent 55%),
-    linear-gradient(180deg, #f4faf7 0%, #ebf6f2 40%, #f7fcfa 100%);
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(26, 155, 181, 0.22), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 95% 5%, rgba(13, 143, 122, 0.2), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(217, 53, 74, 0.08), transparent 55%),
+    linear-gradient(180deg, #eaf2ef 0%, #dfeedb 40%, #e8f1ee 100%);
 }
 
 .bg-mesh {

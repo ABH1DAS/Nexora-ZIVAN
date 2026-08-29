@@ -84,9 +84,9 @@ export default function NotificationsPage() {
   };
 
   const bgMap = {
-    emergency: "border border-rose-200 bg-rose-50/70 shadow-2xs hover:shadow-sm",
-    status: "border border-accent/20 bg-accent-soft/70 shadow-2xs hover:shadow-sm",
-    info: "border border-border bg-white shadow-sm hover:shadow-md",
+    emergency: "border-0 bg-emergency-soft/90 shadow-[0_12px_32px_rgba(217,53,74,0.18)] hover:shadow-[0_18px_44px_rgba(217,53,74,0.28)]",
+    status: "border-0 bg-accent-soft/90 shadow-[0_12px_32px_rgba(26,155,181,0.18)] hover:shadow-[0_18px_44px_rgba(26,155,181,0.28)]",
+    info: "border-0 bg-[#eef6f4] shadow-[0_12px_32px_rgba(15,61,53,0.08)] hover:shadow-[0_18px_44px_rgba(13,143,122,0.16)]",
   };
 
   return (
@@ -96,7 +96,7 @@ export default function NotificationsPage() {
         <div className="flex items-center gap-3">
           <h1 className="font-semibold text-foreground text-lg">Notifications</h1>
           {unreadCount > 0 && (
-            <span className="rounded-full bg-emergency px-2.5 py-0.5 text-xs font-bold text-white shadow-2xs">
+            <span className="rounded-full bg-emergency px-2.5 py-0.5 text-xs font-bold text-white shadow-[0_4px_14px_rgba(217,53,74,0.35)]">
               {unreadCount} new
             </span>
           )}
@@ -108,10 +108,10 @@ export default function NotificationsPage() {
               type="button"
               onClick={() => setFilter(f)}
               className={cn(
-                "rounded-full border px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
+                "rounded-full border-0 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
                 filter === f
-                  ? "border-primary bg-primary text-white shadow-sm"
-                  : "border-border bg-white text-muted hover:bg-primary-soft hover:text-primary",
+                  ? "bg-primary text-white shadow-sm"
+                  : "bg-white text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
               )}
             >
               {f === "all" ? "All" : "Unread"}
@@ -122,7 +122,7 @@ export default function NotificationsPage() {
 
       {/* List */}
       {displayed.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-[2rem] border border-border bg-white/80 py-20 text-center shadow-sm backdrop-blur">
+        <div className="flex flex-col items-center gap-4 rounded-[2rem] border-0 bg-[#eef6f4] py-20 text-center shadow-[0_14px_40px_rgba(15,61,53,0.1)]">
           {filter === "unread" ? (
             <>
               <BellOff className="h-10 w-10 text-muted/60" aria-hidden />

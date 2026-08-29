@@ -47,11 +47,11 @@ function InputField({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-sm font-semibold text-foreground">
+      <label htmlFor={id} className="mb-1.5 block text-sm font-semibold text-slate-700">
         {label}
       </label>
       <div className="relative">
-        <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden />
+        <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
         <input
           id={id}
           type={type}
@@ -61,9 +61,9 @@ function InputField({
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            "h-12 w-full rounded-xl border border-border bg-white pl-10 pr-4 text-sm text-foreground outline-none transition",
-            "placeholder:text-muted shadow-2xs",
-            "focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10",
+            "h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-[#0b1f2a] outline-none transition",
+            "placeholder:text-slate-400",
+            "focus:border-[#0b1f2a] focus:bg-white focus:ring-2 focus:ring-[#0b1f2a]/10",
             "disabled:cursor-not-allowed disabled:opacity-50",
             rightSlot && "pr-11",
           )}
@@ -160,10 +160,10 @@ export default function HospitalLoginPage() {
       <main className="flex flex-1 items-center justify-center px-4 pb-16 pt-6">
         <div className="w-full max-w-md">
           {/* Main Card Division */}
-          <div className="rounded-[2rem] border border-border bg-white/90 backdrop-blur-md p-8 shadow-sm">
+          <div className="rounded-[2rem] border border-border bg-white/90 backdrop-blur-md p-8 shadow-[0_20px_60px_rgba(13,143,122,0.16)] hover:shadow-[0_28px_70px_rgba(13,143,122,0.24)] transition-all duration-300">
             {/* Icon + heading */}
             <div className="mb-6 flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary shadow-xs shadow-primary/25">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary shadow-md shadow-primary/25">
                 <ShieldCheck className="h-6 w-6 text-white" aria-hidden />
               </div>
               <div>
@@ -181,7 +181,7 @@ export default function HospitalLoginPage() {
 
             {/* Hospital verification indicator */}
             {verified && (
-              <div className="mb-5 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-2xs animate-in fade-in duration-200">
+              <div className="mb-5 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-[0_6px_20px_rgba(5,150,105,0.15)] animate-in fade-in duration-200">
                 <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
                 Hospital account verified
               </div>
@@ -191,7 +191,7 @@ export default function HospitalLoginPage() {
             {error && (
               <div
                 role="alert"
-                className="mb-5 flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-2xs animate-in fade-in duration-200"
+                className="mb-5 flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-[0_6px_20px_rgba(217,53,74,0.15)] animate-in fade-in duration-200"
               >
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
                 <span>{error}</span>
@@ -271,7 +271,7 @@ export default function HospitalLoginPage() {
                 variant="primary"
                 size="lg"
                 disabled={submitting || !email || !password}
-                className="mt-2 w-full shadow-2xs"
+                className="mt-2 w-full shadow-[0_8px_25px_rgba(13,143,122,0.35)] hover:shadow-[0_12px_32px_rgba(13,143,122,0.45)]"
               >
                 {submitting ? (
                   <>
@@ -286,7 +286,7 @@ export default function HospitalLoginPage() {
           </div>
 
           {/* Demo credentials panel */}
-          <div className="mt-5 rounded-[1.5rem] border border-border bg-white/80 backdrop-blur-sm p-6 shadow-sm">
+          <div className="mt-5 rounded-[1.5rem] border border-border bg-white/80 backdrop-blur-sm p-6 shadow-[0_12px_36px_rgba(15,61,53,0.08)] hover:shadow-[0_18px_45px_rgba(13,143,122,0.14)] transition-all duration-300">
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-muted">
               Demo Accounts
             </p>
@@ -296,7 +296,7 @@ export default function HospitalLoginPage() {
                   key={acc.id}
                   type="button"
                   onClick={() => fillDemo(acc)}
-                  className="group flex w-full items-center justify-between rounded-2xl border border-border bg-white px-4 py-3 text-left shadow-2xs hover:border-primary/40 hover:shadow-xs hover:-translate-y-0.5 transition-all duration-200"
+                  className="group flex w-full items-center justify-between rounded-2xl border border-border bg-white px-4 py-3 text-left shadow-[0_4px_16px_rgba(15,61,53,0.04)] hover:border-primary/40 hover:shadow-[0_8px_24px_rgba(13,143,122,0.16)] hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <div>
                     <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">

@@ -140,32 +140,32 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-border bg-white shadow-xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border-0 bg-[#eef6f4] shadow-[0_25px_70px_rgba(13,143,122,0.28)] flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-border bg-[#f7fbfa] px-6 py-4 text-foreground">
+        <div className="flex items-center justify-between border-0 bg-gradient-to-r from-slate-900 via-[#0f2420] to-slate-900 px-6 py-4 text-white">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white shadow-2xs">
-              <Activity className="h-5 w-5 animate-pulse" aria-hidden />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary shadow-xs shadow-primary/40">
+              <Activity className="h-5 w-5 text-white animate-pulse" aria-hidden />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-display text-lg font-bold text-foreground">
+                <h3 className="font-display text-lg font-bold">
                   Live Patient Telemetry &amp; SBAR Handover
                 </h3>
-                <span className="flex items-center gap-1 rounded-full bg-emerald-100 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
+                <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 border-0">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
                   LIVE STREAM
                 </span>
               </div>
-              <p className="text-xs text-muted">
-                Patient: <strong className="text-foreground">{request.patientName}</strong> · Assigned to {request.acceptedBy || "Paramedic Unit"}
+              <p className="text-xs text-slate-300">
+                Patient: <strong className="text-white">{request.patientName}</strong> · Assigned to {request.acceptedBy || "Paramedic Unit"}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-muted hover:bg-slate-100 hover:text-foreground transition"
+            className="rounded-full p-2 text-slate-400 hover:bg-white/10 hover:text-white transition"
           >
             <X className="h-5 w-5" />
           </button>
@@ -174,7 +174,7 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
         {/* Modal Body */}
         <div className="overflow-y-auto p-6 space-y-6 flex-1">
           {/* ECG Oscilloscope Screen */}
-          <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#071318] p-4 shadow-inner">
+          <div className="overflow-hidden rounded-2xl border-0 bg-[#071318] p-4 shadow-inner">
             <div className="flex items-center justify-between mb-2 text-xs text-slate-400">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-emerald-400 font-bold">LEAD II · 25mm/s · 10mm/mV</span>
@@ -197,7 +197,7 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
           {/* Vitals HUD Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {/* Heart Rate */}
-            <div className="rounded-[1.25rem] border border-rose-200 bg-rose-50/70 p-3.5 shadow-2xs">
+            <div className="rounded-[1.25rem] border-0 bg-rose-100/90 p-3.5 shadow-[0_6px_20px_rgba(217,53,74,0.14)]">
               <div className="flex items-center justify-between text-xs font-bold text-rose-800">
                 <span>Heart Rate</span>
                 <Heart className="h-4 w-4 fill-rose-500 text-rose-500" />
@@ -211,7 +211,7 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
             </div>
 
             {/* Blood Pressure */}
-            <div className="rounded-[1.25rem] border border-sky-200 bg-sky-50/70 p-3.5 shadow-2xs">
+            <div className="rounded-[1.25rem] border-0 bg-sky-100/90 p-3.5 shadow-[0_6px_20px_rgba(26,155,181,0.14)]">
               <div className="flex items-center justify-between text-xs font-bold text-sky-800">
                 <span>Blood Pressure</span>
                 <Activity className="h-4 w-4 text-sky-600" />
@@ -223,7 +223,7 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
             </div>
 
             {/* SpO2 */}
-            <div className="rounded-[1.25rem] border border-emerald-200 bg-emerald-50/70 p-3.5 shadow-2xs">
+            <div className="rounded-[1.25rem] border-0 bg-emerald-100/90 p-3.5 shadow-[0_6px_20px_rgba(5,150,105,0.14)]">
               <div className="flex items-center justify-between text-xs font-bold text-emerald-800">
                 <span>SpO2 Oxygen</span>
                 <Wind className="h-4 w-4 text-emerald-600" />
@@ -235,7 +235,7 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
             </div>
 
             {/* Core Temp */}
-            <div className="rounded-[1.25rem] border border-amber-200 bg-amber-50/70 p-3.5 shadow-2xs">
+            <div className="rounded-[1.25rem] border-0 bg-amber-100/90 p-3.5 shadow-[0_6px_20px_rgba(245,158,11,0.14)]">
               <div className="flex items-center justify-between text-xs font-bold text-amber-800">
                 <span>Temperature</span>
                 <Thermometer className="h-4 w-4 text-amber-600" />
@@ -248,17 +248,17 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
           </div>
 
           {/* SBAR Pre-Arrival Clinical Handover Summary */}
-          <div className="rounded-[1.5rem] border border-border bg-white p-5 space-y-3 shadow-2xs">
+          <div className="rounded-[1.5rem] border-0 bg-white p-5 space-y-3 shadow-[0_8px_24px_rgba(15,61,53,0.06)]">
             <h4 className="font-semibold text-foreground text-sm flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 text-primary" />
               SBAR Pre-Arrival Clinical Checklist
             </h4>
             <div className="grid sm:grid-cols-2 gap-3 text-xs">
-              <div className="rounded-xl border border-border bg-[#f7fbfa] p-3 shadow-2xs">
+              <div className="rounded-xl border-0 bg-[#eef6f4] p-3 shadow-2xs">
                 <span className="font-bold text-primary block mb-1">S - Situation &amp; Chief Complaint:</span>
                 <p className="text-muted leading-relaxed">{request.notes}</p>
               </div>
-              <div className="rounded-xl border border-border bg-[#f7fbfa] p-3 shadow-2xs">
+              <div className="rounded-xl border-0 bg-[#eef6f4] p-3 shadow-2xs">
                 <span className="font-bold text-primary block mb-1">B - Background &amp; Allergies:</span>
                 <p className="text-muted leading-relaxed">
                   Blood Group: <strong className="text-foreground">{request.bloodGroup ?? "Unknown"}</strong> · Allergies: <strong className="text-foreground">{request.allergies?.join(", ") || "None"}</strong> · Meds: {request.medications?.join(", ") || "None"}
@@ -276,14 +276,14 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
                 value={handoverText}
                 onChange={(e) => setHandoverText(e.target.value)}
                 placeholder="Enter pre-arrival treatments, airway status, or specific trauma bay prep instructions..."
-                className="w-full rounded-xl border border-border bg-[#f7fbfa] p-3 text-xs text-foreground placeholder:text-muted outline-none focus:ring-2 focus:ring-primary/20 transition"
+                className="w-full rounded-xl border-0 bg-[#eef6f4] p-3 text-xs text-foreground placeholder:text-muted outline-none focus:ring-2 focus:ring-primary/20 transition"
               />
             </div>
           </div>
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between border-t border-border bg-[#f7fbfa] px-6 py-4">
+        <div className="flex items-center justify-between border-t border-black/5 bg-[#eef6f4] px-6 py-4">
           <div className="flex items-center gap-2 text-xs text-muted">
             <Clock className="h-4 w-4 text-primary" />
             <span>ETA to ER Bay: <strong className="text-foreground">{request.etaMinutes != null ? `${request.etaMinutes} mins` : "Arrived"}</strong></span>

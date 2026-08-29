@@ -127,37 +127,37 @@ export function AmbulanceCommsDrawer({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 overflow-hidden bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="absolute inset-y-0 right-0 flex max-w-full pl-10">
-        <div className="w-screen max-w-md bg-white shadow-xl border-l border-border flex flex-col">
+        <div className="w-screen max-w-md bg-[#eef6f4] shadow-[0_25px_70px_rgba(13,143,122,0.28)] border-0 flex flex-col">
           {/* Drawer Header */}
-          <div className="flex items-center justify-between border-b border-border bg-[#f7fbfa] px-6 py-4 text-foreground">
+          <div className="flex items-center justify-between border-0 bg-gradient-to-r from-slate-900 via-[#0f2420] to-slate-900 px-6 py-4 text-white">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white shadow-2xs">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white shadow-xs shadow-primary/30">
                 <Radio className="h-5 w-5 animate-pulse" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-display text-base font-bold text-foreground">Tactical Ambulance Comms</h3>
-                  <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                  <h3 className="font-display text-base font-bold">Tactical Ambulance Comms</h3>
+                  <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
                 </div>
-                <p className="text-xs text-muted">
-                  Channel 4 · Patient: <strong className="text-foreground">{request.patientName}</strong>
+                <p className="text-xs text-slate-300">
+                  Channel 4 · Patient: <strong className="text-white">{request.patientName}</strong>
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="rounded-full p-2 text-muted hover:bg-slate-100 hover:text-foreground transition"
+              className="rounded-full p-2 text-slate-400 hover:bg-white/10 hover:text-white transition"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Messages Thread */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/60">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#ebf5f2]">
             <div className="text-center my-2">
-              <span className="rounded-full border border-border bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted shadow-2xs">
+              <span className="rounded-full bg-slate-200/80 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted shadow-2xs">
                 Secure Telemetry &amp; Radio Bridge
               </span>
             </div>
@@ -179,14 +179,14 @@ export function AmbulanceCommsDrawer({
                     className={cn(
                       "rounded-2xl px-4 py-2.5 text-xs leading-relaxed",
                       isHospital
-                        ? "bg-primary text-white rounded-br-xs shadow-2xs"
-                        : "bg-white border border-border text-foreground rounded-bl-xs shadow-2xs"
+                        ? "bg-primary text-white rounded-br-xs shadow-[0_4px_16px_rgba(13,143,122,0.25)]"
+                        : "bg-white border-0 text-foreground rounded-bl-xs shadow-[0_4px_16px_rgba(15,61,53,0.08)]"
                     )}
                   >
                     {msg.text}
                   </div>
                   {isHospital && (
-                    <div className="flex items-center gap-1 text-[10px] text-primary mt-0.5 px-1 font-semibold">
+                    <div className="flex items-center gap-1 text-[10px] text-muted mt-0.5 px-1 font-semibold">
                       <CheckCheck className="h-3 w-3 text-primary" />
                       Delivered to ambulance HUD
                     </div>
@@ -198,12 +198,12 @@ export function AmbulanceCommsDrawer({
           </div>
 
           {/* Quick Preset One-Tap Responses */}
-          <div className="border-t border-border bg-[#f7fbfa] px-4 py-2.5 overflow-x-auto whitespace-nowrap scrollbar-none flex gap-2">
+          <div className="border-t border-black/5 bg-[#eef6f4] px-4 py-2.5 overflow-x-auto whitespace-nowrap scrollbar-none flex gap-2">
             {PRESET_MESSAGES.map((preset, idx) => (
               <button
                 key={idx}
                 onClick={() => handleSend(preset)}
-                className="shrink-0 rounded-full border border-border bg-white px-3 py-1 text-[11px] font-medium text-muted hover:bg-primary-soft hover:text-primary transition shadow-2xs"
+                className="shrink-0 rounded-full border-0 bg-white px-3 py-1 text-[11px] font-medium text-muted hover:bg-primary-soft hover:text-primary transition shadow-2xs"
               >
                 {preset}
               </button>
@@ -211,7 +211,7 @@ export function AmbulanceCommsDrawer({
           </div>
 
           {/* Input Footer */}
-          <div className="border-t border-border bg-[#f7fbfa] p-4 space-y-2">
+          <div className="border-t border-black/5 bg-[#eef6f4] p-4 space-y-2">
             <div className="flex items-center gap-2">
               <input
                 type="text"
@@ -219,12 +219,12 @@ export function AmbulanceCommsDrawer({
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
                 placeholder="Type radio dispatch message..."
-                className="flex-1 rounded-2xl border border-border bg-white px-4 py-2.5 text-xs text-foreground placeholder:text-muted outline-none focus:ring-2 focus:ring-primary/20 shadow-2xs transition"
+                className="flex-1 rounded-2xl border-0 bg-white px-4 py-2.5 text-xs text-foreground placeholder:text-muted outline-none focus:ring-2 focus:ring-primary/20 shadow-[0_4px_14px_rgba(15,61,53,0.06)] transition"
               />
               <button
                 type="button"
                 onClick={() => handleSend()}
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-2xs hover:bg-primary/90 transition"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-xs shadow-primary/30 hover:bg-primary/90 transition"
               >
                 <Send className="h-4 w-4" />
               </button>
@@ -236,10 +236,10 @@ export function AmbulanceCommsDrawer({
               onClick={handleRadioTransmit}
               disabled={isTransmitting}
               className={cn(
-                "w-full flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold transition-all shadow-2xs border",
+                "w-full flex items-center justify-center gap-2 rounded-xl py-2 text-xs font-bold transition-all shadow-xs",
                 isTransmitting
-                  ? "bg-rose-600 border-rose-600 text-white animate-pulse"
-                  : "border-border bg-white text-muted hover:bg-slate-50 hover:text-foreground"
+                  ? "bg-rose-600 text-white animate-pulse shadow-[0_4px_16px_rgba(217,53,74,0.35)]"
+                  : "bg-white text-muted hover:bg-slate-100 hover:text-foreground"
               )}
             >
               <Mic className="h-3.5 w-3.5 text-rose-500" />

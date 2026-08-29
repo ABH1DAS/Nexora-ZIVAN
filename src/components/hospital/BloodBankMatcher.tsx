@@ -70,24 +70,24 @@ export function BloodBankMatcher({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-border bg-white shadow-xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_25px_70px_rgba(217,53,74,0.22)] flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border bg-[#f7fbfa] px-6 py-4 text-foreground">
+        <div className="flex items-center justify-between border-b border-border bg-gradient-to-r from-slate-900 via-[#0f2420] to-slate-900 px-6 py-4 text-white">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-500 text-white shadow-2xs">
-              <Droplet className="h-5 w-5" aria-hidden />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-500 shadow-lg shadow-rose-500/40">
+              <Droplet className="h-5 w-5 text-white" aria-hidden />
             </div>
             <div>
-              <h3 className="font-display text-lg font-bold text-foreground">Blood Bank Cross-Match</h3>
-              <p className="text-xs text-muted">
-                Patient: <strong className="text-foreground">{request.patientName}</strong> · Group: <strong className="text-rose-600 font-bold">{bloodGroup}</strong>
+              <h3 className="font-display text-lg font-bold">Blood Bank Cross-Match</h3>
+              <p className="text-xs text-slate-300">
+                Patient: <strong className="text-white">{request.patientName}</strong> · Group: <strong className="text-rose-400 font-bold">{bloodGroup}</strong>
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-muted hover:bg-slate-100 hover:text-foreground transition"
+            className="rounded-full p-2 text-slate-400 hover:bg-white/10 hover:text-white transition"
           >
             <X className="h-5 w-5" />
           </button>
@@ -221,7 +221,7 @@ export function BloodBankMatcher({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-border bg-[#f7fbfa] px-6 py-4">
+        <div className="flex items-center justify-between border-t border-border bg-slate-50/80 px-6 py-4">
           <Button variant="outline" size="sm" onClick={onClose}>
             Close
           </Button>
