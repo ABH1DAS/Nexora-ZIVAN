@@ -5,14 +5,16 @@ import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import {
   Activity,
+  Bot,
   Brain,
-  Droplets,
+  CheckSquare,
   Gift,
   LayoutDashboard,
   LogOut,
   Menu,
   Settings,
   ShieldAlert,
+  Sparkles,
   Trophy,
   UserRound,
   Watch,
@@ -24,16 +26,16 @@ import { useEffect, useState, type ReactNode } from "react";
 import { AutoEmergencyMonitor } from "@/components/dashboard/AutoEmergencyMonitor";
 
 const navItems = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: "/dashboard/health", label: "Health", icon: Activity },
-  { href: "/dashboard/water", label: "Water", icon: Droplets },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/health", label: "Health Tracking", icon: Activity },
+  { href: "/dashboard/wellbeing", label: "Mental Wellbeing", icon: Brain },
+  { href: "/dashboard/habits", label: "Habits & Goals", icon: CheckSquare },
+  { href: "/dashboard/ai", label: "AI Assistant", icon: Sparkles },
+  { href: "/dashboard/emergency", label: "SOS Emergency", icon: ShieldAlert },
+  { href: "/dashboard/profile", label: "Health Profile", icon: UserRound },
   { href: "/dashboard/devices", label: "Devices", icon: Watch },
-  { href: "/dashboard/wellbeing", label: "Wellbeing", icon: Brain },
-  { href: "/dashboard/emergency", label: "Emergency", icon: ShieldAlert },
   { href: "/dashboard/challenges", label: "Challenges", icon: Trophy },
   { href: "/dashboard/rewards", label: "Rewards", icon: Gift },
-  { href: "/dashboard/profile", label: "Profile", icon: UserRound },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 export function DashboardShell({ children }: { children: ReactNode }) {
