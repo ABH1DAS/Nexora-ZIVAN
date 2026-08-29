@@ -1,7 +1,7 @@
 "use client";
 
 import { useHospitalAuth } from "@/lib/hospitalAuth";
-import { subscribeAmbulanceRequests, statusLabel } from "@/lib/ambulanceStore";
+import { subscribeAmbulanceRequests, statusLabel, INITIAL_DEMO_REQUESTS } from "@/lib/ambulanceStore";
 import { hospitalAudio } from "@/lib/hospitalAudio";
 import { LiveTelemetryModal } from "@/components/hospital/LiveTelemetryModal";
 import { BedAllocationModal } from "@/components/hospital/BedAllocationModal";
@@ -32,7 +32,7 @@ import {
 
 export default function CommandCenterPage() {
   const { account } = useHospitalAuth();
-  const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
+  const [requests, setRequests] = useState<AmbulanceRequest[]>(INITIAL_DEMO_REQUESTS.filter(r => r.hospitalId === "city-hospital"));
   const [time, setTime] = useState<Date | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundOn, setSoundOn] = useState(hospitalAudio.isEnabled());
@@ -51,10 +51,14 @@ export default function CommandCenterPage() {
   }, []);
 
   useEffect(() => {
-    if (!account) return;
     return subscribeAmbulanceRequests((all) => {
-      const mine = all.filter((r) => r.hospitalId === account.hospitalId);
-      setRequests(mine);
+      const hospitalId = account?.hospitalId || "city-hospital";
+      const mine = all.filter((r) => r.hospitalId === hospitalId);
+      setRequests(
+        mine.length > 0
+          ? mine
+          : INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === "city-hospital")
+      );
     });
   }, [account]);
 

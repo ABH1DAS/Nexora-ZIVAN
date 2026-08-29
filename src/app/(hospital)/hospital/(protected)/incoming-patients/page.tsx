@@ -1,7 +1,7 @@
 "use client";
 
 import { useHospitalAuth } from "@/lib/hospitalAuth";
-import { subscribeAmbulanceRequests, statusLabel } from "@/lib/ambulanceStore";
+import { subscribeAmbulanceRequests, statusLabel, INITIAL_DEMO_REQUESTS } from "@/lib/ambulanceStore";
 import { LiveTelemetryModal } from "@/components/hospital/LiveTelemetryModal";
 import { BedAllocationModal } from "@/components/hospital/BedAllocationModal";
 import { AmbulanceCommsDrawer } from "@/components/hospital/AmbulanceCommsDrawer";
@@ -22,7 +22,13 @@ import {
 
 export default function IncomingPatientsPage() {
   const { account } = useHospitalAuth();
-  const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
+  const [requests, setRequests] = useState<AmbulanceRequest[]>(
+    INITIAL_DEMO_REQUESTS.filter(
+      (r) =>
+        r.hospitalId === "city-hospital" &&
+        !["declined", "cancelled"].includes(r.status)
+    )
+  );
   const [selectedReq, setSelectedReq] = useState<AmbulanceRequest | null>(null);
 
   // Modals state
@@ -32,21 +38,28 @@ export default function IncomingPatientsPage() {
   const [bloodOpen, setBloodOpen] = useState(false);
 
   useEffect(() => {
-    if (!account) return;
-    return subscribeAmbulanceRequests((all) =>
+    return subscribeAmbulanceRequests((all) => {
+      const hospitalId = account?.hospitalId || "city-hospital";
+      const filtered = all
+        .filter(
+          (r) =>
+            r.hospitalId === hospitalId &&
+            !["declined", "cancelled"].includes(r.status)
+        )
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       setRequests(
-        all
-          .filter(
-            (r) =>
-              r.hospitalId === account.hospitalId &&
-              !["declined", "cancelled"].includes(r.status),
-          )
-          .sort(
-            (a, b) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-          ),
-      ),
-    );
+        filtered.length > 0
+          ? filtered
+          : INITIAL_DEMO_REQUESTS.filter(
+              (r) =>
+                r.hospitalId === "city-hospital" &&
+                !["declined", "cancelled"].includes(r.status)
+            )
+      );
+    });
   }, [account]);
 
   const incoming = requests.filter((r) => r.status === "searching");

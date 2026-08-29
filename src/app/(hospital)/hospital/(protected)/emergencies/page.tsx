@@ -1,7 +1,7 @@
 "use client";
 
 import { useHospitalAuth } from "@/lib/hospitalAuth";
-import { subscribeAmbulanceRequests, statusLabel } from "@/lib/ambulanceStore";
+import { subscribeAmbulanceRequests, statusLabel, INITIAL_DEMO_REQUESTS } from "@/lib/ambulanceStore";
 import { LiveTelemetryModal } from "@/components/hospital/LiveTelemetryModal";
 import { BloodBankMatcher } from "@/components/hospital/BloodBankMatcher";
 import { cn } from "@/lib/utils";
@@ -40,21 +40,28 @@ function StatusDot({ status }: { status: AmbulanceRequest["status"] }) {
     declined: "bg-rose-400",
     cancelled: "bg-slate-300",
   };
-  return <span className={cn("inline-block h-2 w-2 rounded-full", colors[status])} />;
+  return <span className={cn("h-2.5 w-2.5 rounded-full shrink-0", colors[status])} />;
 }
 
 export default function EmergenciesPage() {
   const { account } = useHospitalAuth();
-  const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
+  const [requests, setRequests] = useState<AmbulanceRequest[]>(
+    INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === "city-hospital")
+  );
   const [selectedReq, setSelectedReq] = useState<AmbulanceRequest | null>(null);
   const [telemetryOpen, setTelemetryOpen] = useState(false);
   const [bloodOpen, setBloodOpen] = useState(false);
 
   useEffect(() => {
-    if (!account) return;
-    return subscribeAmbulanceRequests((all) =>
-      setRequests(all.filter((r) => r.hospitalId === account.hospitalId)),
-    );
+    return subscribeAmbulanceRequests((all) => {
+      const hospitalId = account?.hospitalId || "city-hospital";
+      const mine = all.filter((r) => r.hospitalId === hospitalId);
+      setRequests(
+        mine.length > 0
+          ? mine
+          : INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === "city-hospital")
+      );
+    });
   }, [account]);
 
   const active = requests.filter((r) => ["searching", "accepted", "en_route"].includes(r.status));

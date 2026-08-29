@@ -8,6 +8,7 @@ import {
   markAmbulanceEnRoute,
   markAmbulanceArrived,
   statusLabel,
+  INITIAL_DEMO_REQUESTS,
 } from "@/lib/ambulanceStore";
 import { hospitalAudio } from "@/lib/hospitalAudio";
 import { exportRequestsToCSV } from "@/lib/exportUtils";
@@ -112,8 +113,10 @@ function StatCard({
 
 export default function HospitalDashboardPage() {
   const { account } = useHospitalAuth();
-  const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [requests, setRequests] = useState<AmbulanceRequest[]>(
+    INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === "city-hospital")
+  );
+  const [selectedId, setSelectedId] = useState<string | null>("amb_sample_01");
   const [filter, setFilter] = useState<FilterTab>("all");
   const [notice, setNotice] = useState<{ msg: string; type: "success" | "info" } | null>(null);
 
@@ -125,12 +128,16 @@ export default function HospitalDashboardPage() {
   const [reportModalOpen, setReportModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!account) return;
     const unsub = subscribeAmbulanceRequests((all) => {
-      const mine = all.filter((r) => r.hospitalId === account.hospitalId);
-      setRequests(mine);
-      if (!selectedId && mine.length > 0) {
-        setSelectedId(mine[0].id);
+      const hospitalId = account?.hospitalId || "city-hospital";
+      const mine = all.filter((r) => r.hospitalId === hospitalId);
+      const activeList =
+        mine.length > 0
+          ? mine
+          : INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === "city-hospital");
+      setRequests(activeList);
+      if (!selectedId && activeList.length > 0) {
+        setSelectedId(activeList[0].id);
       }
     });
     return unsub;
