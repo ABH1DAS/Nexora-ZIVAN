@@ -46,17 +46,47 @@ import {
   XCircle,
 } from "lucide-react";
 
+function formatSafeTime(dateStr?: string | null): string {
+  if (!dateStr) return "Just now";
+  try {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? "Just now" : d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "Just now";
+  }
+}
+
+function formatSafeFullTime(dateStr?: string | null): string {
+  if (!dateStr) return "Just now";
+  try {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? "Just now" : d.toLocaleTimeString();
+  } catch {
+    return "Just now";
+  }
+}
+
 type FilterTab = "all" | "pending" | "active" | "resolved";
 
 function toneForStatus(status: AmbulanceRequestStatus) {
   switch (status) {
     case "searching":
+    case "PENDING":
+    case "REQUEST RECEIVED":
       return "bg-amber-100 text-amber-800";
     case "accepted":
+    case "HOSPITAL ACCEPTED":
+    case "AMBULANCE ASSIGNED":
       return "bg-primary-soft text-primary";
     case "en_route":
+    case "AMBULANCE EN ROUTE":
+    case "AMBULANCE ON THE WAY":
+    case "PATIENT PICKED UP":
       return "bg-sky-100 text-sky-800";
     case "arrived":
+    case "AMBULANCE ARRIVED":
+    case "ARRIVED AT HOSPITAL":
+    case "HELP ARRIVED":
       return "bg-emerald-100 text-emerald-800";
     case "declined":
     case "cancelled":
@@ -156,11 +186,12 @@ export default function HospitalDashboardPage() {
   const activeCount = requests.filter((r) => ["accepted", "en_route", "HOSPITAL ACCEPTED", "AMBULANCE ASSIGNED", "AMBULANCE EN ROUTE", "AMBULANCE ON THE WAY", "AMBULANCE ARRIVED", "HELP ARRIVED", "PATIENT PICKED UP"].includes(r.status)).length;
   const resolvedCount = requests.filter((r) => ["arrived", "ARRIVED AT HOSPITAL", "declined", "cancelled"].includes(r.status)).length;
 
-  function flash(msg: string, type: "success" | "info" = "success") {
-    setNotice({ msg, type });
-  }
-
-  if (!account) return null;
+  const activeAccount = account || {
+    hospitalId: "city-hospital",
+    hospitalName: "City Super-Specialty Hospital",
+    contactName: "City Dispatch Desk",
+    email: "dispatch@cityhospital.demo",
+  };
 
   return (
     <div className="space-y-6">
@@ -170,7 +201,7 @@ export default function HospitalDashboardPage() {
           <div>
             <p className="text-sm font-bold text-primary uppercase tracking-wider">Operational Console</p>
             <h1 className="mt-1 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-              {account.hospitalName}
+              {activeAccount.hospitalName}
             </h1>
             <p className="mt-2 max-w-xl text-sm text-muted sm:text-base">
               Real-time emergency dispatch, incoming patient triage, and ambulance fleet coordination.
@@ -196,7 +227,7 @@ export default function HospitalDashboardPage() {
         <StatCard label="Total Requests" value={requests.length} icon={TrendingUp} tone="default" />
       </div>
 
-      {/* Demo banner division */}
+      {/* Live sync banner */}
       <div className="flex items-start gap-3 rounded-[1.5rem] border-0 bg-[#fcf5e8] px-5 py-3.5 text-sm text-amber-950 shadow-[0_12px_32px_rgba(245,158,11,0.16)] hover:shadow-[0_16px_40px_rgba(245,158,11,0.24)] transition-all duration-300">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden />
         <div className="flex-1">
@@ -237,7 +268,7 @@ export default function HospitalDashboardPage() {
 
       {/* Two-column layout: Request list & Detail panel */}
       <div className="grid gap-6 lg:grid-cols-5">
-        {/* Left: Request list division */}
+        {/* Left: Request list */}
         <section
           aria-label="Ambulance requests"
           className="rounded-[2rem] border-0 bg-[#eef6f4] p-5 sm:p-6 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300 lg:col-span-2"
@@ -276,7 +307,7 @@ export default function HospitalDashboardPage() {
               <p className="mt-3 text-sm font-semibold text-muted">No requests here</p>
               <p className="mt-1 text-xs text-muted/70">
                 Trigger SOS from the member app to create a request for{" "}
-                {account.hospitalName}.
+                {activeAccount.hospitalName}.
               </p>
             </div>
           ) : (
@@ -295,11 +326,11 @@ export default function HospitalDashboardPage() {
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="truncate font-semibold">{req.patientName}</p>
+                        <p className="truncate font-semibold">{req.patientName || "Emergency Patient"}</p>
                         <p className={cn("mt-0.5 text-xs", selectedId === req.id ? "text-white/80" : "text-muted")}>
-                          {new Date(req.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          {formatSafeTime(req.createdAt)}
                           {" · "}
-                          {req.priority}
+                          {req.priority || "critical"}
                         </p>
                       </div>
                       <span
@@ -320,7 +351,7 @@ export default function HospitalDashboardPage() {
           )}
         </section>
 
-        {/* Right: Request detail division */}
+        {/* Right: Request detail */}
         <section
           aria-label="Request details"
           className="rounded-[2rem] border-0 bg-[#eef6f4] p-5 sm:p-6 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300 lg:col-span-3"
@@ -336,7 +367,7 @@ export default function HospitalDashboardPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="font-display text-xl font-bold text-foreground">
-                      {selected.patientName}
+                      {selected.patientName || "Emergency Patient"}
                     </h2>
                     <span
                       className={cn(
@@ -349,13 +380,13 @@ export default function HospitalDashboardPage() {
                   </div>
                   <p className="mt-1 text-xs text-muted">
                     Request ID: <code className="font-mono text-foreground font-semibold">{selected.id}</code> · Priority:{" "}
-                    <strong className="capitalize text-foreground font-bold">{selected.priority}</strong>
+                    <strong className="capitalize text-foreground font-bold">{selected.priority || "critical"}</strong>
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-muted">Received</p>
                   <p className="text-sm font-semibold text-foreground">
-                    {new Date(selected.createdAt).toLocaleTimeString()}
+                    {formatSafeFullTime(selected.createdAt)}
                   </p>
                 </div>
               </div>
@@ -475,15 +506,15 @@ export default function HospitalDashboardPage() {
 
               {/* Action buttons */}
               <div className="flex flex-wrap gap-3 border-t border-black/5 pt-5">
-                {selected.status === "searching" && (
+                {["searching", "PENDING", "REQUEST RECEIVED"].includes(selected.status) && (
                   <>
                     <Button
                       variant="primary"
                       size="md"
                       onClick={() => {
-                        acceptAmbulanceRequest(selected.id, account.contactName, 12);
+                        acceptAmbulanceRequest(selected.id, activeAccount.contactName, 12);
                         hospitalAudio.playDispatchChime();
-                        flash("Request accepted. Ambulance dispatched. Member SOS view will update.");
+                        setNotice({ msg: "Request accepted. Ambulance dispatched. Member SOS view will update.", type: "success" });
                       }}
                     >
                       <CheckCircle2 className="h-4 w-4" aria-hidden />
@@ -493,8 +524,8 @@ export default function HospitalDashboardPage() {
                       variant="emergency"
                       size="md"
                       onClick={() => {
-                        declineAmbulanceRequest(selected.id, account.contactName);
-                        flash("Request declined. Member notified.", "info");
+                        declineAmbulanceRequest(selected.id, activeAccount.contactName);
+                        setNotice({ msg: "Request declined. Member notified.", type: "info" });
                       }}
                     >
                       <XCircle className="h-4 w-4" aria-hidden />
@@ -503,14 +534,14 @@ export default function HospitalDashboardPage() {
                   </>
                 )}
 
-                {selected.status === "accepted" && (
+                {["accepted", "HOSPITAL ACCEPTED", "AMBULANCE ASSIGNED"].includes(selected.status) && (
                   <Button
                     variant="primary"
                     size="md"
                     onClick={() => {
                       markAmbulanceEnRoute(selected.id);
                       hospitalAudio.playDispatchChime();
-                      flash("Status updated to En Route. Member tracking live.");
+                      setNotice({ msg: "Status updated to En Route. Member tracking live.", type: "success" });
                     }}
                   >
                     <Ambulance className="h-4 w-4" aria-hidden />
@@ -518,14 +549,14 @@ export default function HospitalDashboardPage() {
                   </Button>
                 )}
 
-                {selected.status === "en_route" && (
+                {["en_route", "AMBULANCE EN ROUTE", "AMBULANCE ON THE WAY", "PATIENT PICKED UP"].includes(selected.status) && (
                   <Button
                     variant="primary"
                     size="md"
                     onClick={() => {
                       markAmbulanceArrived(selected.id);
                       hospitalAudio.playDispatchChime();
-                      flash("Status updated to Arrived. Patient at ER bay.");
+                      setNotice({ msg: "Status updated to Arrived. Patient at ER bay.", type: "success" });
                     }}
                   >
                     <CheckCircle2 className="h-4 w-4" aria-hidden />
@@ -533,7 +564,7 @@ export default function HospitalDashboardPage() {
                   </Button>
                 )}
 
-                {["arrived", "declined", "cancelled"].includes(selected.status) && (
+                {["arrived", "AMBULANCE ARRIVED", "ARRIVED AT HOSPITAL", "HELP ARRIVED", "declined", "cancelled"].includes(selected.status) && (
                   <p className="text-xs text-muted flex items-center gap-1.5">
                     <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" aria-hidden />
                     This request is complete. No further dispatch actions required.

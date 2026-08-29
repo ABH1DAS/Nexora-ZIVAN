@@ -64,7 +64,7 @@ export function AmbulanceCommsDrawer({
           id: "m2",
           sender: "hospital",
           senderName: "ER Command Desk",
-          text: `Roger Alpha-1. Patient flagged as ${request.priority.toUpperCase()} priority with blood group ${request.bloodGroup || "O+"}.`,
+          text: `Roger Alpha-1. Patient flagged as ${(request.priority || "critical").toUpperCase()} priority with blood group ${request.bloodGroup || "O+"}.`,
           timestamp: "10 mins ago",
         },
         {

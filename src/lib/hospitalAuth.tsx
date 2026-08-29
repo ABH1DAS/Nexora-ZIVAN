@@ -14,27 +14,31 @@ import {
   loginHospitalStaff,
   logoutHospitalStaff,
 } from "@/lib/ambulanceStore";
-import type { HospitalAccount } from "@/data/ambulanceRequests";
+import { HOSPITAL_ACCOUNTS, type HospitalAccount } from "@/data/ambulanceRequests";
 
 interface HospitalAuthContextValue {
-  account: HospitalAccount | null;
+  account: HospitalAccount;
   loading: boolean;
   login: (
     email: string,
     password: string,
   ) => Promise<{ ok: true } | { ok: false; error: string }>;
   logout: () => void;
+  switchHospital: (hospitalId: string) => void;
 }
 
 const HospitalAuthContext = createContext<HospitalAuthContextValue | null>(null);
 
 export function HospitalAuthProvider({ children }: { children: ReactNode }) {
-  const [account, setAccount] = useState<HospitalAccount | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Always initialize with active City Super-Specialty Hospital so /hospital is immediately active
+  const [account, setAccount] = useState<HospitalAccount>(HOSPITAL_ACCOUNTS[1]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setAccount(getHospitalSession());
-    setLoading(false);
+    const session = getHospitalSession();
+    if (session) {
+      setAccount(session);
+    }
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -47,12 +51,20 @@ export function HospitalAuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     logoutHospitalStaff();
-    setAccount(null);
+    setAccount(HOSPITAL_ACCOUNTS[1]);
+  }, []);
+
+  const switchHospital = useCallback((hospitalId: string) => {
+    const found = HOSPITAL_ACCOUNTS.find((h) => h.hospitalId === hospitalId) ?? HOSPITAL_ACCOUNTS[1];
+    setAccount(found);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("zivan-hospital-session", JSON.stringify(found));
+    }
   }, []);
 
   const value = useMemo(
-    () => ({ account, loading, login, logout }),
-    [account, loading, login, logout],
+    () => ({ account, loading, login, logout, switchHospital }),
+    [account, loading, login, logout, switchHospital],
   );
 
   return (

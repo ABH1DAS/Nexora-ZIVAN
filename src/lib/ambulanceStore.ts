@@ -376,20 +376,15 @@ function mapSupabaseToLocal(remote: SupabaseEmergencyRecord): AmbulanceRequest {
 export function subscribeAmbulanceRequests(
   listener: (requests: AmbulanceRequest[]) => void,
 ) {
-  if (isSupabaseConfigured) {
-    // Initial fetch from Supabase to sync active state
-    fetchSupabaseEmergencies().then((records) => {
-      if (records && records.length > 0) {
-        const mapped = records.map(mapSupabaseToLocal);
-        writeRequests(mapped);
-        listener(mapped);
-      }
-    });
-  }
-
   if (!canUseStorage()) return () => undefined;
 
-  const emit = () => listener(getAmbulanceRequests());
+  const emit = () => {
+    try {
+      listener(getAmbulanceRequests());
+    } catch {
+      // ignore
+    }
+  };
 
   const onStorage = (event: StorageEvent) => {
     if (event.key === AMBULANCE_REQUESTS_KEY) emit();
@@ -398,29 +393,49 @@ export function subscribeAmbulanceRequests(
 
   window.addEventListener("storage", onStorage);
   window.addEventListener("zivan-ambulance-updated", onCustom);
-  
+
+  // Initial fetch from Supabase to sync active state
+  if (isSupabaseConfigured) {
+    fetchSupabaseEmergencies()
+      .then((records) => {
+        if (records && records.length > 0) {
+          const mapped = records.map(mapSupabaseToLocal);
+          writeRequests(mapped);
+        }
+      })
+      .catch(() => {});
+  }
+
   // Real-time Supabase remote subscription sync (Postgres CDC)
-  const unsubscribeSupabase = subscribeSupabaseEmergencies((remoteRecord) => {
-    const local = readRequests();
-    const idx = local.findIndex((r) => r.id === remoteRecord.id);
-    if (idx >= 0) {
-      local[idx] = {
-        ...local[idx],
-        ...mapSupabaseToLocal(remoteRecord),
-      };
-      writeRequests(local);
-    } else {
-      const newReq = mapSupabaseToLocal(remoteRecord);
-      writeRequests([newReq, ...local]);
-    }
-  });
+  let unsubscribeSupabase = () => {};
+  try {
+    unsubscribeSupabase = subscribeSupabaseEmergencies((remoteRecord) => {
+      if (!remoteRecord || !remoteRecord.id) return;
+      const local = readRequests();
+      const idx = local.findIndex((r) => r.id === remoteRecord.id);
+      if (idx >= 0) {
+        local[idx] = {
+          ...local[idx],
+          ...mapSupabaseToLocal(remoteRecord),
+        };
+        writeRequests(local);
+      } else {
+        const newReq = mapSupabaseToLocal(remoteRecord);
+        writeRequests([newReq, ...local]);
+      }
+    });
+  } catch {
+    // ignore
+  }
 
   emit();
 
   return () => {
     window.removeEventListener("storage", onStorage);
     window.removeEventListener("zivan-ambulance-updated", onCustom);
-    unsubscribeSupabase();
+    if (typeof unsubscribeSupabase === "function") {
+      unsubscribeSupabase();
+    }
   };
 }
 
@@ -445,13 +460,14 @@ export function loginHospitalStaff(
 }
 
 export function getHospitalSession(): HospitalAccount | null {
-  if (!canUseStorage()) return null;
+  if (!canUseStorage()) return HOSPITAL_ACCOUNTS[1];
   try {
     const raw = localStorage.getItem(HOSPITAL_SESSION_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as HospitalAccount;
+    if (!raw) return HOSPITAL_ACCOUNTS[1];
+    const parsed = JSON.parse(raw) as HospitalAccount;
+    return parsed?.id ? parsed : HOSPITAL_ACCOUNTS[1];
   } catch {
-    return null;
+    return HOSPITAL_ACCOUNTS[1];
   }
 }
 

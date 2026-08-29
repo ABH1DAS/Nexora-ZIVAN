@@ -12,7 +12,14 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
 export const supabase: SupabaseClient | null =
   isSupabaseConfigured && supabaseUrl && supabaseAnonKey
-    ? createClient(supabaseUrl, supabaseAnonKey)
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        auth: { persistSession: false },
+        realtime: {
+          params: {
+            eventsPerSecond: 10,
+          },
+        },
+      })
     : null;
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -209,25 +216,33 @@ export interface SupabaseReward {
 
 export async function fetchHospitals(): Promise<SupabaseHospital[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("hospitals")
-    .select("*")
-    .order("distance_km", { ascending: true });
-  if (error) { console.warn("fetchHospitals:", error.message); return []; }
-  return (data as SupabaseHospital[]) ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("hospitals")
+      .select("*")
+      .order("distance_km", { ascending: true });
+    if (error) { console.warn("fetchHospitals:", error.message); return []; }
+    return (data as SupabaseHospital[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchHospitalById(
   id: string
 ): Promise<SupabaseHospital | null> {
   if (!supabase) return null;
-  const { data, error } = await supabase
-    .from("hospitals")
-    .select("*")
-    .eq("id", id)
-    .single();
-  if (error) return null;
-  return data as SupabaseHospital;
+  try {
+    const { data, error } = await supabase
+      .from("hospitals")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) return null;
+    return data as SupabaseHospital;
+  } catch {
+    return null;
+  }
 }
 
 export async function updateHospitalBeds(
@@ -235,34 +250,46 @@ export async function updateHospitalBeds(
   patch: { available_beds?: number; available_icu_beds?: number }
 ): Promise<boolean> {
   if (!supabase) return false;
-  const { error } = await supabase.from("hospitals").update(patch).eq("id", id);
-  return !error;
+  try {
+    const { error } = await supabase.from("hospitals").update(patch).eq("id", id);
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchAmbulancesByHospital(
   hospitalId: string
 ): Promise<SupabaseAmbulance[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("ambulances")
-    .select("*")
-    .eq("hospital_id", hospitalId)
-    .order("id");
-  if (error) return [];
-  return (data as SupabaseAmbulance[]) ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("ambulances")
+      .select("*")
+      .eq("hospital_id", hospitalId)
+      .order("id");
+    if (error) return [];
+    return (data as SupabaseAmbulance[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchAvailableAmbulances(
   hospitalId: string
 ): Promise<SupabaseAmbulance[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("ambulances")
-    .select("*")
-    .eq("hospital_id", hospitalId)
-    .eq("status", "available");
-  if (error) return [];
-  return (data as SupabaseAmbulance[]) ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("ambulances")
+      .select("*")
+      .eq("hospital_id", hospitalId)
+      .eq("status", "available");
+    if (error) return [];
+    return (data as SupabaseAmbulance[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -316,12 +343,16 @@ export async function insertSupabaseEmergency(
 
 export async function fetchSupabaseEmergencies(): Promise<SupabaseEmergencyRecord[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("emergencies")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (error) return [];
-  return (data as SupabaseEmergencyRecord[]) ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("emergencies")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) return [];
+    return (data as SupabaseEmergencyRecord[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function updateSupabaseEmergency(
@@ -356,22 +387,37 @@ export function subscribeSupabaseEmergencies(
   onChange: (record: SupabaseEmergencyRecord) => void,
   hospitalId?: string
 ): () => void {
-  if (!supabase) return () => undefined;
+  if (!supabase || typeof window === "undefined") return () => undefined;
 
-  const filter = hospitalId
-    ? { event: "*" as const, schema: "public", table: "emergencies", filter: `hospital_id=eq.${hospitalId}` }
-    : { event: "*" as const, schema: "public", table: "emergencies" };
+  try {
+    const filter = hospitalId
+      ? { event: "*" as const, schema: "public", table: "emergencies", filter: `hospital_id=eq.${hospitalId}` }
+      : { event: "*" as const, schema: "public", table: "emergencies" };
 
-  const channel = supabase
-    .channel(hospitalId ? `emergencies_hospital_${hospitalId}` : "emergencies_global")
-    .on("postgres_changes", filter, (payload) => {
-      if (payload.new) onChange(payload.new as SupabaseEmergencyRecord);
-    })
-    .subscribe();
+    const channelName = `emergencies_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const channel = supabase
+      .channel(channelName)
+      .on("postgres_changes", filter, (payload) => {
+        try {
+          if (payload.new && typeof payload.new === "object" && "id" in payload.new) {
+            onChange(payload.new as SupabaseEmergencyRecord);
+          }
+        } catch {
+          // ignore
+        }
+      })
+      .subscribe();
 
-  return () => {
-    supabase!.removeChannel(channel);
-  };
+    return () => {
+      try {
+        supabase!.removeChannel(channel);
+      } catch {
+        // ignore
+      }
+    };
+  } catch {
+    return () => undefined;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -380,44 +426,56 @@ export function subscribeSupabaseEmergencies(
 
 export async function fetchHealthProfile(patientId = "demo-user"): Promise<SupabaseHealthProfile | null> {
   if (!supabase) return null;
-  const { data, error } = await supabase
-    .from("health_profiles")
-    .select("*")
-    .eq("patient_id", patientId)
-    .single();
-  if (error) return null;
-  return data as SupabaseHealthProfile;
+  try {
+    const { data, error } = await supabase
+      .from("health_profiles")
+      .select("*")
+      .eq("patient_id", patientId)
+      .single();
+    if (error) return null;
+    return data as SupabaseHealthProfile;
+  } catch {
+    return null;
+  }
 }
 
 export async function saveHealthProfile(profile: Partial<SupabaseHealthProfile>): Promise<boolean> {
   if (!supabase) return false;
-  const payload = {
-    patient_id: profile.patient_id || "demo-user",
-    full_name: profile.full_name || "Abhijeet Das",
-    blood_group: profile.blood_group || "O+",
-    allergies: profile.allergies || [],
-    medications: profile.medications || [],
-    medical_history: profile.medical_history || [],
-    organ_donor: profile.organ_donor ?? true,
-    doctor_name: profile.doctor_name || "Dr. Ananya Sharma",
-    doctor_phone: profile.doctor_phone || "+91 98765 43210",
-    emergency_notes: profile.emergency_notes || "",
-    updated_at: new Date().toISOString(),
-  };
-  const { error } = await supabase.from("health_profiles").upsert(payload, { onConflict: "patient_id" });
-  if (error) console.warn("saveHealthProfile:", error.message);
-  return !error;
+  try {
+    const payload = {
+      patient_id: profile.patient_id || "demo-user",
+      full_name: profile.full_name || "Abhijeet Das",
+      blood_group: profile.blood_group || "O+",
+      allergies: profile.allergies || [],
+      medications: profile.medications || [],
+      medical_history: profile.medical_history || [],
+      organ_donor: profile.organ_donor ?? true,
+      doctor_name: profile.doctor_name || "Dr. Ananya Sharma",
+      doctor_phone: profile.doctor_phone || "+91 98765 43210",
+      emergency_notes: profile.emergency_notes || "",
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from("health_profiles").upsert(payload, { onConflict: "patient_id" });
+    if (error) console.warn("saveHealthProfile:", error.message);
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchEmergencyContacts(patientId = "demo-user"): Promise<SupabaseEmergencyContact[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("emergency_contacts")
-    .select("*")
-    .eq("patient_id", patientId)
-    .order("priority", { ascending: true });
-  if (error) { console.warn("fetchEmergencyContacts:", error.message); return []; }
-  return (data as SupabaseEmergencyContact[]) ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("emergency_contacts")
+      .select("*")
+      .eq("patient_id", patientId)
+      .order("priority", { ascending: true });
+    if (error) { console.warn("fetchEmergencyContacts:", error.message); return []; }
+    return (data as SupabaseEmergencyContact[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function addEmergencyContact(contact: {
@@ -428,29 +486,37 @@ export async function addEmergencyContact(contact: {
   priority?: "Primary" | "Secondary";
 }): Promise<SupabaseEmergencyContact | null> {
   if (!supabase) return null;
-  const payload = {
-    patient_id: contact.patient_id || "demo-user",
-    name: contact.name,
-    phone: contact.phone,
-    relationship: contact.relationship,
-    priority: contact.priority || "Primary",
-  };
-  const { data, error } = await supabase
-    .from("emergency_contacts")
-    .insert([payload])
-    .select()
-    .single();
-  if (error) {
-    console.warn("addEmergencyContact error:", error.message);
+  try {
+    const payload = {
+      patient_id: contact.patient_id || "demo-user",
+      name: contact.name,
+      phone: contact.phone,
+      relationship: contact.relationship,
+      priority: contact.priority || "Primary",
+    };
+    const { data, error } = await supabase
+      .from("emergency_contacts")
+      .insert([payload])
+      .select()
+      .single();
+    if (error) {
+      console.warn("addEmergencyContact error:", error.message);
+      return null;
+    }
+    return data as SupabaseEmergencyContact;
+  } catch {
     return null;
   }
-  return data as SupabaseEmergencyContact;
 }
 
 export async function removeEmergencyContact(contactId: string): Promise<boolean> {
   if (!supabase) return false;
-  const { error } = await supabase.from("emergency_contacts").delete().eq("id", contactId);
-  return !error;
+  try {
+    const { error } = await supabase.from("emergency_contacts").delete().eq("id", contactId);
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchDailyMetrics(
@@ -458,51 +524,63 @@ export async function fetchDailyMetrics(
   date = new Date().toISOString().split("T")[0]
 ): Promise<SupabaseDailyMetrics | null> {
   if (!supabase) return null;
-  const { data, error } = await supabase
-    .from("daily_metrics")
-    .select("*")
-    .eq("patient_id", patientId)
-    .eq("metric_date", date)
-    .single();
-  if (error) return null;
-  return data as SupabaseDailyMetrics;
+  try {
+    const { data, error } = await supabase
+      .from("daily_metrics")
+      .select("*")
+      .eq("patient_id", patientId)
+      .eq("metric_date", date)
+      .single();
+    if (error) return null;
+    return data as SupabaseDailyMetrics;
+  } catch {
+    return null;
+  }
 }
 
 export async function saveDailyMetrics(metrics: Partial<SupabaseDailyMetrics>): Promise<boolean> {
   if (!supabase) return false;
-  const today = new Date().toISOString().split("T")[0];
-  const payload: Record<string, any> = {
-    patient_id: metrics.patient_id || "demo-user",
-    metric_date: metrics.metric_date || today,
-    heart_rate: metrics.heart_rate || 72,
-    resting_hr: metrics.resting_hr || 68,
-    spo2: metrics.spo2 || 98,
-    steps: metrics.steps || 6400,
-    step_goal: metrics.step_goal || 10000,
-    active_minutes: metrics.active_minutes || 45,
-    calories_burned: metrics.calories_burned || 420,
-    sleep_hours: metrics.sleep_hours || 7.5,
-    sleep_score: metrics.sleep_score || 85,
-    water_liters: metrics.water_liters || 2.1,
-    water_goal: metrics.water_goal || 3.0,
-  };
-  const { error } = await supabase
-    .from("daily_metrics")
-    .upsert(payload, { onConflict: "patient_id,metric_date" });
-  if (error) console.warn("saveDailyMetrics:", error.message);
-  return !error;
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    const payload: Record<string, any> = {
+      patient_id: metrics.patient_id || "demo-user",
+      metric_date: metrics.metric_date || today,
+      heart_rate: metrics.heart_rate || 72,
+      resting_hr: metrics.resting_hr || 68,
+      spo2: metrics.spo2 || 98,
+      steps: metrics.steps || 6400,
+      step_goal: metrics.step_goal || 10000,
+      active_minutes: metrics.active_minutes || 45,
+      calories_burned: metrics.calories_burned || 420,
+      sleep_hours: metrics.sleep_hours || 7.5,
+      sleep_score: metrics.sleep_score || 85,
+      water_liters: metrics.water_liters || 2.1,
+      water_goal: metrics.water_goal || 3.0,
+    };
+    const { error } = await supabase
+      .from("daily_metrics")
+      .upsert(payload, { onConflict: "patient_id,metric_date" });
+    if (error) console.warn("saveDailyMetrics:", error.message);
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchWaterLogs(patientId = "demo-user"): Promise<SupabaseWaterLog[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("water_logs")
-    .select("*")
-    .eq("patient_id", patientId)
-    .order("logged_at", { ascending: false })
-    .limit(30);
-  if (error) return [];
-  return (data as SupabaseWaterLog[]) ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("water_logs")
+      .select("*")
+      .eq("patient_id", patientId)
+      .order("logged_at", { ascending: false })
+      .limit(30);
+    if (error) return [];
+    return (data as SupabaseWaterLog[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function logWaterIntake(
@@ -511,67 +589,87 @@ export async function logWaterIntake(
   note?: string
 ): Promise<SupabaseWaterLog | null> {
   if (!supabase) return null;
-  const payload = {
-    patient_id: patientId || "demo-user",
-    amount_ml: amountMl,
-    note: note || "Water Hydration Log",
-    logged_at: new Date().toISOString(),
-  };
-  const { data, error } = await supabase
-    .from("water_logs")
-    .insert([payload])
-    .select()
-    .single();
-  if (error) {
-    console.warn("logWaterIntake error:", error.message);
+  try {
+    const payload = {
+      patient_id: patientId || "demo-user",
+      amount_ml: amountMl,
+      note: note || "Water Hydration Log",
+      logged_at: new Date().toISOString(),
+    };
+    const { data, error } = await supabase
+      .from("water_logs")
+      .insert([payload])
+      .select()
+      .single();
+    if (error) {
+      console.warn("logWaterIntake error:", error.message);
+      return null;
+    }
+    return data as SupabaseWaterLog;
+  } catch {
     return null;
   }
-  return data as SupabaseWaterLog;
 }
 
 export async function fetchConnectedDevices(patientId = "demo-user"): Promise<SupabaseConnectedDevice[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("connected_devices")
-    .select("*")
-    .eq("patient_id", patientId)
-    .order("created_at", { ascending: true });
-  if (error) return [];
-  return (data as SupabaseConnectedDevice[]) ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("connected_devices")
+      .select("*")
+      .eq("patient_id", patientId)
+      .order("created_at", { ascending: true });
+    if (error) return [];
+    return (data as SupabaseConnectedDevice[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function updateConnectedDevice(
   device: Partial<SupabaseConnectedDevice> & { id: string }
 ): Promise<boolean> {
   if (!supabase) return false;
-  const payload = {
-    ...device,
-    patient_id: device.patient_id || "demo-user",
-    last_sync_at: new Date().toISOString(),
-  };
-  const { error } = await supabase.from("connected_devices").upsert(payload);
-  if (error) console.warn("updateConnectedDevice:", error.message);
-  return !error;
+  try {
+    const payload = {
+      ...device,
+      patient_id: device.patient_id || "demo-user",
+      last_sync_at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from("connected_devices").upsert(payload);
+    if (error) console.warn("updateConnectedDevice:", error.message);
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchChallenges(): Promise<SupabaseChallenge[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("challenges")
-    .select("*")
-    .order("created_at", { ascending: true });
-  if (error) return [];
-  return (data as SupabaseChallenge[]) ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("challenges")
+      .select("*")
+      .order("created_at", { ascending: true });
+    if (error) return [];
+    return (data as SupabaseChallenge[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function fetchUserChallenges(patientId = "demo-user"): Promise<SupabaseUserChallenge[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("user_challenges")
-    .select("*")
-    .eq("patient_id", patientId);
-  if (error) return [];
-  return (data as SupabaseUserChallenge[]) ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("user_challenges")
+      .select("*")
+      .eq("patient_id", patientId);
+    if (error) return [];
+    return (data as SupabaseUserChallenge[]) ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export async function updateUserChallengeProgress(
@@ -581,25 +679,33 @@ export async function updateUserChallengeProgress(
   completed = false
 ): Promise<boolean> {
   if (!supabase) return false;
-  const payload = {
-    patient_id: patientId || "demo-user",
-    challenge_id: challengeId,
-    progress,
-    completed,
-    streak_days: Math.min(progress, 7),
-    updated_at: new Date().toISOString(),
-  };
-  const { error } = await supabase.from("user_challenges").upsert(payload, { onConflict: "patient_id,challenge_id" });
-  return !error;
+  try {
+    const payload = {
+      patient_id: patientId || "demo-user",
+      challenge_id: challengeId,
+      progress,
+      completed,
+      streak_days: Math.min(progress, 7),
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await supabase.from("user_challenges").upsert(payload, { onConflict: "patient_id,challenge_id" });
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 export async function fetchRewards(): Promise<SupabaseReward[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase
-    .from("rewards")
-    .select("*")
-    .eq("active", true)
-    .order("points_cost", { ascending: true });
-  if (error) return [];
-  return (data as SupabaseReward[]) ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("rewards")
+      .select("*")
+      .eq("active", true)
+      .order("points_cost", { ascending: true });
+    if (error) return [];
+    return (data as SupabaseReward[]) ?? [];
+  } catch {
+    return [];
+  }
 }

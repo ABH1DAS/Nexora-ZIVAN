@@ -70,7 +70,7 @@ export function BedAllocationModal({
             <div>
               <h3 className="font-display text-lg font-bold">Allocate ER / Trauma Bay</h3>
               <p className="text-xs text-slate-300">
-                Patient: <strong className="text-white">{request.patientName}</strong> ({request.priority.toUpperCase()} priority)
+                Patient: <strong className="text-white">{request.patientName || "Emergency Patient"}</strong> ({(request.priority || "critical").toUpperCase()} priority)
               </p>
             </div>
           </div>

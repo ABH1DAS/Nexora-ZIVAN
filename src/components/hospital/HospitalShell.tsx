@@ -367,13 +367,13 @@ export function HospitalShell({
               {account && (
                 <div className="hidden items-center gap-2.5 rounded-2xl border border-transparent px-3 py-1.5 transition-all duration-200 hover:border-border hover:bg-white/70 sm:flex">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white shadow-xs">
-                    {account.contactName.charAt(0).toUpperCase()}
+                    {(account.contactName || "H").charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden xl:block">
                     <p className="text-sm font-semibold text-foreground leading-tight">
-                      {account.contactName}
+                      {account.contactName || "Dispatch Staff"}
                     </p>
-                    <p className="text-xs text-muted">{account.hospitalName}</p>
+                    <p className="text-xs text-muted">{account.hospitalName || "Hospital Portal"}</p>
                   </div>
                 </div>
               )}
