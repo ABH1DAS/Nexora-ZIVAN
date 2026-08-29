@@ -251,25 +251,61 @@ export function GoogleAmbulanceMap({
       { elementType: "geometry", stylers: [{ color: "#1e293b" }] },
       { elementType: "labels.text.stroke", stylers: [{ color: "#0f172a" }] },
       { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
+
+      // Completely remove all distracting non-emergency POIs (hotels, restaurants, shops, cafes)
+      {
+        featureType: "poi",
+        elementType: "labels",
+        stylers: [{ visibility: "off" }],
+      },
+      {
+        featureType: "poi",
+        elementType: "labels.icon",
+        stylers: [{ visibility: "off" }],
+      },
+      {
+        featureType: "poi.business",
+        stylers: [{ visibility: "off" }],
+      },
+      {
+        featureType: "poi.attraction",
+        stylers: [{ visibility: "off" }],
+      },
+      {
+        featureType: "poi.place_of_worship",
+        stylers: [{ visibility: "off" }],
+      },
+      {
+        featureType: "poi.school",
+        stylers: [{ visibility: "off" }],
+      },
+      {
+        featureType: "poi.sports_complex",
+        stylers: [{ visibility: "off" }],
+      },
+      {
+        featureType: "transit.station.bus",
+        stylers: [{ visibility: "off" }],
+      },
       {
         featureType: "administrative.locality",
         elementType: "labels.text.fill",
         stylers: [{ color: "#f8fafc" }],
       },
       {
-        featureType: "poi",
-        elementType: "labels.text.fill",
-        stylers: [{ color: "#38bdf8" }],
-      },
-      {
-        featureType: "poi.medical",
-        elementType: "geometry",
-        stylers: [{ color: "#0c4a6e" }],
-      },
-      {
         featureType: "road",
         elementType: "geometry",
         stylers: [{ color: "#334155" }],
+      },
+      {
+        featureType: "road",
+        elementType: "geometry.stroke",
+        stylers: [{ color: "#1e293b" }],
+      },
+      {
+        featureType: "road.highway",
+        elementType: "geometry",
+        stylers: [{ color: "#475569" }],
       },
       {
         featureType: "water",
