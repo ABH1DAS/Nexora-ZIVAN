@@ -237,12 +237,40 @@ export async function insertSupabaseEmergency(
 ): Promise<SupabaseEmergencyRecord | null> {
   if (!supabase) return null;
   try {
+    // Build sanitized payload with only core table columns
+    const payload: Record<string, any> = {
+      patient_id: record.patient_id || "demo-user",
+      patient_name: record.patient_name || "Emergency Patient",
+      patient_phone: record.patient_phone || "+91 98765 43210",
+      location_label: record.location_label || "Live Location",
+      latitude: record.latitude || 28.6139,
+      longitude: record.longitude || 77.2090,
+      hospital_id: record.hospital_id || "city-hospital",
+      hospital_name: record.hospital_name || "City Hospital",
+      status: record.status || "PENDING",
+      priority: record.priority || "urgent",
+      ambulance_type: record.ambulance_type || "government",
+      doctor_specialization: record.doctor_specialization || "Emergency Medicine",
+      notes: record.notes || "SOS Emergency Dispatch",
+    };
+
+    if (record.ambulance_id) payload.ambulance_id = record.ambulance_id;
+    if (record.driver_name) payload.driver_name = record.driver_name;
+    if (record.vehicle_number) payload.vehicle_number = record.vehicle_number;
+    if (record.eta_minutes !== undefined) payload.eta_minutes = record.eta_minutes;
+    if (record.accepted_by) payload.accepted_by = record.accepted_by;
+    if (record.icu_requirement !== undefined) payload.icu_requirement = record.icu_requirement;
+    if (record.estimated_private_fare) payload.estimated_private_fare = record.estimated_private_fare;
+
     const { data, error } = await supabase
       .from("emergencies")
-      .insert([record])
+      .insert([payload])
       .select()
       .single();
-    if (error) { console.warn("insertSupabaseEmergency:", error.message); return null; }
+    if (error) {
+      console.warn("insertSupabaseEmergency:", error.message);
+      return null;
+    }
     return data as SupabaseEmergencyRecord;
   } catch (err) {
     console.warn("insertSupabaseEmergency exception:", err);

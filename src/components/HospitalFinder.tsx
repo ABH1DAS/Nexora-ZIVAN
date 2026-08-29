@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/Button";
 import { Reveal } from "@/components/ui/Reveal";
 import { Section } from "@/components/ui/Section";
 import { hospitals } from "@/data/hospitals";
+import { fetchHospitals, isSupabaseConfigured } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Building2, Cross, MapPinned, Pill } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const typeIcon = {
   hospital: Building2,
@@ -15,7 +16,31 @@ const typeIcon = {
 };
 
 export function HospitalFinder() {
+  const [hospitalList, setHospitalList] = useState(hospitals);
   const [selected, setSelected] = useState(hospitals[0].id);
+
+  useEffect(() => {
+    if (isSupabaseConfigured) {
+      fetchHospitals().then((remote) => {
+        if (remote && remote.length > 0) {
+          const mapped = remote.map((h) => ({
+            id: h.id,
+            name: h.name,
+            category: (h.id.startsWith("govt") ? "government" : "private") as any,
+            type: (h.type as any) || "hospital",
+            distanceKm: h.distance_km || 2.4,
+            estimatedTravelTime: `${Math.round((h.distance_km || 2.4) * 3)}–${Math.round((h.distance_km || 2.4) * 4)} mins`,
+            address: h.address || "Sector 24, Health City",
+            open: h.open !== false,
+            specializations: h.specializations || ["Emergency / Trauma", "General Physician"],
+            icuStatus: ((h.available_icu_beds && h.available_icu_beds > 0) ? "Available" : "Limited") as any,
+          }));
+          setHospitalList(mapped);
+          setSelected(mapped[0].id);
+        }
+      });
+    }
+  }, []);
 
   return (
     <Section
@@ -27,7 +52,7 @@ export function HospitalFinder() {
       <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
         <Reveal>
           <ul className="space-y-3">
-            {hospitals.map((place) => {
+            {hospitalList.map((place) => {
               const Icon = typeIcon[place.type];
               const active = selected === place.id;
               return (
@@ -110,14 +135,14 @@ export function HospitalFinder() {
               </svg>
             </div>
 
-            {hospitals.map((place, index) => {
+            {hospitalList.map((place, index) => {
               const positions = [
                 { top: "28%", left: "34%" },
                 { top: "48%", left: "62%" },
                 { top: "62%", left: "24%" },
                 { top: "36%", left: "72%" },
               ];
-              const pos = positions[index];
+              const pos = positions[index % positions.length];
               return (
                 <button
                   key={place.id}
