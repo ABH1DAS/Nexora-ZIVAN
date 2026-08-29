@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import {
   Ambulance,
   MapPin,
@@ -13,10 +13,11 @@ import {
   Clock,
   Shield,
   Activity,
+  LocateFixed,
 } from "lucide-react";
 import { hospitals as defaultHospitals, type Hospital } from "@/data/hospitals";
 
-interface Coordinates {
+export interface Coordinates {
   lat: number;
   lng: number;
 }
@@ -35,15 +36,81 @@ interface GoogleAmbulanceMapProps {
   etaMinutes?: number;
   nearbyHospitals?: Hospital[];
   onSelectHospital?: (hospital: Hospital) => void;
+  onLocationDetected?: (coords: Coordinates, address: string) => void;
 }
 
 const DEFAULT_PATIENT_COORDS: Coordinates = { lat: 28.6139, lng: 77.2090 };
 const DEFAULT_HOSPITAL_COORDS: Coordinates = { lat: 28.5729, lng: 77.1743 };
 const DEFAULT_AMBULANCE_COORDS: Coordinates = { lat: 28.5950, lng: 77.1920 };
 
+function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 10) / 10;
+}
+
+function getHospitalIconSvg(category: "government" | "private", isSelected: boolean) {
+  const bgColor = isSelected ? "#0284c7" : (category === "government" ? "#2563eb" : "#059669");
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="38" height="48" viewBox="0 0 38 48">
+      <defs>
+        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.4"/>
+        </filter>
+      </defs>
+      <path d="M19 0 C8.5 0 0 8.5 0 19 C0 31.5 19 48 19 48 C19 48 38 31.5 38 19 C38 8.5 29.5 0 19 0 Z" fill="${bgColor}" filter="url(#shadow)"/>
+      <circle cx="19" cy="18" r="12" fill="#ffffff"/>
+      <rect x="16.5" y="10" width="5" height="16" rx="1.5" fill="${bgColor}"/>
+      <rect x="11" y="15.5" width="16" height="5" rx="1.5" fill="${bgColor}"/>
+    </svg>
+  `;
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+}
+
+function getPatientIconSvg() {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="38" height="48" viewBox="0 0 38 48">
+      <defs>
+        <filter id="patShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#dc2626" flood-opacity="0.6"/>
+        </filter>
+      </defs>
+      <path d="M19 0 C8.5 0 0 8.5 0 19 C0 31.5 19 48 19 48 C19 48 38 31.5 38 19 C38 8.5 29.5 0 19 0 Z" fill="#ef4444" filter="url(#patShadow)"/>
+      <circle cx="19" cy="18" r="12" fill="#ffffff"/>
+      <circle cx="19" cy="18" r="6" fill="#dc2626"/>
+    </svg>
+  `;
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+}
+
+function getAmbulanceIconSvg() {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 46 46">
+      <defs>
+        <filter id="ambShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0d9488" flood-opacity="0.7"/>
+        </filter>
+      </defs>
+      <circle cx="23" cy="23" r="19" fill="#0f766e" stroke="#ffffff" stroke-width="2.5" filter="url(#ambShadow)"/>
+      <path d="M13 26 L13 19 C13 17.5 14 16.5 15.5 16.5 L25 16.5 L30 21 L33 21 C33.8 21 34.5 21.7 34.5 22.5 L34.5 26" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="19" y="18.5" width="2" height="6" fill="#ef4444"/>
+      <rect x="17" y="20.5" width="6" height="2" fill="#ef4444"/>
+      <circle cx="18" cy="28" r="2.5" fill="#ffffff"/>
+      <circle cx="29" cy="28" r="2.5" fill="#ffffff"/>
+    </svg>
+  `;
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+}
+
 export function GoogleAmbulanceMap({
-  patientCoords = DEFAULT_PATIENT_COORDS,
-  patientLabel = "742 Evergreen Terrace, Sector 14",
+  patientCoords: initialPatientCoords = DEFAULT_PATIENT_COORDS,
+  patientLabel: initialPatientLabel = "742 Evergreen Terrace, Sector 14",
   ambulanceCoords = DEFAULT_AMBULANCE_COORDS,
   ambulanceId = "AMB-01",
   ambulanceType = "government",
@@ -55,11 +122,17 @@ export function GoogleAmbulanceMap({
   etaMinutes = 8,
   nearbyHospitals = defaultHospitals,
   onSelectHospital,
+  onLocationDetected,
 }: GoogleAmbulanceMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [apiKeyAvailable, setApiKeyAvailable] = useState(false);
+
+  const [activePatientCoords, setActivePatientCoords] = useState<Coordinates>(initialPatientCoords);
+  const [activePatientLabel, setActivePatientLabel] = useState<string>(initialPatientLabel);
+  const [gpsDetecting, setGpsDetecting] = useState(false);
+
   const [etaText, setEtaText] = useState(`${etaMinutes} mins`);
   const [distanceText, setDistanceText] = useState("4.2 km");
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
@@ -70,10 +143,76 @@ export function GoogleAmbulanceMap({
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
     "AIzaSyCdU5-QL9eWfz71iJE4INZYwqkF1SzM8l0";
 
-  const filteredHospitals = nearbyHospitals.filter((h) => {
+  const dynamicHospitals = useMemo(() => {
+    return nearbyHospitals.map((hosp) => {
+      if (!hosp.coordinates) return hosp;
+      const realDist = calculateDistanceKm(
+        activePatientCoords.lat,
+        activePatientCoords.lng,
+        hosp.coordinates.lat,
+        hosp.coordinates.lng
+      );
+      return {
+        ...hosp,
+        distanceKm: realDist,
+        estimatedTravelTime: `${Math.max(3, Math.round(realDist * 2.2))}–${Math.max(6, Math.round(realDist * 3.1))} mins`,
+      };
+    }).sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
+  }, [nearbyHospitals, activePatientCoords]);
+
+  const filteredHospitals = dynamicHospitals.filter((h) => {
     if (filterCategory === "all") return true;
     return h.category === filterCategory;
   });
+
+  function detectUserCurrentLocation() {
+    if (typeof window === "undefined" || !navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setGpsDetecting(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const detectedCoords: Coordinates = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setActivePatientCoords(detectedCoords);
+
+        if ((window as any).google?.maps?.Geocoder) {
+          const geocoder = new (window as any).google.maps.Geocoder();
+          geocoder.geocode({ location: detectedCoords }, (results: any, statusResult: string) => {
+            if (statusResult === "OK" && results && results[0]) {
+              const formatted = results[0].formatted_address;
+              setActivePatientLabel(formatted);
+              if (onLocationDetected) onLocationDetected(detectedCoords, formatted);
+            } else {
+              const fallbackLabel = `GPS (${detectedCoords.lat.toFixed(4)}, ${detectedCoords.lng.toFixed(4)})`;
+              setActivePatientLabel(fallbackLabel);
+              if (onLocationDetected) onLocationDetected(detectedCoords, fallbackLabel);
+            }
+          });
+        } else {
+          const fallbackLabel = `GPS (${detectedCoords.lat.toFixed(4)}, ${detectedCoords.lng.toFixed(4)})`;
+          setActivePatientLabel(fallbackLabel);
+          if (onLocationDetected) onLocationDetected(detectedCoords, fallbackLabel);
+        }
+
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.panTo(detectedCoords);
+          mapInstanceRef.current.setZoom(15);
+        }
+
+        setGpsDetecting(false);
+      },
+      (error) => {
+        console.warn("Geolocation detection error:", error.message);
+        setGpsDetecting(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }
 
   useEffect(() => {
     if (!apiKey) {
@@ -133,16 +272,6 @@ export function GoogleAmbulanceMap({
         stylers: [{ color: "#334155" }],
       },
       {
-        featureType: "road",
-        elementType: "geometry.stroke",
-        stylers: [{ color: "#1e293b" }],
-      },
-      {
-        featureType: "road.highway",
-        elementType: "geometry",
-        stylers: [{ color: "#475569" }],
-      },
-      {
         featureType: "water",
         elementType: "geometry",
         stylers: [{ color: "#0f172a" }],
@@ -151,8 +280,8 @@ export function GoogleAmbulanceMap({
 
     const map = new google.maps.Map(mapRef.current, {
       center: {
-        lat: (patientCoords.lat + ambulanceCoords.lat) / 2,
-        lng: (patientCoords.lng + ambulanceCoords.lng) / 2,
+        lat: (activePatientCoords.lat + ambulanceCoords.lat) / 2,
+        lng: (activePatientCoords.lng + ambulanceCoords.lng) / 2,
       },
       zoom: 13,
       mapTypeId: mapType,
@@ -165,34 +294,30 @@ export function GoogleAmbulanceMap({
     });
 
     mapInstanceRef.current = map;
-
     const bounds = new google.maps.LatLngBounds();
 
     // 1. Patient Marker
-    const patientLatLng = new google.maps.LatLng(patientCoords.lat, patientCoords.lng);
+    const patientLatLng = new google.maps.LatLng(activePatientCoords.lat, activePatientCoords.lng);
     bounds.extend(patientLatLng);
 
     const patientMarker = new google.maps.Marker({
-      position: patientCoords,
+      position: activePatientCoords,
       map,
-      title: "Patient SOS Location",
+      title: "Patient Location (SOS Origin)",
       zIndex: 100,
       icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 11,
-        fillColor: "#ef4444",
-        fillOpacity: 1,
-        strokeColor: "#ffffff",
-        strokeWeight: 3,
+        url: getPatientIconSvg(),
+        scaledSize: new google.maps.Size(36, 46),
+        anchor: new google.maps.Point(18, 46),
       },
     });
 
     const patientInfoWindow = new google.maps.InfoWindow({
       content: `
         <div style="color: #0f172a; padding: 6px; font-family: sans-serif;">
-          <strong style="color: #dc2626; font-size: 13px;">🚨 Patient SOS Location</strong>
-          <p style="margin: 4px 0 0; font-size: 11px;">${patientLabel}</p>
-          <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#fee2e2; color:#991b1b; padding: 2px 6px; border-radius: 4px;">ACTIVE EMERGENCY</span>
+          <strong style="color: #dc2626; font-size: 13px;">🚨 Your Location (SOS Origin)</strong>
+          <p style="margin: 4px 0 0; font-size: 11px;">${activePatientLabel}</p>
+          <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#fee2e2; color:#991b1b; padding: 2px 6px; border-radius: 4px;">CURRENT GPS PIN</span>
         </div>
       `,
     });
@@ -211,12 +336,9 @@ export function GoogleAmbulanceMap({
       title: `Ambulance: ${vehicleNumber}`,
       zIndex: 90,
       icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: 12,
-        fillColor: "#14b8a6",
-        fillOpacity: 1,
-        strokeColor: "#ffffff",
-        strokeWeight: 3,
+        url: getAmbulanceIconSvg(),
+        scaledSize: new google.maps.Size(42, 42),
+        anchor: new google.maps.Point(21, 21),
       },
     });
 
@@ -226,7 +348,7 @@ export function GoogleAmbulanceMap({
           <strong style="color: #0f766e; font-size: 13px;">🚑 Ambulance Unit (${vehicleNumber})</strong>
           <p style="margin: 4px 0 0; font-size: 11px;"><b>Paramedic:</b> ${driverName}</p>
           <p style="margin: 2px 0 0; font-size: 11px;"><b>Status:</b> ${status}</p>
-          <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#ccfbf1; color:#115e59; padding: 2px 6px; border-radius: 4px;">LIVE TELEMETRY</span>
+          <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#ccfbf1; color:#115e59; padding: 2px 6px; border-radius: 4px;">LIVE GPS TELEMETRY</span>
         </div>
       `,
     });
@@ -235,14 +357,13 @@ export function GoogleAmbulanceMap({
       ambulanceInfoWindow.open(map, ambulanceMarker);
     });
 
-    // 3. Nearby Hospitals Markers
+    // 3. Nearby Hospitals Markers with custom Hospital Cross icons
     filteredHospitals.forEach((hosp) => {
       if (!hosp.coordinates) return;
       const hospLatLng = new google.maps.LatLng(hosp.coordinates.lat, hosp.coordinates.lng);
       bounds.extend(hospLatLng);
 
       const isSelected = hosp.name === hospitalName || hosp.id === selectedHospital?.id;
-      const isGovt = hosp.category === "government";
 
       const hospitalMarker = new google.maps.Marker({
         position: hosp.coordinates,
@@ -250,32 +371,29 @@ export function GoogleAmbulanceMap({
         title: hosp.name,
         zIndex: isSelected ? 80 : 50,
         icon: {
-          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-          scale: isSelected ? 8 : 6,
-          fillColor: isSelected ? "#38bdf8" : (isGovt ? "#2563eb" : "#10b981"),
-          fillOpacity: 1,
-          strokeColor: "#ffffff",
-          strokeWeight: 2,
+          url: getHospitalIconSvg(hosp.category, isSelected),
+          scaledSize: new google.maps.Size(isSelected ? 38 : 32, isSelected ? 48 : 40),
+          anchor: new google.maps.Point(isSelected ? 19 : 16, isSelected ? 48 : 40),
         },
       });
 
       const hospInfoWindow = new google.maps.InfoWindow({
         content: `
-          <div style="color: #0f172a; padding: 8px; max-width: 220px; font-family: sans-serif;">
+          <div style="color: #0f172a; padding: 8px; max-width: 230px; font-family: sans-serif;">
             <div style="font-weight: bold; font-size: 13px; color: #1e293b;">🏥 ${hosp.name}</div>
             <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${hosp.address}</div>
             <div style="margin-top: 6px; font-size: 11px; display: flex; gap: 4px; flex-wrap: wrap;">
               <span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: bold;">
-                ${hosp.availableBeds ?? 18} ER Beds Free
+                🟢 ${hosp.availableBeds ?? 18} ER Beds Free
               </span>
-              <span style="background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px;">
+              <span style="background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; font-weight: bold;">
                 ${hosp.distanceKm} km (${hosp.estimatedTravelTime})
               </span>
             </div>
             <div style="margin-top: 6px; font-size: 11px;">
-              <b>ICU:</b> <span style="color: ${hosp.icuStatus === 'Available' ? '#16a34a' : '#d97706'}">${hosp.icuStatus}</span>
+              <b>ICU:</b> <span style="color: ${hosp.icuStatus === 'Available' ? '#16a34a' : '#d97706'}; font-weight: bold;">${hosp.icuStatus}</span>
             </div>
-            ${hosp.phone ? `<div style="margin-top: 4px; font-size: 11px; color: #2563eb;">📞 ${hosp.phone}</div>` : ''}
+            ${hosp.phone ? `<div style="margin-top: 4px; font-size: 11px; color: #2563eb; font-weight: bold;">📞 ${hosp.phone}</div>` : ''}
           </div>
         `,
       });
@@ -287,7 +405,7 @@ export function GoogleAmbulanceMap({
       });
     });
 
-    // 4. Directions Service Driving Route
+    // 4. Route from Ambulance to Patient
     const directionsService = new google.maps.DirectionsService();
     const directionsRenderer = new google.maps.DirectionsRenderer({
       map,
@@ -302,7 +420,7 @@ export function GoogleAmbulanceMap({
     directionsService.route(
       {
         origin: ambulanceCoords,
-        destination: patientCoords,
+        destination: activePatientCoords,
         travelMode: google.maps.TravelMode.DRIVING,
       },
       (result: any, statusResult: string) => {
@@ -320,7 +438,8 @@ export function GoogleAmbulanceMap({
     map.fitBounds(bounds, { top: 50, bottom: 50, left: 50, right: 50 });
   }, [
     mapsLoaded,
-    patientCoords,
+    activePatientCoords,
+    activePatientLabel,
     ambulanceCoords,
     hospitalCoords,
     hospitalName,
@@ -339,33 +458,44 @@ export function GoogleAmbulanceMap({
   }
 
   function centerOnPatient() {
-    if (mapInstanceRef.current && patientCoords) {
-      mapInstanceRef.current.panTo(patientCoords);
+    if (mapInstanceRef.current && activePatientCoords) {
+      mapInstanceRef.current.panTo(activePatientCoords);
       mapInstanceRef.current.setZoom(15);
     }
   }
 
   return (
     <div className="relative flex flex-col w-full overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-950 shadow-2xl">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-slate-900/90 px-5 py-3 backdrop-blur-md">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-slate-900/90 px-5 py-3.5 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/20 text-teal-300">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-500/20 text-teal-300 shadow-xs">
             <Ambulance className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-teal-300">
-                Live GPS Map · {filteredHospitals.length} Nearby Hospitals
+                Hospital GPS Network · {filteredHospitals.length} Hospitals
               </span>
             </div>
-            <p className="text-xs font-bold text-white">
-              {vehicleNumber} ➔ {hospitalName}
+            <p className="text-xs font-bold text-white flex items-center gap-1.5 truncate max-w-xs sm:max-w-md">
+              <MapPin className="h-3.5 w-3.5 text-rose-400 shrink-0" />
+              <span className="truncate">{activePatientLabel}</span>
             </p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={detectUserCurrentLocation}
+            disabled={gpsDetecting}
+            className="flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-950/70 px-3 py-1.5 text-[11px] font-bold text-rose-300 hover:bg-rose-900 transition shadow-xs"
+          >
+            <LocateFixed className={`h-3.5 w-3.5 ${gpsDetecting ? "animate-spin" : ""}`} />
+            {gpsDetecting ? "Detecting GPS..." : "📍 Get My Location"}
+          </button>
+
           <div className="flex rounded-xl bg-slate-800/90 p-1 text-[11px] font-bold text-slate-300 border border-white/5">
             <button
               type="button"
@@ -393,16 +523,16 @@ export function GoogleAmbulanceMap({
           <button
             type="button"
             onClick={centerOnAmbulance}
-            className="rounded-xl border border-teal-500/30 bg-teal-950/60 px-3 py-1 text-[11px] font-bold text-teal-300 hover:bg-teal-900 transition"
+            className="rounded-xl border border-teal-500/30 bg-teal-950/60 px-2.5 py-1 text-[11px] font-bold text-teal-300 hover:bg-teal-900 transition"
           >
-            🚑 Focus Unit
+            🚑 Unit
           </button>
           <button
             type="button"
             onClick={centerOnPatient}
-            className="rounded-xl border border-rose-500/30 bg-rose-950/60 px-3 py-1 text-[11px] font-bold text-rose-300 hover:bg-rose-900 transition"
+            className="rounded-xl border border-rose-500/30 bg-rose-950/60 px-2.5 py-1 text-[11px] font-bold text-rose-300 hover:bg-rose-900 transition"
           >
-            📍 Focus Patient
+            📍 Patient
           </button>
           <button
             type="button"
@@ -415,7 +545,7 @@ export function GoogleAmbulanceMap({
         </div>
       </div>
 
-      <div className="relative h-[420px] w-full bg-slate-950">
+      <div className="relative h-[430px] w-full bg-slate-950">
         {apiKeyAvailable && mapsLoaded ? (
           <div ref={mapRef} className="h-full w-full" />
         ) : (
@@ -430,7 +560,7 @@ export function GoogleAmbulanceMap({
                 </div>
               </div>
               <span className="mt-1.5 rounded-md bg-slate-900/90 px-2 py-0.5 text-[10px] font-bold text-rose-300 border border-rose-500/40 shadow">
-                You (Patient Pin)
+                You (Current GPS)
               </span>
             </div>
 
@@ -447,7 +577,7 @@ export function GoogleAmbulanceMap({
             </div>
 
             <div className="absolute left-[50%] top-[25%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-10">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white font-bold shadow-[0_0_15px_rgba(37,99,235,0.7)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white font-bold shadow-[0_0_15px_rgba(37,99,235,0.8)] border border-white/20">
                 🏥
               </div>
               <span className="mt-1 rounded-md bg-slate-900/90 px-2 py-0.5 text-[9px] font-bold text-blue-300 border border-blue-500/30">
@@ -467,11 +597,12 @@ export function GoogleAmbulanceMap({
 
       <div className="border-t border-white/10 bg-slate-900/95 p-4 backdrop-blur-md">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-            🏥 Nearby Hospitals within 6 km Network
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+            <Building2 className="h-3.5 w-3.5 text-teal-400" />
+            Nearby Hospitals Sorted by Proximity
           </span>
           <span className="text-[10px] text-teal-400 font-semibold">
-            Click any hospital pin to view ER beds & route
+            Click any hospital pin to view available beds & routing
           </span>
         </div>
 
@@ -484,12 +615,12 @@ export function GoogleAmbulanceMap({
                 onClick={() => {
                   setSelectedHospital(hosp);
                   if (onSelectHospital) onSelectHospital(hosp);
-                  if (mapInstanceRef.current) {
+                  if (mapInstanceRef.current && hosp.coordinates) {
                     mapInstanceRef.current.panTo(hosp.coordinates);
                     mapInstanceRef.current.setZoom(14);
                   }
                 }}
-                className={`cursor-pointer rounded-2xl border p-2.5 transition-all text-xs ${
+                className={`cursor-pointer rounded-2xl border p-3 transition-all text-xs ${
                   isTarget
                     ? "border-teal-500 bg-teal-950/40 text-white ring-1 ring-teal-500/40 shadow-lg"
                     : "border-white/5 bg-slate-800/50 text-slate-300 hover:border-white/20 hover:bg-slate-800"
@@ -510,9 +641,11 @@ export function GoogleAmbulanceMap({
                   </span>
                 </div>
 
-                <p className="mt-1 font-bold truncate text-white">{hosp.name}</p>
+                <p className="mt-1.5 font-bold truncate text-white flex items-center gap-1">
+                  <span>🏥</span> {hosp.name}
+                </p>
 
-                <div className="mt-1.5 flex items-center justify-between text-[10px]">
+                <div className="mt-2 flex items-center justify-between text-[10px]">
                   <span className="text-emerald-400 font-semibold">
                     🟢 {hosp.availableBeds ?? 18} Beds Free
                   </span>
