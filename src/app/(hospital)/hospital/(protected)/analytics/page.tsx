@@ -28,17 +28,17 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300">
       <div className="flex items-start justify-between">
         <p className="text-xs font-bold uppercase tracking-widest text-slate-400">{label}</p>
-        <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${color}`}>
-          <Icon className="h-4 w-4" aria-hidden />
+        <div className={`flex h-9 w-9 items-center justify-center rounded-xl shadow-xs ${color}`}>
+          <Icon className="h-4.5 w-4.5" aria-hidden />
         </div>
       </div>
       <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-[#0b1f2a]">
         {value}
       </p>
-      {sub && <p className="mt-1 text-xs text-slate-400">{sub}</p>}
+      {sub && <p className="mt-1 text-xs text-slate-400 font-medium">{sub}</p>}
     </div>
   );
 }
@@ -123,23 +123,23 @@ export default function AnalyticsPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Status breakdown */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        {/* Status breakdown division */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
           <h2 className="mb-5 text-sm font-bold uppercase tracking-widest text-slate-400">
             Request Status Breakdown
           </h2>
-          <div className="space-y-3">
-            <Bar label="Accepted / En Route / Arrived" value={stats.accepted} max={stats.total} color="bg-emerald-400" />
+          <div className="space-y-3.5">
+            <Bar label="Accepted / En Route / Arrived" value={stats.accepted} max={stats.total} color="bg-emerald-500" />
             <Bar label="Pending (Searching)" value={stats.pending} max={stats.total} color="bg-amber-400" />
             <Bar label="Declined" value={stats.declined} max={stats.total} color="bg-rose-400" />
           </div>
-          <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+          <div className="mt-6 grid grid-cols-3 gap-3.5 text-center">
             {[
               { label: "Accepted", val: stats.accepted, icon: CheckCircle2, color: "text-emerald-500" },
               { label: "Arrived", val: stats.arrived, icon: Ambulance, color: "text-sky-500" },
               { label: "Declined", val: stats.declined, icon: XCircle, color: "text-rose-500" },
             ].map(({ label, val, icon: Icon, color }) => (
-              <div key={label} className="rounded-xl bg-slate-50 p-3">
+              <div key={label} className="rounded-xl border border-slate-100 bg-slate-50/80 p-3.5 shadow-2xs hover:shadow-xs hover:border-slate-200 hover:-translate-y-0.5 transition-all">
                 <Icon className={`mx-auto h-5 w-5 ${color}`} aria-hidden />
                 <p className="mt-2 font-display text-xl font-semibold text-[#0b1f2a]">{val}</p>
                 <p className="text-xs text-slate-400">{label}</p>
@@ -148,17 +148,17 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Priority breakdown */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        {/* Priority breakdown division */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
           <h2 className="mb-5 text-sm font-bold uppercase tracking-widest text-slate-400">
             Priority Distribution
           </h2>
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             <Bar label="Critical" value={stats.byPriority.critical} max={stats.total} color="bg-rose-500" />
             <Bar label="Urgent" value={stats.byPriority.urgent} max={stats.total} color="bg-amber-400" />
             <Bar label="Standard" value={stats.byPriority.standard} max={stats.total} color="bg-slate-300" />
           </div>
-          <div className="mt-6 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center text-sm text-slate-400">
+          <div className="mt-6 rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-5 text-center text-sm text-slate-400">
             <BarChart3 className="mx-auto mb-2 h-6 w-6 text-slate-300" aria-hidden />
             Time-series charts will be available once the backend connects real data.
           </div>

@@ -60,15 +60,15 @@ export default function IncomingPatientsPage() {
           </span>
         </h2>
         {items.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-400">
+          <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-6 text-center text-sm text-slate-400">
             {emptyMsg}
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {items.map((req) => (
               <div
                 key={req.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -77,33 +77,33 @@ export default function IncomingPatientsPage() {
                       {new Date(req.createdAt).toLocaleString()}
                     </p>
                   </div>
-                  <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-600">
+                  <span className="rounded-full border border-slate-200/80 bg-slate-100/80 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-600 shadow-2xs">
                     {statusLabel(req.status)}
                   </span>
                 </div>
 
                 <div className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
-                  <div className="flex items-start gap-2 text-slate-600">
+                  <div className="flex items-start gap-2 rounded-xl bg-slate-50/80 p-3 text-slate-600">
                     <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
                     {req.locationLabel}
                   </div>
                   {req.etaMinutes != null && (
-                    <div className="flex items-center gap-2 font-semibold text-sky-600">
-                      <Clock className="h-4 w-4" aria-hidden />
+                    <div className="flex items-center gap-2 rounded-xl border border-sky-200/80 bg-sky-50/80 p-3 font-semibold text-sky-700">
+                      <Clock className="h-4 w-4 text-sky-500" aria-hidden />
                       ETA {req.etaMinutes} min
                     </div>
                   )}
                   {req.acceptedBy && (
-                    <div className="flex items-center gap-2 text-slate-500">
+                    <div className="flex items-center gap-2 rounded-xl bg-slate-50/80 p-3 text-slate-600">
                       <UserCheck className="h-4 w-4 text-slate-400" aria-hidden />
                       {req.acceptedBy}
                     </div>
                   )}
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-3 text-xs text-slate-500">
+                <div className="mt-3.5 flex flex-wrap gap-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
                   <span>
-                    <Activity className="inline h-3.5 w-3.5 text-slate-400" aria-hidden /> Blood:{" "}
+                    <Activity className="inline h-3.5 w-3.5 text-slate-400 mr-1" aria-hidden /> Blood:{" "}
                     <strong className="text-slate-700">{req.bloodGroup ?? "—"}</strong>
                   </span>
                   <span>

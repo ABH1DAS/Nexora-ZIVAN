@@ -46,11 +46,11 @@ function StatCard({
   tone?: "default" | "amber" | "sky" | "emerald" | "rose";
 }) {
   const tones = {
-    default: "bg-white border-slate-200 text-slate-700",
-    amber: "bg-amber-50 border-amber-200 text-amber-900",
-    sky: "bg-sky-50 border-sky-200 text-sky-900",
-    emerald: "bg-emerald-50 border-emerald-200 text-emerald-900",
-    rose: "bg-rose-50 border-rose-200 text-rose-900",
+    default: "bg-white border-slate-200/80 text-slate-700 hover:border-slate-300",
+    amber: "bg-amber-50/90 border-amber-200/90 text-amber-900 hover:border-amber-300",
+    sky: "bg-sky-50/90 border-sky-200/90 text-sky-900 hover:border-sky-300",
+    emerald: "bg-emerald-50/90 border-emerald-200/90 text-emerald-900 hover:border-emerald-300",
+    rose: "bg-rose-50/90 border-rose-200/90 text-rose-900 hover:border-rose-300",
   };
   const iconTones = {
     default: "text-slate-400",
@@ -60,9 +60,14 @@ function StatCard({
     rose: "text-rose-500",
   };
   return (
-    <div className={cn("rounded-2xl border p-5 shadow-sm", tones[tone])}>
+    <div
+      className={cn(
+        "rounded-2xl border p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.07)] hover:-translate-y-0.5 transition-all duration-300",
+        tones[tone],
+      )}
+    >
       <div className="flex items-start justify-between">
-        <p className="text-xs font-bold uppercase tracking-widest opacity-60">{label}</p>
+        <p className="text-xs font-bold uppercase tracking-widest opacity-65">{label}</p>
         <Icon className={cn("h-5 w-5", iconTones[tone])} aria-hidden />
       </div>
       <p className="mt-3 font-display text-3xl font-semibold tracking-tight">{value}</p>
@@ -126,12 +131,12 @@ export default function HospitalDashboardPage() {
         <StatCard label="Total" value={requests.length} icon={TrendingUp} tone="default" />
       </div>
 
-      {/* Demo banner */}
-      <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      {/* Demo banner division */}
+      <div className="flex items-start gap-3 rounded-2xl border border-amber-200/90 bg-amber-50/90 px-4 py-3.5 text-sm text-amber-900 shadow-sm hover:shadow-md hover:border-amber-300 transition-all duration-300">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" aria-hidden />
         <span>
           Demo portal — accepting a request does not dispatch a real ambulance.{" "}
-          <Link href="/dashboard/emergency" className="font-semibold underline underline-offset-2">
+          <Link href="/dashboard/emergency" className="font-semibold underline underline-offset-2 hover:text-amber-950">
             Trigger a test SOS →
           </Link>
         </span>
@@ -142,7 +147,7 @@ export default function HospitalDashboardPage() {
         <div
           role="status"
           className={cn(
-            "rounded-2xl border px-4 py-3 text-sm font-semibold",
+            "rounded-2xl border px-4 py-3.5 text-sm font-semibold shadow-md animate-in fade-in slide-in-from-top-2 duration-300",
             notice.type === "success"
               ? "border-emerald-200 bg-emerald-50 text-emerald-800"
               : "border-sky-200 bg-sky-50 text-sky-800",
@@ -152,10 +157,10 @@ export default function HospitalDashboardPage() {
         </div>
       )}
 
-      {/* Request list + detail panel */}
+      {/* Request list + detail panel divisions */}
       <div className="grid gap-6 lg:grid-cols-[1fr_1.15fr]">
         {/* LEFT — Request list */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-4 sm:p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
           <div className="mb-4 flex flex-wrap gap-2">
             {(
               [
@@ -170,10 +175,10 @@ export default function HospitalDashboardPage() {
                 type="button"
                 onClick={() => setFilter(id)}
                 className={cn(
-                  "rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition",
+                  "rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
                   filter === id
-                    ? "bg-[#0b1f2a] text-white"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                    ? "bg-[#0b1f2a] text-white shadow-sm"
+                    : "bg-slate-100/90 text-slate-600 hover:bg-slate-200 hover:text-slate-900 hover:shadow-xs",
                 )}
               >
                 {lbl}
@@ -187,7 +192,7 @@ export default function HospitalDashboardPage() {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-12 text-center">
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-12 text-center">
               <Ambulance className="mx-auto h-8 w-8 text-slate-300" aria-hidden />
               <p className="mt-3 text-sm font-semibold text-slate-600">No requests here</p>
               <p className="mt-1 text-xs text-slate-400">
@@ -203,10 +208,10 @@ export default function HospitalDashboardPage() {
                     type="button"
                     onClick={() => setSelectedId(req.id)}
                     className={cn(
-                      "w-full rounded-xl border p-4 text-left transition-all",
+                      "w-full rounded-xl border p-4 text-left transition-all duration-200",
                       selectedId === req.id
-                        ? "border-[#0b1f2a] bg-[#0b1f2a] text-white shadow-md"
-                        : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-white",
+                        ? "border-[#0b1f2a] bg-[#0b1f2a] text-white shadow-md shadow-slate-900/15"
+                        : "border-slate-200/80 bg-slate-50/70 hover:border-slate-300 hover:bg-white hover:shadow-sm hover:-translate-y-0.5",
                     )}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -228,7 +233,7 @@ export default function HospitalDashboardPage() {
                       </div>
                       <span
                         className={cn(
-                          "shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide",
+                          "shrink-0 rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide shadow-2xs",
                           selectedId === req.id
                             ? "border-white/20 bg-white/15 text-white"
                             : toneForStatus(req.status),
@@ -253,7 +258,7 @@ export default function HospitalDashboardPage() {
         </section>
 
         {/* RIGHT — Detail panel */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <section className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
           {!selected ? (
             <div className="flex h-full min-h-[340px] flex-col items-center justify-center gap-3 text-center">
               <Ambulance className="h-10 w-10 text-slate-200" aria-hidden />
@@ -275,7 +280,7 @@ export default function HospitalDashboardPage() {
                 </div>
                 <span
                   className={cn(
-                    "rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide",
+                    "rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide shadow-2xs",
                     toneForStatus(selected.status),
                   )}
                 >
@@ -285,7 +290,7 @@ export default function HospitalDashboardPage() {
 
               {/* Location + Contact */}
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-xl bg-slate-50 p-4 text-sm">
+                <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-4 text-sm shadow-2xs hover:shadow-xs hover:border-slate-200 transition-all">
                   <p className="mb-1.5 flex items-center gap-2 font-semibold text-slate-700">
                     <MapPin className="h-4 w-4 text-slate-400" aria-hidden />
                     Location
@@ -295,7 +300,7 @@ export default function HospitalDashboardPage() {
                     {selected.coordinates.lat.toFixed(4)}, {selected.coordinates.lng.toFixed(4)}
                   </p>
                 </div>
-                <div className="rounded-xl bg-slate-50 p-4 text-sm">
+                <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-4 text-sm shadow-2xs hover:shadow-xs hover:border-slate-200 transition-all">
                   <p className="mb-1.5 flex items-center gap-2 font-semibold text-slate-700">
                     <Phone className="h-4 w-4 text-slate-400" aria-hidden />
                     Contact
@@ -308,7 +313,7 @@ export default function HospitalDashboardPage() {
               </div>
 
               {/* Health profile */}
-              <div className="rounded-xl border border-slate-200 p-4 text-sm">
+              <div className="rounded-xl border border-slate-200/80 p-4 text-sm shadow-xs hover:shadow-sm hover:border-slate-300 transition-all">
                 <p className="mb-3 font-semibold text-slate-700">Emergency Health Profile</p>
                 <dl className="grid gap-2.5 sm:grid-cols-2">
                   {[
@@ -327,7 +332,7 @@ export default function HospitalDashboardPage() {
 
               {/* ETA */}
               {selected.etaMinutes != null && (
-                <div className="flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-800">
+                <div className="flex items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-800 shadow-xs">
                   <Clock3 className="h-4 w-4 shrink-0" aria-hidden />
                   ETA {selected.etaMinutes} minutes
                   {selected.acceptedBy && (
@@ -341,16 +346,19 @@ export default function HospitalDashboardPage() {
                 {selected.status === "searching" && (
                   <>
                     <Button
+                      variant="hospital"
+                      size="md"
                       onClick={() => {
                         acceptAmbulanceRequest(selected.id, account.contactName, 12);
                         flash("Request accepted. Ambulance dispatched. Member SOS view will update.");
                       }}
                     >
                       <CheckCircle2 className="h-4 w-4" aria-hidden />
-                      Accept & Dispatch
+                      Accept &amp; Dispatch
                     </Button>
                     <Button
                       variant="emergency"
+                      size="md"
                       onClick={() => {
                         declineAmbulanceRequest(selected.id, account.contactName);
                         flash("Request declined. Member notified.", "info");
@@ -363,6 +371,8 @@ export default function HospitalDashboardPage() {
                 )}
                 {selected.status === "accepted" && (
                   <Button
+                    variant="hospital"
+                    size="md"
                     onClick={() => {
                       markAmbulanceEnRoute(selected.id);
                       flash("Status updated — ambulance en route.");
@@ -374,6 +384,8 @@ export default function HospitalDashboardPage() {
                 )}
                 {selected.status === "en_route" && (
                   <Button
+                    variant="hospital"
+                    size="md"
                     onClick={() => {
                       markAmbulanceArrived(selected.id);
                       flash("Ambulance marked as arrived.");

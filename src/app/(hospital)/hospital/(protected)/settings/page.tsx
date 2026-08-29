@@ -1,6 +1,7 @@
 "use client";
 
 import { useHospitalAuth } from "@/lib/hospitalAuth";
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import {
@@ -81,8 +82,8 @@ function InputRow({ label, value, type = "text", onChange, icon: Icon }: {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            "h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pr-4 text-sm text-[#0b1f2a] outline-none placeholder:text-slate-400",
-            "focus:border-[#0b1f2a] focus:bg-white focus:ring-2 focus:ring-[#0b1f2a]/10",
+            "h-11 w-full rounded-xl border border-slate-200/80 bg-slate-50/80 pr-4 text-sm text-[#0b1f2a] shadow-xs outline-none placeholder:text-slate-400",
+            "focus:border-[#0b1f2a] focus:bg-white focus:ring-2 focus:ring-[#0b1f2a]/10 hover:border-slate-300 transition-all",
             Icon ? "pl-10" : "pl-4",
           )}
         />
@@ -130,10 +131,10 @@ export default function SettingsPage() {
             type="button"
             onClick={() => setTab(value)}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all",
+              "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
               tab === value
-                ? "bg-[#0b1f2a] text-white"
-                : "text-slate-600 hover:bg-slate-100 hover:text-[#0b1f2a]",
+                ? "bg-[#0b1f2a] text-white shadow-sm"
+                : "text-slate-600 hover:bg-slate-100/90 hover:text-[#0b1f2a] hover:shadow-2xs",
             )}
           >
             <Icon className="h-4 w-4 shrink-0" aria-hidden />
@@ -146,7 +147,7 @@ export default function SettingsPage() {
       </nav>
 
       {/* Panel */}
-      <div className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="min-w-0 flex-1 rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.07)] transition-all duration-300">
         {tab === "profile" && (
           <div className="space-y-5">
             <div>
@@ -157,7 +158,7 @@ export default function SettingsPage() {
                 Manage your facility and contact information.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+            <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm text-slate-600 shadow-2xs">
               <strong className="text-[#0b1f2a]">Facility:</strong> {account?.hospitalName}
               <span className="ml-2 text-xs text-slate-400">(ID: {account?.hospitalId})</span>
             </div>
@@ -180,7 +181,7 @@ export default function SettingsPage() {
                 Choose what events trigger alerts.
               </p>
             </div>
-            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-slate-50 px-4">
+            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 shadow-2xs">
               <Toggle label="SOS / Emergency Requests" description="New ambulance requests from patients" checked={notifSOS} onChange={setNotifSOS} />
               <Toggle label="Status Updates" description="Accepted, en route, arrived events" checked={notifStatus} onChange={setNotifStatus} />
               <Toggle label="Email Notifications" description="Send summaries to work email" checked={notifEmail} onChange={setNotifEmail} />
@@ -191,7 +192,7 @@ export default function SettingsPage() {
                 onChange={setNotifSound}
               />
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
+            <div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-4 py-3 text-sm text-slate-500 shadow-2xs">
               <Volume2 className="h-4 w-4 text-slate-400" aria-hidden />
               Push notification support requires backend integration.
             </div>
@@ -206,7 +207,7 @@ export default function SettingsPage() {
                 Account security and access controls.
               </p>
             </div>
-            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-slate-50 px-4">
+            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 shadow-2xs">
               <Toggle label="Two-Factor Authentication" description="Require OTP on every sign-in" checked={twoFactor} onChange={setTwoFactor} />
               <Toggle label="Session Activity Alerts" description="Alert when a new login occurs" checked={sessionAlert} onChange={setSessionAlert} />
             </div>
@@ -229,7 +230,7 @@ export default function SettingsPage() {
                 Appearance and layout preferences.
               </p>
             </div>
-            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-slate-50 px-4">
+            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 shadow-2xs">
               <Toggle
                 label="Dark Mode"
                 description="Use dark theme for the portal"
@@ -243,7 +244,7 @@ export default function SettingsPage() {
                 onChange={setCompactView}
               />
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+            <div className="flex items-center gap-2 rounded-xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-800 shadow-2xs">
               <Sun className="h-4 w-4 shrink-0" aria-hidden />
               Dark mode and compact view are UI preference placeholders. Full theming is a Phase 2 feature.
             </div>
@@ -252,16 +253,17 @@ export default function SettingsPage() {
 
         {/* Save button */}
         <div className="mt-6 flex items-center gap-3 border-t border-slate-100 pt-5">
-          <button
+          <Button
             type="button"
+            variant="hospital"
+            size="md"
             onClick={handleSave}
-            className="flex items-center gap-2 rounded-xl bg-[#0b1f2a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#162f3f] active:scale-[0.98]"
           >
             <Save className="h-4 w-4" aria-hidden />
             Save Changes
-          </button>
+          </Button>
           {saved && (
-            <span className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600">
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600 animate-in fade-in duration-200">
               <ChevronRight className="h-4 w-4" aria-hidden />
               Saved!
             </span>

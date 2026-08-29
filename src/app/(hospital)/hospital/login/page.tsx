@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
 import { useHospitalAuth } from "@/lib/hospitalAuth";
 import { HOSPITAL_ACCOUNTS } from "@/data/ambulanceRequests";
 import { cn } from "@/lib/utils";
@@ -158,11 +159,11 @@ export default function HospitalLoginPage() {
       {/* Main login card */}
       <main className="flex flex-1 items-center justify-center px-4 pb-16 pt-6">
         <div className="w-full max-w-md">
-          {/* Card */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+          {/* Main Card Division */}
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.09)] transition-all duration-300">
             {/* Icon + heading */}
             <div className="mb-6 flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0b1f2a]">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0b1f2a] shadow-md shadow-slate-900/20">
                 <ShieldCheck className="h-6 w-6 text-white" aria-hidden />
               </div>
               <div>
@@ -180,7 +181,7 @@ export default function HospitalLoginPage() {
 
             {/* Hospital verification indicator */}
             {verified && (
-              <div className="mb-5 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700">
+              <div className="mb-5 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm animate-in fade-in duration-200">
                 <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
                 Hospital account verified
               </div>
@@ -190,7 +191,7 @@ export default function HospitalLoginPage() {
             {error && (
               <div
                 role="alert"
-                className="mb-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+                className="mb-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm animate-in fade-in duration-200"
               >
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
                 <span>{error}</span>
@@ -265,16 +266,12 @@ export default function HospitalLoginPage() {
               </div>
 
               {/* Submit */}
-              <button
+              <Button
                 type="submit"
+                variant="hospital"
+                size="lg"
                 disabled={submitting || !email || !password}
-                className={cn(
-                  "relative mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl text-sm font-bold transition-all duration-200",
-                  "bg-[#0b1f2a] text-white",
-                  "hover:bg-[#162f3f] active:scale-[0.98]",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b1f2a] focus-visible:ring-offset-2",
-                  "disabled:cursor-not-allowed disabled:opacity-50",
-                )}
+                className="mt-2 w-full"
               >
                 {submitting ? (
                   <>
@@ -284,30 +281,30 @@ export default function HospitalLoginPage() {
                 ) : (
                   "Sign In to Hospital Portal"
                 )}
-              </button>
+              </Button>
             </form>
           </div>
 
           {/* Demo credentials panel */}
-          <div className="mt-4 rounded-2xl border border-slate-200 bg-white/60 p-5">
+          <div className="mt-5 rounded-2xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5 shadow-sm hover:shadow-md transition-all duration-300">
             <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
               Demo Accounts
             </p>
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {HOSPITAL_ACCOUNTS.map((acc) => (
                 <button
                   key={acc.id}
                   type="button"
                   onClick={() => fillDemo(acc)}
-                  className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-left transition hover:border-[#0b1f2a]/30 hover:bg-slate-50"
+                  className="group flex w-full items-center justify-between rounded-xl border border-slate-200/70 bg-white px-4 py-3 text-left shadow-xs hover:border-[#0b1f2a]/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-[#0b1f2a]">
+                    <p className="text-sm font-semibold text-[#0b1f2a] group-hover:text-[#0b1f2a]">
                       {acc.hospitalName}
                     </p>
                     <p className="mt-0.5 text-xs text-slate-500">{acc.email}</p>
                   </div>
-                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 group-hover:bg-[#0b1f2a] group-hover:text-white transition-colors duration-150">
                     Use
                   </span>
                 </button>

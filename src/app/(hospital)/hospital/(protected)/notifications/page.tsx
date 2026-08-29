@@ -122,7 +122,7 @@ export default function NotificationsPage() {
 
       {/* List */}
       {displayed.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-200 bg-white py-20 text-center">
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-200 bg-white py-20 text-center shadow-xs">
           {filter === "unread" ? (
             <>
               <BellOff className="h-10 w-10 text-slate-300" aria-hidden />
@@ -140,16 +140,16 @@ export default function NotificationsPage() {
           )}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {displayed.map((notif) => (
             <div
               key={notif.id}
               className={cn(
-                "flex items-start gap-4 rounded-2xl border p-4 transition",
+                "flex items-start gap-4 rounded-2xl border p-4.5 shadow-[0_4px_20px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-200",
                 bgMap[notif.type],
                 !notif.read && "ring-2 ring-offset-1",
-                notif.type === "emergency" && !notif.read && "ring-rose-200",
-                notif.type === "status" && !notif.read && "ring-sky-200",
+                notif.type === "emergency" && !notif.read && "ring-rose-200 shadow-sm",
+                notif.type === "status" && !notif.read && "ring-sky-200 shadow-sm",
               )}
             >
               <div className="mt-0.5 shrink-0">{iconMap[notif.type]}</div>
@@ -158,7 +158,7 @@ export default function NotificationsPage() {
                   <p className="font-semibold text-[#0b1f2a]">{notif.title}</p>
                   <div className="flex items-center gap-2">
                     {!notif.read && (
-                      <span className="h-2 w-2 rounded-full bg-rose-400" />
+                      <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
                     )}
                     {notif.read && (
                       <CheckCircle2 className="h-4 w-4 text-slate-300" aria-hidden />
@@ -168,7 +168,7 @@ export default function NotificationsPage() {
                     </span>
                   </div>
                 </div>
-                <p className="mt-1 text-sm text-slate-600">{notif.body}</p>
+                <p className="mt-1 text-sm text-slate-600 leading-relaxed">{notif.body}</p>
               </div>
             </div>
           ))}

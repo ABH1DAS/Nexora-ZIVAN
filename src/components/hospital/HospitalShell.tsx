@@ -73,10 +73,10 @@ function NavLink({
       href={href}
       onClick={onClick}
       className={cn(
-        "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-150",
+        "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
         active
-          ? "bg-white text-[#0b1f2a] shadow-sm"
-          : "text-white/60 hover:bg-white/10 hover:text-white",
+          ? "bg-white text-[#0b1f2a] shadow-md shadow-black/10 translate-x-0.5"
+          : "text-white/65 hover:bg-white/10 hover:text-white hover:translate-x-0.5",
       )}
     >
       <Icon
@@ -111,14 +111,14 @@ function Sidebar({
   }
 
   return (
-    <div className="flex h-full flex-col bg-[#0b1f2a]">
+    <div className="flex h-full flex-col bg-[#0b1f2a] shadow-xl">
       {/* Brand */}
       <div className="flex items-center justify-between px-5 pb-4 pt-5">
         <div>
           <Link
             href="/hospital"
             onClick={onClose}
-            className="font-display text-xl font-bold tracking-tight text-white"
+            className="font-display text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-90"
           >
             ZIVAN
           </Link>
@@ -130,7 +130,7 @@ function Sidebar({
           <button
             onClick={onClose}
             aria-label="Close menu"
-            className="rounded-lg p-1.5 text-white/50 transition hover:bg-white/10 hover:text-white lg:hidden"
+            className="rounded-lg p-1.5 text-white/50 transition-all hover:bg-white/10 hover:text-white"
           >
             <X className="h-5 w-5" />
           </button>
@@ -139,7 +139,7 @@ function Sidebar({
 
       {/* Facility badge */}
       {account && (
-        <div className="mx-4 mb-4 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5">
+        <div className="mx-4 mb-4 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 shadow-inner hover:bg-white/10 transition-colors duration-200">
           <p className="truncate text-xs font-bold text-white">
             {account.hospitalName}
           </p>
@@ -153,7 +153,7 @@ function Sidebar({
       <nav className="flex-1 overflow-y-auto px-3 pb-4" aria-label="Hospital portal navigation">
         {navSections.map((section) => (
           <div key={section.label} className="mb-5">
-            <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.15em] text-white/30">
+            <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.15em] text-white/35">
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -185,7 +185,7 @@ function Sidebar({
         )}
         <button
           onClick={onLogout}
-          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white/60 transition hover:bg-rose-500/15 hover:text-rose-300"
+          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white/60 transition-all hover:bg-rose-500/20 hover:text-rose-200 hover:shadow-xs active:scale-[0.98]"
         >
           <LogOut className="h-4 w-4" aria-hidden />
           Sign out
@@ -200,11 +200,11 @@ function NotificationBell({ count = 0 }: { count?: number }) {
     <Link
       href="/hospital/notifications"
       aria-label={`Notifications${count > 0 ? `, ${count} unread` : ""}`}
-      className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+      className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-600 shadow-2xs transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
     >
       <Bell className="h-4 w-4" aria-hidden />
       {count > 0 && (
-        <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#d9354a] px-1 text-[10px] font-bold text-white">
+        <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#d9354a] px-1 text-[10px] font-bold text-white shadow-xs animate-pulse">
           {count > 9 ? "9+" : count}
         </span>
       )}
@@ -310,8 +310,8 @@ export function HospitalShell({
 
               {/* Profile chip */}
               {account && (
-                <div className="hidden items-center gap-2.5 sm:flex">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1f2a] text-sm font-bold text-white">
+                <div className="hidden items-center gap-2.5 rounded-xl border border-transparent px-2.5 py-1.5 transition-all duration-200 hover:border-slate-200/80 hover:bg-slate-50/80 sm:flex">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1f2a] text-sm font-bold text-white shadow-xs">
                     {account.contactName.charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden xl:block">
@@ -326,7 +326,7 @@ export function HospitalShell({
               {/* Quick patient portal link */}
               <Link
                 href="/dashboard"
-                className="hidden items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:flex"
+                className="hidden items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-2xs transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-xs hover:-translate-y-0.5 active:scale-95 sm:flex"
               >
                 <ClipboardList className="h-3.5 w-3.5" aria-hidden />
                 Patient Portal

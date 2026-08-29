@@ -68,15 +68,15 @@ export default function EmergenciesPage() {
         <>
           {active.length > 0 && (
             <section>
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500">
+              <h2 className="mb-3.5 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500">
                 <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden />
                 Active Emergencies ({active.length})
               </h2>
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 {active.map((req) => (
                   <div
                     key={req.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                    className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
@@ -90,27 +90,38 @@ export default function EmergenciesPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <PriorityBadge priority={req.priority} />
-                        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-600">
+                        <span className="rounded-full border border-slate-200/80 bg-slate-100/80 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-600 shadow-2xs">
                           {statusLabel(req.status)}
                         </span>
                       </div>
                     </div>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      <div className="flex items-start gap-2 text-sm text-slate-600">
+                      <div className="flex items-start gap-2 rounded-xl bg-slate-50/80 p-3 text-sm text-slate-600">
                         <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
                         {req.locationLabel}
                       </div>
-                      {req.etaMinutes != null && (
-                        <div className="flex items-center gap-2 text-sm font-semibold text-sky-700">
-                          <Clock3 className="h-4 w-4 text-sky-400" aria-hidden />
+                      {req.etaMinutes != null ? (
+                        <div className="flex items-center gap-2 rounded-xl border border-sky-200/80 bg-sky-50/80 p-3 text-sm font-semibold text-sky-700">
+                          <Clock3 className="h-4 w-4 text-sky-500" aria-hidden />
                           ETA {req.etaMinutes} min · {req.acceptedBy}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 rounded-xl bg-slate-50/80 p-3 text-sm text-slate-400">
+                          <Clock3 className="h-4 w-4 text-slate-400" aria-hidden />
+                          Awaiting ambulance assignment
                         </div>
                       )}
                     </div>
-                    <div className="mt-3 text-sm text-slate-500">
-                      <span className="font-semibold">Blood:</span> {req.bloodGroup ?? "—"} ·{" "}
-                      <span className="font-semibold">Allergies:</span>{" "}
-                      {req.allergies?.join(", ") || "—"}
+                    <div className="mt-3.5 flex flex-wrap gap-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
+                      <span>
+                        Blood group: <strong className="text-slate-700">{req.bloodGroup ?? "—"}</strong>
+                      </span>
+                      <span>
+                        Allergies:{" "}
+                        <strong className="text-slate-700">
+                          {req.allergies?.join(", ") || "None"}
+                        </strong>
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -127,7 +138,7 @@ export default function EmergenciesPage() {
                 {resolved.map((req) => (
                   <div
                     key={req.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm"
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200/60 bg-white/90 px-4 py-3 text-sm shadow-2xs hover:shadow-xs hover:border-slate-300 hover:bg-white transition-all duration-200"
                   >
                     <div className="flex items-center gap-3">
                       <StatusDot status={req.status} />
