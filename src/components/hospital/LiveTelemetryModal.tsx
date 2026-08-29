@@ -141,9 +141,9 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_25px_70px_rgba(15,61,53,0.25)] flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border-0 bg-[#eef6f4] shadow-[0_25px_70px_rgba(13,143,122,0.28)] flex flex-col max-h-[90vh]">
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-border bg-gradient-to-r from-slate-900 via-[#0f2420] to-slate-900 px-6 py-4 text-white">
+        <div className="flex items-center justify-between border-0 bg-gradient-to-r from-slate-900 via-[#0f2420] to-slate-900 px-6 py-4 text-white">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary shadow-xs shadow-primary/40">
               <Activity className="h-5 w-5 text-white animate-pulse" aria-hidden />
@@ -153,7 +153,7 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
                 <h3 className="font-display text-lg font-bold">
                   Live Patient Telemetry &amp; SBAR Handover
                 </h3>
-                <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
+                <span className="flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 border-0">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
                   LIVE STREAM
                 </span>
@@ -174,7 +174,7 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
         {/* Modal Body */}
         <div className="overflow-y-auto p-6 space-y-6 flex-1">
           {/* ECG Oscilloscope Screen */}
-          <div className="overflow-hidden rounded-2xl border border-slate-800 bg-[#071318] p-4 shadow-inner">
+          <div className="overflow-hidden rounded-2xl border-0 bg-[#071318] p-4 shadow-inner">
             <div className="flex items-center justify-between mb-2 text-xs text-slate-400">
               <div className="flex items-center gap-2">
                 <span className="font-mono text-emerald-400 font-bold">LEAD II · 25mm/s · 10mm/mV</span>
@@ -197,68 +197,68 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
           {/* Vitals HUD Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {/* Heart Rate */}
-            <div className="rounded-[1.25rem] border border-border bg-rose-50/70 p-3.5 shadow-sm">
-              <div className="flex items-center justify-between text-xs font-semibold text-rose-700">
+            <div className="rounded-[1.25rem] border-0 bg-rose-100/90 p-3.5 shadow-[0_6px_20px_rgba(217,53,74,0.14)]">
+              <div className="flex items-center justify-between text-xs font-bold text-rose-800">
                 <span>Heart Rate</span>
                 <Heart className="h-4 w-4 fill-rose-500 text-rose-500" />
               </div>
               <p className="mt-1 font-display text-2xl font-bold text-rose-950">
-                {liveBpm} <span className="text-xs font-normal text-rose-700">BPM</span>
+                {liveBpm} <span className="text-xs font-normal text-rose-800">BPM</span>
               </p>
-              <p className="mt-0.5 text-[11px] text-rose-600 font-medium">
+              <p className="mt-0.5 text-[11px] text-rose-700 font-semibold">
                 {liveBpm > 100 ? "Tachycardia" : "Normal Sinus"}
               </p>
             </div>
 
             {/* Blood Pressure */}
-            <div className="rounded-[1.25rem] border border-border bg-sky-50/70 p-3.5 shadow-sm">
-              <div className="flex items-center justify-between text-xs font-semibold text-sky-700">
+            <div className="rounded-[1.25rem] border-0 bg-sky-100/90 p-3.5 shadow-[0_6px_20px_rgba(26,155,181,0.14)]">
+              <div className="flex items-center justify-between text-xs font-bold text-sky-800">
                 <span>Blood Pressure</span>
-                <Activity className="h-4 w-4 text-sky-500" />
+                <Activity className="h-4 w-4 text-sky-600" />
               </div>
               <p className="mt-1 font-display text-2xl font-bold text-sky-950">
-                {vitals.bp} <span className="text-xs font-normal text-sky-700">mmHg</span>
+                {vitals.bp} <span className="text-xs font-normal text-sky-800">mmHg</span>
               </p>
-              <p className="mt-0.5 text-[11px] text-sky-600 font-medium">Mean Art: 98</p>
+              <p className="mt-0.5 text-[11px] text-sky-700 font-semibold">Mean Art: 98</p>
             </div>
 
             {/* SpO2 */}
-            <div className="rounded-[1.25rem] border border-border bg-emerald-50/70 p-3.5 shadow-sm">
-              <div className="flex items-center justify-between text-xs font-semibold text-emerald-700">
+            <div className="rounded-[1.25rem] border-0 bg-emerald-100/90 p-3.5 shadow-[0_6px_20px_rgba(5,150,105,0.14)]">
+              <div className="flex items-center justify-between text-xs font-bold text-emerald-800">
                 <span>SpO2 Oxygen</span>
-                <Wind className="h-4 w-4 text-emerald-500" />
+                <Wind className="h-4 w-4 text-emerald-600" />
               </div>
               <p className="mt-1 font-display text-2xl font-bold text-emerald-950">
-                {vitals.spo2}% <span className="text-xs font-normal text-emerald-700">O₂</span>
+                {vitals.spo2}% <span className="text-xs font-normal text-emerald-800">O₂</span>
               </p>
-              <p className="mt-0.5 text-[11px] text-emerald-600 font-medium">High Flow O2 on</p>
+              <p className="mt-0.5 text-[11px] text-emerald-700 font-semibold">High Flow O2 on</p>
             </div>
 
             {/* Core Temp */}
-            <div className="rounded-[1.25rem] border border-border bg-amber-50/70 p-3.5 shadow-sm">
-              <div className="flex items-center justify-between text-xs font-semibold text-amber-700">
+            <div className="rounded-[1.25rem] border-0 bg-amber-100/90 p-3.5 shadow-[0_6px_20px_rgba(245,158,11,0.14)]">
+              <div className="flex items-center justify-between text-xs font-bold text-amber-800">
                 <span>Temperature</span>
-                <Thermometer className="h-4 w-4 text-amber-500" />
+                <Thermometer className="h-4 w-4 text-amber-600" />
               </div>
               <p className="mt-1 font-display text-2xl font-bold text-amber-950">
                 {vitals.temp}°C
               </p>
-              <p className="mt-0.5 text-[11px] text-amber-600 font-medium">Normothermic</p>
+              <p className="mt-0.5 text-[11px] text-amber-700 font-semibold">Normothermic</p>
             </div>
           </div>
 
           {/* SBAR Pre-Arrival Clinical Handover Summary */}
-          <div className="rounded-[1.5rem] border border-border bg-slate-50/70 p-5 space-y-3">
+          <div className="rounded-[1.5rem] border-0 bg-white p-5 space-y-3 shadow-[0_8px_24px_rgba(15,61,53,0.06)]">
             <h4 className="font-semibold text-foreground text-sm flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 text-primary" />
               SBAR Pre-Arrival Clinical Checklist
             </h4>
             <div className="grid sm:grid-cols-2 gap-3 text-xs">
-              <div className="rounded-xl border border-border bg-white p-3 shadow-2xs">
+              <div className="rounded-xl border-0 bg-[#eef6f4] p-3 shadow-2xs">
                 <span className="font-bold text-primary block mb-1">S - Situation &amp; Chief Complaint:</span>
                 <p className="text-muted leading-relaxed">{request.notes}</p>
               </div>
-              <div className="rounded-xl border border-border bg-white p-3 shadow-2xs">
+              <div className="rounded-xl border-0 bg-[#eef6f4] p-3 shadow-2xs">
                 <span className="font-bold text-primary block mb-1">B - Background &amp; Allergies:</span>
                 <p className="text-muted leading-relaxed">
                   Blood Group: <strong className="text-foreground">{request.bloodGroup ?? "Unknown"}</strong> · Allergies: <strong className="text-foreground">{request.allergies?.join(", ") || "None"}</strong> · Meds: {request.medications?.join(", ") || "None"}
@@ -276,14 +276,14 @@ export function LiveTelemetryModal({ request, isOpen, onClose }: LiveTelemetryMo
                 value={handoverText}
                 onChange={(e) => setHandoverText(e.target.value)}
                 placeholder="Enter pre-arrival treatments, airway status, or specific trauma bay prep instructions..."
-                className="w-full rounded-xl border border-border bg-white p-3 text-xs text-foreground placeholder:text-muted outline-none focus:border-primary focus:ring-2 focus:ring-primary/10 transition"
+                className="w-full rounded-xl border-0 bg-[#eef6f4] p-3 text-xs text-foreground placeholder:text-muted outline-none focus:ring-2 focus:ring-primary/20 transition"
               />
             </div>
           </div>
         </div>
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between border-t border-border bg-slate-50/80 px-6 py-4">
+        <div className="flex items-center justify-between border-t border-black/5 bg-[#eef6f4] px-6 py-4">
           <div className="flex items-center gap-2 text-xs text-muted">
             <Clock className="h-4 w-4 text-primary" />
             <span>ETA to ER Bay: <strong className="text-foreground">{request.etaMinutes != null ? `${request.etaMinutes} mins` : "Arrived"}</strong></span>

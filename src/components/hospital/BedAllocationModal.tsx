@@ -60,15 +60,15 @@ export function BedAllocationModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_25px_70px_rgba(15,61,53,0.25)] flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border-0 bg-[#eef6f4] shadow-[0_25px_70px_rgba(13,143,122,0.28)] flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border bg-gradient-to-r from-slate-900 via-[#0f2420] to-slate-900 px-6 py-4 text-white">
+        <div className="flex items-center justify-between border-0 bg-gradient-to-r from-slate-900 via-[#0f2420] to-slate-900 px-6 py-4 text-white">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary shadow-xs shadow-primary/40">
               <Bed className="h-5 w-5 text-white" aria-hidden />
             </div>
             <div>
-              <h3 className="font-display text-lg font-bold">Allocate ER / Trauma Bed</h3>
+              <h3 className="font-display text-lg font-bold">Allocate ER / Trauma Bay</h3>
               <p className="text-xs text-slate-300">
                 Patient: <strong className="text-white">{request.patientName}</strong> ({request.priority.toUpperCase()} priority)
               </p>
@@ -96,10 +96,10 @@ export function BedAllocationModal({
                   key={bed.id}
                   onClick={() => setSelectedBed(bed.name)}
                   className={cn(
-                    "cursor-pointer flex items-center justify-between rounded-2xl border p-4 transition-all duration-200",
+                    "cursor-pointer flex items-center justify-between rounded-2xl border-0 p-4 transition-all duration-200",
                     isSelected
-                      ? "border-primary bg-primary-soft/40 shadow-sm ring-2 ring-primary/20"
-                      : "border-border bg-white hover:border-primary/40 hover:bg-slate-50/80 hover:shadow-2xs",
+                      ? "bg-primary-soft shadow-[0_8px_24px_rgba(13,143,122,0.2)] ring-2 ring-primary"
+                      : "bg-white hover:bg-white/90 shadow-[0_4px_16px_rgba(15,61,53,0.06)] hover:shadow-[0_8px_24px_rgba(13,143,122,0.14)]",
                   )}
                 >
                   <div className="flex items-start gap-3">

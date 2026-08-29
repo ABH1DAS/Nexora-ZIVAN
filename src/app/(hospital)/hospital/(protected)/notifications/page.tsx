@@ -84,9 +84,9 @@ export default function NotificationsPage() {
   };
 
   const bgMap = {
-    emergency: "border-emergency/25 bg-emergency-soft/70 shadow-[0_10px_30px_rgba(217,53,74,0.14)] hover:shadow-[0_16px_40px_rgba(217,53,74,0.22)]",
-    status: "border-accent/25 bg-accent-soft/70 shadow-[0_10px_30px_rgba(26,155,181,0.14)] hover:shadow-[0_16px_40px_rgba(26,155,181,0.22)]",
-    info: "border-border bg-white shadow-[0_10px_30px_rgba(15,61,53,0.06)] hover:shadow-[0_16px_40px_rgba(13,143,122,0.12)]",
+    emergency: "border-0 bg-emergency-soft/90 shadow-[0_12px_32px_rgba(217,53,74,0.18)] hover:shadow-[0_18px_44px_rgba(217,53,74,0.28)]",
+    status: "border-0 bg-accent-soft/90 shadow-[0_12px_32px_rgba(26,155,181,0.18)] hover:shadow-[0_18px_44px_rgba(26,155,181,0.28)]",
+    info: "border-0 bg-[#eef6f4] shadow-[0_12px_32px_rgba(15,61,53,0.08)] hover:shadow-[0_18px_44px_rgba(13,143,122,0.16)]",
   };
 
   return (
@@ -108,10 +108,10 @@ export default function NotificationsPage() {
               type="button"
               onClick={() => setFilter(f)}
               className={cn(
-                "rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
+                "rounded-full border-0 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
                 filter === f
                   ? "bg-primary text-white shadow-sm"
-                  : "bg-slate-100 text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
+                  : "bg-white text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
               )}
             >
               {f === "all" ? "All" : "Unread"}
@@ -122,7 +122,7 @@ export default function NotificationsPage() {
 
       {/* List */}
       {displayed.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-[2rem] border border-dashed border-border bg-white/70 py-20 text-center shadow-xs">
+        <div className="flex flex-col items-center gap-4 rounded-[2rem] border-0 bg-[#eef6f4] py-20 text-center shadow-[0_14px_40px_rgba(15,61,53,0.1)]">
           {filter === "unread" ? (
             <>
               <BellOff className="h-10 w-10 text-muted/60" aria-hidden />

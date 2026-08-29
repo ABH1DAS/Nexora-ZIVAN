@@ -85,7 +85,7 @@ export default function AmbulancesPage() {
       </div>
 
       {/* Mock demo note */}
-      <div className="flex items-center gap-2.5 rounded-[1.25rem] border border-border bg-white/80 p-3.5 text-sm text-muted shadow-[0_4px_16px_rgba(15,61,53,0.04)] hover:shadow-[0_8px_24px_rgba(13,143,122,0.1)] hover:border-primary/30 transition-all">
+      <div className="flex items-center gap-2.5 rounded-[1.25rem] border-0 bg-[#eef6f4] p-3.5 text-sm text-muted shadow-[0_8px_24px_rgba(15,61,53,0.07)] hover:shadow-[0_12px_32px_rgba(13,143,122,0.14)] transition-all">
         <Radio className="h-4 w-4 shrink-0 text-primary" aria-hidden />
         Fleet data is mock/demo. Real-time GPS integration can be connected by the backend team.
       </div>
@@ -97,7 +97,7 @@ export default function AmbulancesPage() {
           return (
             <div
               key={amb.id}
-              className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-[0_14px_40px_rgba(15,61,53,0.07)] hover:shadow-[0_20px_50px_rgba(13,143,122,0.14)] hover:-translate-y-0.5 transition-all duration-300"
+              className="rounded-[1.5rem] border-0 bg-[#eef6f4] p-5 sm:p-6 shadow-[0_16px_45px_rgba(15,61,53,0.1)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.18)] hover:-translate-y-0.5 transition-all duration-300"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -109,13 +109,13 @@ export default function AmbulancesPage() {
                     <p className="text-xs text-muted">{amb.driver}</p>
                   </div>
                 </div>
-                <span className={cn("rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide shadow-2xs", cfg.color)}>
+                <span className={cn("rounded-full border-0 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide shadow-2xs", cfg.color)}>
                   {cfg.label}
                 </span>
               </div>
 
               {amb.currentRequest ? (
-                <div className="mt-4 rounded-[1.25rem] border border-accent/20 bg-accent-soft p-4 text-sm shadow-2xs">
+                <div className="mt-4 rounded-[1.25rem] border-0 bg-accent-soft p-4 text-sm shadow-[0_8px_24px_rgba(26,155,181,0.18)]">
                   <p className="font-semibold text-accent">{amb.currentRequest.patientName}</p>
                   <div className="mt-1.5 flex items-center gap-2 text-muted">
                     <MapPin className="h-3.5 w-3.5 shrink-0 text-accent" aria-hidden />

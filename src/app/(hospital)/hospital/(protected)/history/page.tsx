@@ -71,14 +71,14 @@ export default function HistoryPage() {
             placeholder="Search by patient name, location, or ID…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-11 w-full rounded-2xl border border-border bg-white pl-10 pr-4 text-sm text-foreground shadow-xs outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/10 hover:border-primary/30 transition-all"
+            className="h-11 w-full rounded-2xl border-0 bg-white pl-10 pr-4 text-sm text-foreground shadow-[0_4px_16px_rgba(15,61,53,0.06)] outline-none placeholder:text-muted focus:ring-2 focus:ring-primary/20 transition-all"
           />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => exportRequestsToCSV(filtered, `hospital-history-${filterStatus}.csv`)}
-            className="flex h-11 items-center gap-1.5 rounded-2xl border border-border bg-white px-4 text-xs font-semibold text-foreground shadow-2xs hover:bg-primary-soft hover:text-primary transition"
+            className="flex h-11 items-center gap-1.5 rounded-2xl border-0 bg-white px-4 text-xs font-semibold text-foreground shadow-[0_4px_16px_rgba(15,61,53,0.06)] hover:bg-primary-soft hover:text-primary transition"
           >
             <Download className="h-4 w-4 text-primary" />
             <span>Export CSV</span>
@@ -93,10 +93,10 @@ export default function HistoryPage() {
                   type="button"
                   onClick={() => setFilterStatus(value)}
                   className={cn(
-                    "rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
+                    "rounded-full border-0 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
                     filterStatus === value
                       ? "bg-primary text-white shadow-sm"
-                      : "bg-slate-100 text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
+                      : "bg-white text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
                   )}
                 >
                   {label}
@@ -109,7 +109,7 @@ export default function HistoryPage() {
 
       {/* Results */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-[2rem] border border-dashed border-border bg-white/70 py-16 text-center shadow-xs">
+        <div className="flex flex-col items-center gap-3 rounded-[2rem] border-0 bg-[#eef6f4] py-16 text-center shadow-[0_14px_40px_rgba(15,61,53,0.1)]">
           <History className="h-10 w-10 text-muted/60" aria-hidden />
           <div>
             <p className="font-semibold text-foreground">No records found</p>
@@ -119,23 +119,23 @@ export default function HistoryPage() {
           </div>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
-          <div className="flex items-center justify-between border-b border-border bg-slate-50/50 px-6 py-4">
-            <p className="text-xs text-muted">
+        <div className="overflow-hidden rounded-[2rem] border-0 bg-[#eef6f4] shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300">
+          <div className="flex items-center justify-between border-b border-black/5 bg-white/40 px-6 py-4">
+            <p className="text-xs text-muted font-medium">
               Showing <span className="font-semibold text-foreground">{filtered.length}</span> record{filtered.length !== 1 ? "s" : ""}
             </p>
-            <span className="text-xs text-muted">Click report icon for printable summary</span>
+            <span className="text-xs text-muted font-medium">Click report icon for printable summary</span>
           </div>
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-black/5">
             {filtered.map((req) => (
               <li
                 key={req.id}
-                className="flex flex-wrap items-center justify-between gap-4 px-6 py-4.5 transition-all duration-200 hover:bg-slate-50/80"
+                className="flex flex-wrap items-center justify-between gap-4 px-6 py-4.5 transition-all duration-200 hover:bg-white/60"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold text-foreground">{req.patientName}</p>
-                    <span className={cn("rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide shadow-2xs", toneForStatus(req.status))}>
+                    <span className={cn("rounded-full border-0 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide shadow-2xs", toneForStatus(req.status))}>
                       {statusLabel(req.status)}
                     </span>
                     {req.allocatedBed && (

@@ -316,12 +316,12 @@ export function HospitalShell({
         {/* Main content area */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-white/80 px-4 py-3.5 backdrop-blur-md sm:px-6">
+          <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-0 bg-[#eef6f4]/90 px-4 py-3.5 backdrop-blur-md sm:px-6 shadow-[0_6px_24px_rgba(15,61,53,0.06)]">
             <div className="flex items-center gap-3">
               {/* Mobile hamburger */}
               <button
                 type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-muted transition hover:bg-primary-soft hover:text-primary lg:hidden"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-0 bg-white text-muted shadow-xs transition hover:bg-primary-soft hover:text-primary lg:hidden"
                 aria-label={mobileOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileOpen}
                 onClick={() => setMobileOpen((v) => !v)}
@@ -355,7 +355,7 @@ export function HospitalShell({
                   if (next) hospitalAudio.playRadioBeep();
                   setMobileOpen((v) => v); // trigger re-render
                 }}
-                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-white text-muted shadow-2xs transition hover:bg-primary-soft hover:text-primary"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl border-0 bg-white text-muted shadow-xs transition hover:bg-primary-soft hover:text-primary"
                 title={hospitalAudio.isEnabled() ? "Sound alerts enabled" : "Sound alerts muted"}
               >
                 {hospitalAudio.isEnabled() ? (

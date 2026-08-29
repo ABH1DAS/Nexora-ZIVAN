@@ -82,8 +82,8 @@ function InputRow({ label, value, type = "text", onChange, icon: Icon }: {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            "h-11 w-full rounded-2xl border border-border bg-slate-50/80 pr-4 text-sm text-foreground shadow-xs outline-none placeholder:text-muted",
-            "focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10 hover:border-primary/30 transition-all",
+            "h-11 w-full rounded-2xl border-0 bg-white pr-4 text-sm text-foreground shadow-[0_4px_14px_rgba(15,61,53,0.06)] outline-none placeholder:text-muted",
+            "focus:ring-2 focus:ring-primary/20 transition-all",
             Icon ? "pl-10" : "pl-4",
           )}
         />
@@ -108,18 +108,19 @@ export default function SettingsPage() {
   const [notifEmail, setNotifEmail] = useState(false);
   const [notifSound, setNotifSound] = useState(true);
 
-  // Security prefs
+  // Security
   const [twoFactor, setTwoFactor] = useState(false);
   const [sessionAlert, setSessionAlert] = useState(true);
 
-  // Display prefs
+  // Display
   const [darkMode, setDarkMode] = useState(false);
   const [compactView, setCompactView] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    setDarkMode(localStorage.getItem("zivan-hospital-dark") === "true");
-    setCompactView(localStorage.getItem("zivan-hospital-compact") === "true");
+    if (typeof window !== "undefined") {
+      setDarkMode(localStorage.getItem("zivan-hospital-dark") === "true");
+      setCompactView(localStorage.getItem("zivan-hospital-compact") === "true");
+    }
   }, []);
 
   const handleToggleDarkMode = (val: boolean) => {
@@ -174,7 +175,7 @@ export default function SettingsPage() {
       </nav>
 
       {/* Panel */}
-      <div className="min-w-0 flex-1 rounded-[2rem] border border-border bg-white p-6 sm:p-8 shadow-[0_18px_50px_rgba(15,61,53,0.08)] hover:shadow-[0_24px_65px_rgba(13,143,122,0.14)] transition-all duration-300">
+      <div className="min-w-0 flex-1 rounded-[2rem] border-0 bg-[#eef6f4] p-6 sm:p-8 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300">
         {tab === "profile" && (
           <div className="space-y-5">
             <div>
@@ -185,9 +186,9 @@ export default function SettingsPage() {
                 Manage your facility and contact information.
               </p>
             </div>
-            <div className="rounded-[1.25rem] border border-border bg-slate-50/80 px-4 py-3 text-sm text-muted shadow-2xs">
+            <div className="rounded-[1.25rem] border-0 bg-white px-4 py-3.5 text-sm text-muted shadow-[0_4px_16px_rgba(15,61,53,0.06)]">
               <strong className="text-foreground">Facility:</strong> {account?.hospitalName}
-              <span className="ml-2 text-xs text-muted/70">(ID: {account?.hospitalId})</span>
+              <span className="ml-2 text-xs text-muted/70 font-mono">(ID: {account?.hospitalId})</span>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <InputRow label="Contact Name" value={contactName} onChange={setContactName} icon={Building2} />
@@ -208,7 +209,7 @@ export default function SettingsPage() {
                 Choose what events trigger alerts.
               </p>
             </div>
-            <div className="divide-y divide-border rounded-[1.25rem] border border-border bg-slate-50/80 px-4 shadow-2xs">
+            <div className="divide-y divide-black/5 rounded-[1.25rem] border-0 bg-white px-4 shadow-[0_6px_20px_rgba(15,61,53,0.06)]">
               <Toggle label="SOS / Emergency Requests" description="New ambulance requests from patients" checked={notifSOS} onChange={setNotifSOS} />
               <Toggle label="Status Updates" description="Accepted, en route, arrived events" checked={notifStatus} onChange={setNotifStatus} />
               <Toggle label="Email Notifications" description="Send summaries to work email" checked={notifEmail} onChange={setNotifEmail} />
@@ -219,7 +220,7 @@ export default function SettingsPage() {
                 onChange={setNotifSound}
               />
             </div>
-            <div className="flex items-center gap-2 rounded-[1.25rem] border border-border bg-white px-4 py-3 text-sm text-muted shadow-2xs">
+            <div className="flex items-center gap-2 rounded-[1.25rem] border-0 bg-white px-4 py-3 text-sm text-muted shadow-[0_4px_14px_rgba(15,61,53,0.06)]">
               <Volume2 className="h-4 w-4 text-primary" aria-hidden />
               Push notification support requires backend integration.
             </div>
@@ -234,7 +235,7 @@ export default function SettingsPage() {
                 Account security and access controls.
               </p>
             </div>
-            <div className="divide-y divide-border rounded-[1.25rem] border border-border bg-slate-50/80 px-4 shadow-2xs">
+            <div className="divide-y divide-black/5 rounded-[1.25rem] border-0 bg-white px-4 shadow-[0_6px_20px_rgba(15,61,53,0.06)]">
               <Toggle label="Two-Factor Authentication" description="Require OTP on every sign-in" checked={twoFactor} onChange={setTwoFactor} />
               <Toggle label="Session Activity Alerts" description="Alert when a new login occurs" checked={sessionAlert} onChange={setSessionAlert} />
             </div>
@@ -257,7 +258,7 @@ export default function SettingsPage() {
                 Appearance and layout preferences.
               </p>
             </div>
-            <div className="divide-y divide-border rounded-[1.25rem] border border-border bg-slate-50/80 px-4 shadow-2xs">
+            <div className="divide-y divide-black/5 rounded-[1.25rem] border-0 bg-white px-4 shadow-[0_6px_20px_rgba(15,61,53,0.06)]">
               <Toggle
                 label="Dark Mode"
                 description="Use dark theme for the hospital portal"
@@ -271,8 +272,8 @@ export default function SettingsPage() {
                 onChange={handleToggleCompactView}
               />
             </div>
-            <div className="flex items-center gap-2 rounded-[1.25rem] border border-emerald-200/80 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-800 shadow-2xs">
-              <Sun className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
+            <div className="flex items-center gap-2 rounded-[1.25rem] border-0 bg-emerald-100/70 px-4 py-3 text-sm text-emerald-900 shadow-[0_4px_16px_rgba(5,150,105,0.1)]">
+              <Sun className="h-4 w-4 shrink-0 text-emerald-700" aria-hidden />
               <span>
                 Theme preferences are active and saved directly to your browser session.
               </span>
@@ -281,7 +282,7 @@ export default function SettingsPage() {
         )}
 
         {/* Save button */}
-        <div className="mt-6 flex items-center gap-3 border-t border-border pt-5">
+        <div className="mt-6 flex items-center gap-3 border-t border-black/5 pt-5">
           <Button
             type="button"
             variant="primary"

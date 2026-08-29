@@ -29,24 +29,20 @@ import {
   Area,
 } from "recharts";
 
-function StatCard({
-  label,
-  value,
-  sub,
-  icon: Icon,
-  color,
-}: {
+interface StatCardProps {
   label: string;
   value: string | number;
   sub?: string;
   icon: React.ElementType;
   color: string;
-}) {
+}
+
+function StatCard({ label, value, sub, icon: Icon, color }: StatCardProps) {
   return (
-    <div className="rounded-[1.5rem] border-0 bg-white p-5 shadow-[0_12px_32px_rgba(15,61,53,0.08)] hover:shadow-[0_18px_42px_rgba(13,143,122,0.16)] hover:-translate-y-0.5 transition-all duration-300">
+    <div className="rounded-[1.5rem] border-0 bg-[#eef6f4] p-5 shadow-[0_14px_38px_rgba(15,61,53,0.1)] hover:shadow-[0_20px_48px_rgba(13,143,122,0.18)] hover:-translate-y-0.5 transition-all duration-300">
       <div className="flex items-start justify-between">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">{label}</p>
-        <div className={`flex h-10 w-10 items-center justify-center rounded-2xl shadow-xs ${color}`}>
+        <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${color} shadow-xs`}>
           <Icon className="h-5 w-5" aria-hidden />
         </div>
       </div>
@@ -207,7 +203,7 @@ export default function AnalyticsPage() {
       {/* Main Graphs Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* 1. Request Status Breakdown Graph */}
-        <div className="rounded-[2rem] border border-border bg-white p-6 sm:p-7 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
+        <div className="rounded-[2rem] border-0 bg-[#eef6f4] p-6 sm:p-7 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold uppercase tracking-widest text-muted">
@@ -228,13 +224,13 @@ export default function AnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(15,61,53,0.06)" />
                   <XAxis
                     dataKey="name"
-                    stroke="#5b6f6a"
+                    stroke="#4e6660"
                     fontSize={11}
                     tickLine={false}
                     axisLine={{ stroke: "rgba(15,61,53,0.1)" }}
                   />
                   <YAxis
-                    stroke="#5b6f6a"
+                    stroke="#4e6660"
                     fontSize={11}
                     tickLine={false}
                     axisLine={{ stroke: "rgba(15,61,53,0.1)" }}
@@ -264,18 +260,18 @@ export default function AnalyticsPage() {
             ].map(({ label, val, icon: Icon, color }) => (
               <div
                 key={label}
-                className="rounded-[1.25rem] border border-border bg-slate-50/80 p-3 shadow-2xs hover:shadow-xs hover:border-primary/30 hover:-translate-y-0.5 transition-all"
+                className="rounded-[1.25rem] border-0 bg-white p-3 shadow-[0_6px_20px_rgba(15,61,53,0.07)] hover:shadow-[0_10px_28px_rgba(13,143,122,0.14)] hover:-translate-y-0.5 transition-all"
               >
                 <Icon className={`mx-auto h-4 w-4 ${color}`} aria-hidden />
                 <p className="mt-1.5 font-display text-lg font-semibold text-foreground">{val}</p>
-                <p className="text-[11px] text-muted">{label}</p>
+                <p className="text-[11px] text-muted font-medium">{label}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* 2. Priority Distribution Graph */}
-        <div className="rounded-[2rem] border border-border bg-white p-6 sm:p-7 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
+        <div className="rounded-[2rem] border-0 bg-[#eef6f4] p-6 sm:p-7 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold uppercase tracking-widest text-muted">
@@ -317,20 +313,20 @@ export default function AnalyticsPage() {
               <span className="mt-1 font-display text-2xl font-bold text-foreground">
                 {stats.total}
               </span>
-              <span className="text-[10px] uppercase tracking-wider text-muted">Cases</span>
+              <span className="text-[10px] uppercase tracking-wider text-muted font-semibold">Cases</span>
             </div>
           </div>
 
           {/* Priority breakdown legend tiles */}
           <div className="mt-4 grid grid-cols-3 gap-2.5">
             {[
-              { label: "Critical", val: stats.byPriority.critical, color: "bg-emergency text-emergency-dark border-emergency/20" },
-              { label: "Urgent", val: stats.byPriority.urgent, color: "bg-amber-400 text-amber-900 border-amber-300" },
-              { label: "Standard", val: stats.byPriority.standard, color: "bg-primary text-primary-dark border-primary/20" },
+              { label: "Critical", val: stats.byPriority.critical, color: "bg-emergency text-emergency-dark" },
+              { label: "Urgent", val: stats.byPriority.urgent, color: "bg-amber-400 text-amber-950" },
+              { label: "Standard", val: stats.byPriority.standard, color: "bg-primary text-primary-dark" },
             ].map(({ label, val, color }) => (
               <div
                 key={label}
-                className="rounded-[1.25rem] border border-border bg-slate-50/80 p-3 text-center shadow-2xs hover:shadow-xs hover:border-primary/30 transition-all"
+                className="rounded-[1.25rem] border-0 bg-white p-3 text-center shadow-[0_6px_20px_rgba(15,61,53,0.07)] hover:shadow-[0_10px_28px_rgba(13,143,122,0.14)] transition-all"
               >
                 <div className="flex items-center justify-center gap-1.5">
                   <span className={`h-2.5 w-2.5 rounded-full ${color.split(" ")[0]}`} />
@@ -344,7 +340,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* 3. Activity Trend / Timeline Graph Section */}
-      <div className="rounded-[2rem] border border-border bg-white p-6 sm:p-7 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
+      <div className="rounded-[2rem] border-0 bg-[#eef6f4] p-6 sm:p-7 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-bold uppercase tracking-widest text-muted">

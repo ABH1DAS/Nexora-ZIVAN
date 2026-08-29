@@ -43,9 +43,9 @@ export function IncidentReportModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_25px_70px_rgba(15,61,53,0.25)] flex flex-col max-h-[92vh]">
+      <div className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border-0 bg-white shadow-[0_25px_70px_rgba(13,143,122,0.28)] flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border bg-slate-900 px-6 py-4 text-white">
+        <div className="flex items-center justify-between border-0 bg-gradient-to-r from-slate-900 via-[#0f2420] to-slate-900 px-6 py-4 text-white print:hidden">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white shadow-xs">
               <FileText className="h-5 w-5" />
@@ -68,7 +68,7 @@ export function IncidentReportModal({
         {/* Printable Document Body */}
         <div className="overflow-y-auto p-8 space-y-6 bg-white text-foreground print:p-0">
           {/* Hospital Header */}
-          <div className="flex items-start justify-between border-b border-border pb-5">
+          <div className="flex items-start justify-between border-b border-black/5 pb-5">
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <Building2 className="h-5 w-5 text-primary" />
@@ -76,7 +76,7 @@ export function IncidentReportModal({
                   {request.hospitalName}
                 </span>
               </div>
-              <p className="text-xs text-muted">Emergency Medicine &amp; Trauma Command Directorate</p>
+              <p className="text-xs text-muted font-medium">Emergency Medicine &amp; Trauma Command Directorate</p>
               <p className="text-[11px] text-muted/80">Accredited Emergency Dispatch &amp; Ambulance Services</p>
             </div>
             <div className="text-right">
@@ -91,19 +91,19 @@ export function IncidentReportModal({
 
           {/* Patient Details & Triage Classification */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="rounded-xl border border-border bg-slate-50/70 p-3">
+            <div className="rounded-xl border-0 bg-[#eef6f4] p-3 shadow-xs">
               <span className="text-[11px] text-muted block">Patient Name</span>
               <p className="font-bold text-foreground text-sm">{request.patientName}</p>
             </div>
-            <div className="rounded-xl border border-border bg-slate-50/70 p-3">
-              <span className="text-[11px] text-muted block">Triage Priority</span>
+            <div className="rounded-xl border-0 bg-rose-50 p-3 shadow-xs">
+              <span className="text-[11px] text-rose-800 block">Triage Priority</span>
               <p className="font-bold text-emergency text-sm uppercase">{request.priority}</p>
             </div>
-            <div className="rounded-xl border border-border bg-slate-50/70 p-3">
+            <div className="rounded-xl border-0 bg-[#eef6f4] p-3 shadow-xs">
               <span className="text-[11px] text-muted block">Blood Group</span>
-              <p className="font-bold text-foreground text-sm">{request.bloodGroup || "O+"}</p>
+              <p className="font-bold text-rose-600 text-sm">{request.bloodGroup || "O+"}</p>
             </div>
-            <div className="rounded-xl border border-border bg-slate-50/70 p-3">
+            <div className="rounded-xl border-0 bg-[#eef6f4] p-3 shadow-xs">
               <span className="text-[11px] text-muted block">Allocated Bay</span>
               <p className="font-bold text-primary text-sm">{request.allocatedBed || "Trauma Bay 01"}</p>
             </div>
@@ -115,19 +115,19 @@ export function IncidentReportModal({
               En-Route Recorded Physiological Vitals:
             </h4>
             <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="rounded-xl border border-border bg-white p-2.5 shadow-2xs">
+              <div className="rounded-xl border-0 bg-[#eef6f4] p-2.5 shadow-2xs">
                 <span className="text-[10px] text-muted block">Heart Rate</span>
                 <span className="font-display font-bold text-sm text-foreground">{vitals.hr} BPM</span>
               </div>
-              <div className="rounded-xl border border-border bg-white p-2.5 shadow-2xs">
+              <div className="rounded-xl border-0 bg-[#eef6f4] p-2.5 shadow-2xs">
                 <span className="text-[10px] text-muted block">Blood Pressure</span>
                 <span className="font-display font-bold text-sm text-foreground">{vitals.bp}</span>
               </div>
-              <div className="rounded-xl border border-border bg-white p-2.5 shadow-2xs">
+              <div className="rounded-xl border-0 bg-[#eef6f4] p-2.5 shadow-2xs">
                 <span className="text-[10px] text-muted block">Oxygen SpO2</span>
                 <span className="font-display font-bold text-sm text-foreground">{vitals.spo2}%</span>
               </div>
-              <div className="rounded-xl border border-border bg-white p-2.5 shadow-2xs">
+              <div className="rounded-xl border-0 bg-[#eef6f4] p-2.5 shadow-2xs">
                 <span className="text-[10px] text-muted block">Core Temp</span>
                 <span className="font-display font-bold text-sm text-foreground">{vitals.temp}°C</span>
               </div>
@@ -136,20 +136,20 @@ export function IncidentReportModal({
 
           {/* Incident Timeline & Clinical Notes */}
           <div className="space-y-3">
-            <div className="rounded-xl border border-border bg-slate-50/70 p-3.5 text-xs space-y-1.5">
+            <div className="rounded-xl border-0 bg-[#eef6f4] p-3.5 text-xs space-y-1.5 shadow-xs">
               <span className="font-bold text-foreground block">Incident Location &amp; Dispatch Dispatcher:</span>
               <p className="text-muted">
                 📍 {request.locationLabel} · Dispatched Unit: <strong>{request.acceptedBy || "City Dispatch Desk"}</strong>
               </p>
             </div>
 
-            <div className="rounded-xl border border-border bg-slate-50/70 p-3.5 text-xs space-y-1.5">
+            <div className="rounded-xl border-0 bg-[#eef6f4] p-3.5 text-xs space-y-1.5 shadow-xs">
               <span className="font-bold text-foreground block">Paramedic Incident Observations:</span>
               <p className="text-muted leading-relaxed">{request.notes}</p>
             </div>
 
             {request.handoverNotes && (
-              <div className="rounded-xl border border-primary/20 bg-primary-soft/40 p-3.5 text-xs space-y-1.5">
+              <div className="rounded-xl border-0 bg-primary-soft/70 p-3.5 text-xs space-y-1.5 shadow-xs">
                 <span className="font-bold text-primary block">Clinical Handover &amp; Administered Interventions:</span>
                 <p className="text-muted leading-relaxed">{request.handoverNotes}</p>
               </div>
@@ -157,7 +157,7 @@ export function IncidentReportModal({
           </div>
 
           {/* Physician Sign-Off */}
-          <div className="pt-4 border-t border-border flex justify-between items-end text-xs">
+          <div className="pt-4 border-t border-black/5 flex justify-between items-end text-xs">
             <div>
               <p className="text-muted">Attending Emergency Physician Signature:</p>
               <div className="h-10 border-b border-dashed border-slate-300 w-48 mt-2" />
@@ -172,8 +172,8 @@ export function IncidentReportModal({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between border-t border-border bg-slate-50/80 px-6 py-4 print:hidden">
+        {/* Modal Footer */}
+        <div className="flex items-center justify-between border-t border-black/5 bg-[#eef6f4] px-6 py-4 print:hidden">
           <Button variant="outline" size="sm" onClick={onClose}>
             Close
           </Button>
