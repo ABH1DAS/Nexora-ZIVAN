@@ -12,7 +12,14 @@ export interface Hospital {
   open: boolean;
   specializations: string[];
   icuStatus: IcuStatus;
-  estimatedFare?: string; // For private hospitals / private ambulance estimate
+  estimatedFare?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  totalBeds?: number;
+  availableBeds?: number;
+  phone?: string;
 }
 
 export const hospitals: Hospital[] = [
@@ -35,6 +42,10 @@ export const hospitals: Hospital[] = [
       "Orthopedic",
     ],
     icuStatus: "Available",
+    coordinates: { lat: 28.5672, lng: 77.2100 },
+    totalBeds: 250,
+    availableBeds: 34,
+    phone: "+91 11 2658 8500",
   },
   {
     id: "govt-safdarjung-civil",
@@ -52,6 +63,10 @@ export const hospitals: Hospital[] = [
       "Pediatrician",
     ],
     icuStatus: "Limited",
+    coordinates: { lat: 28.5705, lng: 77.2065 },
+    totalBeds: 180,
+    availableBeds: 19,
+    phone: "+91 11 2616 5000",
   },
   {
     id: "govt-metro-trauma",
@@ -68,6 +83,10 @@ export const hospitals: Hospital[] = [
       "Emergency / Trauma",
     ],
     icuStatus: "Available",
+    coordinates: { lat: 28.6328, lng: 77.2197 },
+    totalBeds: 140,
+    availableBeds: 12,
+    phone: "+91 11 2323 4000",
   },
 
   // ─── Private Hospitals ─────────────────────────────────────────────────
@@ -89,6 +108,10 @@ export const hospitals: Hospital[] = [
     ],
     icuStatus: "Available",
     estimatedFare: "₹450–₹700 (Est.)",
+    coordinates: { lat: 28.5729, lng: 77.1743 },
+    totalBeds: 210,
+    availableBeds: 28,
+    phone: "+91 11 2617 7000",
   },
   {
     id: "northside",
@@ -107,6 +130,10 @@ export const hospitals: Hospital[] = [
     ],
     icuStatus: "Limited",
     estimatedFare: "₹600–₹950 (Est.)",
+    coordinates: { lat: 28.5284, lng: 77.2126 },
+    totalBeds: 160,
+    availableBeds: 15,
+    phone: "+91 11 2651 5050",
   },
   {
     id: "pvt-fortis-care",
@@ -125,6 +152,10 @@ export const hospitals: Hospital[] = [
     ],
     icuStatus: "Available",
     estimatedFare: "₹750–₹1,200 (Est.)",
+    coordinates: { lat: 28.5402, lng: 77.2831 },
+    totalBeds: 190,
+    availableBeds: 22,
+    phone: "+91 11 4277 6222",
   },
   {
     id: "care-clinic",
@@ -138,5 +169,9 @@ export const hospitals: Hospital[] = [
     specializations: ["General Physician", "Pediatrician"],
     icuStatus: "Not Available",
     estimatedFare: "₹350–₹500 (Est.)",
+    coordinates: { lat: 28.5580, lng: 77.2020 },
+    totalBeds: 30,
+    availableBeds: 6,
+    phone: "+91 11 2656 3000",
   },
 ];
