@@ -61,8 +61,8 @@ export default function EmergenciesPage() {
     });
   }, [account]);
 
-  const active = requests.filter((r) => ["searching", "accepted", "en_route"].includes(r.status));
-  const resolved = requests.filter((r) => ["arrived", "declined", "cancelled"].includes(r.status));
+  const active = requests.filter((r) => !["arrived", "ARRIVED AT HOSPITAL", "declined", "cancelled"].includes(r.status));
+  const resolved = requests.filter((r) => ["arrived", "ARRIVED AT HOSPITAL", "declined", "cancelled"].includes(r.status));
 
   return (
     <div className="space-y-6">

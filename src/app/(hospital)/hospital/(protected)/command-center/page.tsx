@@ -63,7 +63,7 @@ export default function CommandCenterPage() {
   }, [account]);
 
   const activeUnits = requests.filter((r) =>
-    ["searching", "accepted", "en_route"].includes(r.status),
+    !["cancelled", "declined", "ARRIVED AT HOSPITAL"].includes(r.status),
   );
 
   const toggleFullscreen = () => {

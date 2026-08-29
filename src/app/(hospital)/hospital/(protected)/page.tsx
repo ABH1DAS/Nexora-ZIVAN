@@ -146,15 +146,15 @@ export default function HospitalDashboardPage() {
   const selected = requests.find((r) => r.id === selectedId) ?? requests[0] ?? null;
 
   const filtered = requests.filter((r) => {
-    if (filter === "pending") return r.status === "searching";
-    if (filter === "active") return ["accepted", "en_route"].includes(r.status);
-    if (filter === "resolved") return ["arrived", "declined", "cancelled"].includes(r.status);
+    if (filter === "pending") return ["searching", "PENDING", "REQUEST RECEIVED"].includes(r.status);
+    if (filter === "active") return ["accepted", "en_route", "HOSPITAL ACCEPTED", "AMBULANCE ASSIGNED", "AMBULANCE EN ROUTE", "AMBULANCE ON THE WAY", "AMBULANCE ARRIVED", "HELP ARRIVED", "PATIENT PICKED UP"].includes(r.status);
+    if (filter === "resolved") return ["arrived", "ARRIVED AT HOSPITAL", "declined", "cancelled"].includes(r.status);
     return true;
   });
 
-  const pendingCount = requests.filter((r) => r.status === "searching").length;
-  const activeCount = requests.filter((r) => ["accepted", "en_route"].includes(r.status)).length;
-  const resolvedCount = requests.filter((r) => ["arrived", "declined", "cancelled"].includes(r.status)).length;
+  const pendingCount = requests.filter((r) => ["searching", "PENDING", "REQUEST RECEIVED"].includes(r.status)).length;
+  const activeCount = requests.filter((r) => ["accepted", "en_route", "HOSPITAL ACCEPTED", "AMBULANCE ASSIGNED", "AMBULANCE EN ROUTE", "AMBULANCE ON THE WAY", "AMBULANCE ARRIVED", "HELP ARRIVED", "PATIENT PICKED UP"].includes(r.status)).length;
+  const resolvedCount = requests.filter((r) => ["arrived", "ARRIVED AT HOSPITAL", "declined", "cancelled"].includes(r.status)).length;
 
   function flash(msg: string, type: "success" | "info" = "success") {
     setNotice({ msg, type });
