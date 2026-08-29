@@ -76,7 +76,7 @@ export default function EmergenciesPage() {
                 {active.map((req) => (
                   <div
                     key={req.id}
-                    className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+                    className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-[0_12px_36px_rgba(217,53,74,0.12)] hover:shadow-[0_18px_48px_rgba(217,53,74,0.2)] hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
@@ -101,7 +101,7 @@ export default function EmergenciesPage() {
                         {req.locationLabel}
                       </div>
                       {req.etaMinutes != null ? (
-                        <div className="flex items-center gap-2 rounded-[1.25rem] border border-accent/25 bg-accent-soft p-3.5 text-sm font-semibold text-accent">
+                        <div className="flex items-center gap-2 rounded-[1.25rem] border border-accent/25 bg-accent-soft p-3.5 text-sm font-semibold text-accent shadow-[0_4px_16px_rgba(26,155,181,0.15)]">
                           <Clock3 className="h-4 w-4 text-accent" aria-hidden />
                           ETA {req.etaMinutes} min · {req.acceptedBy}
                         </div>
@@ -138,7 +138,7 @@ export default function EmergenciesPage() {
                 {resolved.map((req) => (
                   <div
                     key={req.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-white/90 px-4 py-3.5 text-sm shadow-2xs hover:shadow-xs hover:border-primary/30 transition-all duration-200"
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-white/90 px-4 py-3.5 text-sm shadow-[0_4px_16px_rgba(15,61,53,0.04)] hover:shadow-[0_8px_24px_rgba(13,143,122,0.12)] hover:border-primary/30 transition-all duration-200"
                   >
                     <div className="flex items-center gap-3">
                       <StatusDot status={req.status} />

@@ -147,7 +147,7 @@ export default function SettingsPage() {
       </nav>
 
       {/* Panel */}
-      <div className="min-w-0 flex-1 rounded-[2rem] border border-border bg-white p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-300">
+      <div className="min-w-0 flex-1 rounded-[2rem] border border-border bg-white p-6 sm:p-8 shadow-[0_18px_50px_rgba(15,61,53,0.08)] hover:shadow-[0_24px_65px_rgba(13,143,122,0.14)] transition-all duration-300">
         {tab === "profile" && (
           <div className="space-y-5">
             <div>

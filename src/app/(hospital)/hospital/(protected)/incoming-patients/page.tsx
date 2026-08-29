@@ -68,7 +68,7 @@ export default function IncomingPatientsPage() {
             {items.map((req) => (
               <div
                 key={req.id}
-                className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+                className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-[0_14px_40px_rgba(15,61,53,0.07)] hover:shadow-[0_20px_50px_rgba(13,143,122,0.14)] hover:-translate-y-0.5 transition-all duration-300"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -88,7 +88,7 @@ export default function IncomingPatientsPage() {
                     {req.locationLabel}
                   </div>
                   {req.etaMinutes != null && (
-                    <div className="flex items-center gap-2 rounded-[1.25rem] border border-accent/25 bg-accent-soft p-3.5 font-semibold text-accent">
+                    <div className="flex items-center gap-2 rounded-[1.25rem] border border-accent/25 bg-accent-soft p-3.5 font-semibold text-accent shadow-[0_4px_16px_rgba(26,155,181,0.15)]">
                       <Clock className="h-4 w-4 text-accent" aria-hidden />
                       ETA {req.etaMinutes} min
                     </div>

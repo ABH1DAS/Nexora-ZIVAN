@@ -64,7 +64,7 @@ export default function StaffPage() {
   return (
     <div className="space-y-5">
       {/* Summary division */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-border bg-white/90 backdrop-blur p-6 shadow-sm hover:shadow-md transition-all duration-300">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-border bg-white/90 backdrop-blur p-6 shadow-[0_16px_45px_rgba(13,143,122,0.12)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.18)] transition-all duration-300">
         <div className="flex items-center gap-3.5">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-xs shadow-primary/25">
             <Users className="h-6 w-6" aria-hidden />
@@ -126,7 +126,7 @@ export default function StaffPage() {
           return (
             <div
               key={member.id}
-              className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+              className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-[0_12px_36px_rgba(15,61,53,0.07)] hover:shadow-[0_18px_45px_rgba(13,143,122,0.14)] hover:-translate-y-0.5 transition-all duration-300"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -175,7 +175,7 @@ export default function StaffPage() {
         })}
       </div>
 
-      <div className="flex items-center gap-2.5 rounded-[1.25rem] border border-border bg-white/80 p-4 text-sm text-muted shadow-xs hover:shadow-sm hover:border-primary/30 transition-all">
+      <div className="flex items-center gap-2.5 rounded-[1.25rem] border border-border bg-white/80 p-4 text-sm text-muted shadow-[0_4px_16px_rgba(15,61,53,0.04)] hover:shadow-[0_8px_24px_rgba(13,143,122,0.1)] hover:border-primary/30 transition-all">
         <ShieldCheck className="h-4 w-4 shrink-0 text-primary" aria-hidden />
         Staff data shown is demo/mock. Real staff management connects to the backend team's API.
       </div>

@@ -67,14 +67,14 @@ export default function AmbulancesPage() {
       {/* Fleet summary */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Available", count: counts.available, color: "text-primary", bg: "bg-primary-soft/80" },
-          { label: "Dispatched", count: counts.dispatched, color: "text-accent", bg: "bg-accent-soft/80" },
-          { label: "Maintenance", count: counts.maintenance, color: "text-muted", bg: "bg-slate-50/80" },
+          { label: "Available", count: counts.available, color: "text-primary", bg: "bg-primary-soft/80 shadow-[0_12px_32px_rgba(13,143,122,0.18)] hover:shadow-[0_18px_42px_rgba(13,143,122,0.28)]" },
+          { label: "Dispatched", count: counts.dispatched, color: "text-accent", bg: "bg-accent-soft/80 shadow-[0_12px_32px_rgba(26,155,181,0.18)] hover:shadow-[0_18px_42px_rgba(26,155,181,0.28)]" },
+          { label: "Maintenance", count: counts.maintenance, color: "text-muted", bg: "bg-slate-50/80 shadow-[0_12px_32px_rgba(15,61,53,0.08)] hover:shadow-[0_18px_42px_rgba(15,61,53,0.14)]" },
         ].map(({ label, count, color, bg }) => (
           <div
             key={label}
             className={cn(
-              "rounded-[1.5rem] border-0 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300",
+              "rounded-[1.5rem] border-0 p-5 hover:-translate-y-0.5 transition-all duration-300",
               bg,
             )}
           >
@@ -85,7 +85,7 @@ export default function AmbulancesPage() {
       </div>
 
       {/* Mock demo note */}
-      <div className="flex items-center gap-2.5 rounded-[1.25rem] border border-border bg-white/80 p-3.5 text-sm text-muted shadow-xs hover:shadow-sm hover:border-primary/30 transition-all">
+      <div className="flex items-center gap-2.5 rounded-[1.25rem] border border-border bg-white/80 p-3.5 text-sm text-muted shadow-[0_4px_16px_rgba(15,61,53,0.04)] hover:shadow-[0_8px_24px_rgba(13,143,122,0.1)] hover:border-primary/30 transition-all">
         <Radio className="h-4 w-4 shrink-0 text-primary" aria-hidden />
         Fleet data is mock/demo. Real-time GPS integration can be connected by the backend team.
       </div>
@@ -97,7 +97,7 @@ export default function AmbulancesPage() {
           return (
             <div
               key={amb.id}
-              className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+              className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-[0_14px_40px_rgba(15,61,53,0.07)] hover:shadow-[0_20px_50px_rgba(13,143,122,0.14)] hover:-translate-y-0.5 transition-all duration-300"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">

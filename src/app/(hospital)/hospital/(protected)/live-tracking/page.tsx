@@ -36,7 +36,7 @@ export default function LiveTrackingPage() {
   return (
     <div className="space-y-6">
       {/* Map placeholder */}
-      <div className="relative overflow-hidden rounded-[2rem] border border-border bg-white shadow-sm hover:shadow-md transition-all duration-300">
+      <div className="relative overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_18px_50px_rgba(13,143,122,0.14)] hover:shadow-[0_24px_60px_rgba(13,143,122,0.2)] transition-all duration-300">
         {/* Grid pattern background to simulate a map */}
         <div
           className="flex h-[340px] items-center justify-center sm:h-[420px]"
@@ -115,7 +115,7 @@ export default function LiveTrackingPage() {
               return (
                 <div
                   key={req.id}
-                  className="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-border bg-white p-4.5 sm:p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+                  className="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-border bg-white p-4.5 sm:p-5 shadow-[0_12px_36px_rgba(15,61,53,0.07)] hover:shadow-[0_18px_45px_rgba(13,143,122,0.14)] hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-xs shadow-primary/25">

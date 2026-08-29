@@ -84,9 +84,9 @@ export default function NotificationsPage() {
   };
 
   const bgMap = {
-    emergency: "border-emergency/25 bg-emergency-soft/70",
-    status: "border-accent/25 bg-accent-soft/70",
-    info: "border-border bg-white",
+    emergency: "border-emergency/25 bg-emergency-soft/70 shadow-[0_10px_30px_rgba(217,53,74,0.14)] hover:shadow-[0_16px_40px_rgba(217,53,74,0.22)]",
+    status: "border-accent/25 bg-accent-soft/70 shadow-[0_10px_30px_rgba(26,155,181,0.14)] hover:shadow-[0_16px_40px_rgba(26,155,181,0.22)]",
+    info: "border-border bg-white shadow-[0_10px_30px_rgba(15,61,53,0.06)] hover:shadow-[0_16px_40px_rgba(13,143,122,0.12)]",
   };
 
   return (
@@ -96,7 +96,7 @@ export default function NotificationsPage() {
         <div className="flex items-center gap-3">
           <h1 className="font-semibold text-foreground text-lg">Notifications</h1>
           {unreadCount > 0 && (
-            <span className="rounded-full bg-emergency px-2.5 py-0.5 text-xs font-bold text-white shadow-xs">
+            <span className="rounded-full bg-emergency px-2.5 py-0.5 text-xs font-bold text-white shadow-[0_4px_14px_rgba(217,53,74,0.35)]">
               {unreadCount} new
             </span>
           )}
@@ -145,11 +145,11 @@ export default function NotificationsPage() {
             <div
               key={notif.id}
               className={cn(
-                "flex items-start gap-4 rounded-[1.5rem] border p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200",
+                "flex items-start gap-4 rounded-[1.5rem] border p-5 hover:-translate-y-0.5 transition-all duration-200",
                 bgMap[notif.type],
                 !notif.read && "ring-2 ring-offset-1",
-                notif.type === "emergency" && !notif.read && "ring-emergency/30 shadow-sm",
-                notif.type === "status" && !notif.read && "ring-accent/30 shadow-sm",
+                notif.type === "emergency" && !notif.read && "ring-emergency/30",
+                notif.type === "status" && !notif.read && "ring-accent/30",
               )}
             >
               <div className="mt-0.5 shrink-0">{iconMap[notif.type]}</div>

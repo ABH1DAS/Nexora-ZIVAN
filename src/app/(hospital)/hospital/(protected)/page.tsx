@@ -46,11 +46,11 @@ function StatCard({
   tone?: "default" | "amber" | "sky" | "emerald" | "rose";
 }) {
   const tones = {
-    default: "bg-white text-foreground",
-    amber: "bg-amber-50/80 text-amber-900",
-    sky: "bg-accent-soft/80 text-accent",
-    emerald: "bg-primary-soft/80 text-primary-dark",
-    rose: "bg-emergency-soft/80 text-emergency-dark",
+    default: "bg-white text-foreground shadow-[0_12px_32px_rgba(15,61,53,0.08)] hover:shadow-[0_18px_42px_rgba(15,61,53,0.14)]",
+    amber: "bg-amber-50/80 text-amber-900 shadow-[0_12px_32px_rgba(245,158,11,0.16)] hover:shadow-[0_18px_42px_rgba(245,158,11,0.25)]",
+    sky: "bg-accent-soft/80 text-accent shadow-[0_12px_32px_rgba(26,155,181,0.18)] hover:shadow-[0_18px_42px_rgba(26,155,181,0.28)]",
+    emerald: "bg-primary-soft/80 text-primary-dark shadow-[0_12px_32px_rgba(13,143,122,0.18)] hover:shadow-[0_18px_42px_rgba(13,143,122,0.28)]",
+    rose: "bg-emergency-soft/80 text-emergency-dark shadow-[0_12px_32px_rgba(217,53,74,0.18)] hover:shadow-[0_18px_42px_rgba(217,53,74,0.28)]",
   };
   const iconTones = {
     default: "text-muted",
@@ -62,7 +62,7 @@ function StatCard({
   return (
     <div
       className={cn(
-        "rounded-[1.5rem] border-0 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300",
+        "rounded-[1.5rem] border-0 p-5 hover:-translate-y-0.5 transition-all duration-300",
         tones[tone],
       )}
     >
@@ -124,7 +124,7 @@ export default function HospitalDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Hero section */}
-      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-white via-[#f3faf8] to-[#e8f6fb] p-6 sm:p-8 shadow-sm">
+      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-white via-[#f3faf8] to-[#e8f6fb] p-6 sm:p-8 shadow-[0_18px_45px_rgba(13,143,122,0.12)] hover:shadow-[0_24px_55px_rgba(13,143,122,0.18)] transition-all duration-300">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-semibold text-primary uppercase tracking-wider">Operational Console</p>
@@ -135,7 +135,7 @@ export default function HospitalDashboardPage() {
               Real-time emergency dispatch, incoming patient triage, and ambulance fleet coordination.
             </p>
           </div>
-          <div className="rounded-[1.5rem] bg-[#0f2420] px-5 py-4 text-white shadow-sm">
+          <div className="rounded-[1.5rem] bg-[#0f2420] px-5 py-4 text-white shadow-[0_12px_30px_rgba(15,36,32,0.35)]">
             <p className="text-xs uppercase tracking-wide text-white/60">Active Queue</p>
             <p className="mt-1 font-display text-3xl font-bold">
               🚑 {pendingCount + activeCount} units
@@ -156,7 +156,7 @@ export default function HospitalDashboardPage() {
       </div>
 
       {/* Demo banner division */}
-      <div className="flex items-start gap-3 rounded-[1.5rem] border border-amber-200/90 bg-amber-50/90 px-5 py-3.5 text-sm text-amber-900 shadow-sm hover:shadow-md hover:border-amber-300 transition-all duration-300">
+      <div className="flex items-start gap-3 rounded-[1.5rem] border border-amber-200/90 bg-amber-50/90 px-5 py-3.5 text-sm text-amber-900 shadow-[0_10px_26px_rgba(245,158,11,0.12)] hover:shadow-[0_14px_34px_rgba(245,158,11,0.18)] hover:border-amber-300 transition-all duration-300">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" aria-hidden />
         <span>
           Demo portal — accepting a request simulates live patient dispatch.{" "}
@@ -173,8 +173,8 @@ export default function HospitalDashboardPage() {
           className={cn(
             "rounded-2xl border px-4 py-3.5 text-sm font-semibold shadow-md animate-in fade-in slide-in-from-top-2 duration-300",
             notice.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-              : "border-sky-200 bg-sky-50 text-sky-800",
+              ? "border-emerald-200 bg-emerald-50 text-emerald-800 shadow-[0_10px_30px_rgba(5,150,105,0.18)]"
+              : "border-sky-200 bg-sky-50 text-sky-800 shadow-[0_10px_30px_rgba(26,155,181,0.18)]",
           )}
         >
           {notice.msg}
@@ -184,7 +184,7 @@ export default function HospitalDashboardPage() {
       {/* Request list + detail panel divisions */}
       <div className="grid gap-6 lg:grid-cols-[1fr_1.15fr]">
         {/* LEFT — Request list */}
-        <section className="rounded-[2rem] border border-border bg-white/90 backdrop-blur p-5 shadow-sm hover:shadow-md transition-all duration-300">
+        <section className="rounded-[2rem] border border-border bg-white/90 backdrop-blur p-5 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
           <div className="mb-4 flex flex-wrap gap-2">
             {(
               [
@@ -282,7 +282,7 @@ export default function HospitalDashboardPage() {
         </section>
 
         {/* RIGHT — Detail panel */}
-        <section className="rounded-[2rem] border border-border bg-white/90 backdrop-blur p-6 sm:p-7 shadow-sm hover:shadow-md transition-all duration-300">
+        <section className="rounded-[2rem] border border-border bg-white/90 backdrop-blur p-6 sm:p-7 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
           {!selected ? (
             <div className="flex h-full min-h-[340px] flex-col items-center justify-center gap-3 text-center">
               <Ambulance className="h-10 w-10 text-slate-200" aria-hidden />

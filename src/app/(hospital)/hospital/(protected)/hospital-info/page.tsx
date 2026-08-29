@@ -41,7 +41,7 @@ export default function HospitalInfoPage() {
   return (
     <div className="space-y-6">
       {/* Hospital profile card */}
-      <div className="rounded-[2rem] border border-border bg-gradient-to-br from-white via-[#f3faf8] to-[#e8f6fb] p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-300">
+      <div className="rounded-[2rem] border border-border bg-gradient-to-br from-white via-[#f3faf8] to-[#e8f6fb] p-6 sm:p-8 shadow-[0_18px_50px_rgba(13,143,122,0.15)] hover:shadow-[0_24px_65px_rgba(13,143,122,0.22)] transition-all duration-300">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary text-white shadow-md shadow-primary/25">
@@ -56,19 +56,19 @@ export default function HospitalInfoPage() {
                 {hospitalData.address}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-xl border border-primary/25 bg-primary-soft px-3 py-1 text-xs font-semibold text-primary shadow-2xs">
+                <span className="rounded-xl border border-primary/25 bg-primary-soft px-3 py-1 text-xs font-semibold text-primary shadow-[0_2px_10px_rgba(13,143,122,0.12)]">
                   {hospitalData.open ? "Open 24/7" : "Currently Closed"}
                 </span>
                 <span className="rounded-xl border border-border bg-white/80 px-3 py-1 text-xs font-semibold text-muted capitalize shadow-2xs">
                   {hospitalData.type}
                 </span>
-                <span className="rounded-xl border border-accent/25 bg-accent-soft px-3 py-1 text-xs font-semibold text-accent shadow-2xs">
+                <span className="rounded-xl border border-accent/25 bg-accent-soft px-3 py-1 text-xs font-semibold text-accent shadow-[0_2px_10px_rgba(26,155,181,0.12)]">
                   NABH Accredited · Demo
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-2.5 rounded-[1.25rem] border border-border bg-white/80 backdrop-blur p-4 text-sm text-muted shadow-xs">
+          <div className="flex flex-col gap-2.5 rounded-[1.25rem] border border-border bg-white/80 backdrop-blur p-4 text-sm text-muted shadow-[0_4px_16px_rgba(15,61,53,0.04)]">
             <div className="flex items-center gap-2">
               <Phone className="h-4 w-4 text-primary" aria-hidden />
               <span>+91 11-XXXX-XXXX (Demo)</span>
@@ -96,7 +96,7 @@ export default function HospitalInfoPage() {
             return (
               <div
                 key={dept.name}
-                className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
+                className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-[0_12px_36px_rgba(15,61,53,0.07)] hover:shadow-[0_18px_45px_rgba(13,143,122,0.14)] hover:-translate-y-0.5 transition-all duration-300"
               >
                 <p className="font-semibold text-foreground">{dept.name}</p>
                 <p className="mt-0.5 text-xs text-muted">{dept.head}</p>
@@ -127,7 +127,7 @@ export default function HospitalInfoPage() {
           {services.map((svc) => (
             <span
               key={svc}
-              className="rounded-2xl border border-border bg-white/90 px-4 py-2 text-sm font-semibold text-foreground shadow-2xs hover:shadow-xs hover:border-primary/40 hover:bg-primary-soft hover:text-primary hover:-translate-y-0.5 transition-all duration-200"
+              className="rounded-2xl border border-border bg-white/90 px-4 py-2 text-sm font-semibold text-foreground shadow-[0_2px_8px_rgba(15,61,53,0.04)] hover:shadow-[0_6px_18px_rgba(13,143,122,0.16)] hover:border-primary/40 hover:bg-primary-soft hover:text-primary hover:-translate-y-0.5 transition-all duration-200"
             >
               {svc}
             </span>

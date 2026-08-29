@@ -28,7 +28,7 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="rounded-[1.5rem] border-0 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+    <div className="rounded-[1.5rem] border-0 bg-white p-5 shadow-[0_12px_32px_rgba(15,61,53,0.08)] hover:shadow-[0_18px_42px_rgba(13,143,122,0.16)] hover:-translate-y-0.5 transition-all duration-300">
       <div className="flex items-start justify-between">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">{label}</p>
         <div className={`flex h-10 w-10 items-center justify-center rounded-2xl shadow-xs ${color}`}>
@@ -124,7 +124,7 @@ export default function AnalyticsPage() {
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Status breakdown division */}
-        <div className="rounded-[2rem] border border-border bg-white p-6 sm:p-7 shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="rounded-[2rem] border border-border bg-white p-6 sm:p-7 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
           <h2 className="mb-5 text-sm font-bold uppercase tracking-widest text-muted">
             Request Status Breakdown
           </h2>
@@ -149,7 +149,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Priority breakdown division */}
-        <div className="rounded-[2rem] border border-border bg-white p-6 sm:p-7 shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="rounded-[2rem] border border-border bg-white p-6 sm:p-7 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
           <h2 className="mb-5 text-sm font-bold uppercase tracking-widest text-muted">
             Priority Distribution
           </h2>

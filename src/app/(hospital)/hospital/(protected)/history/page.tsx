@@ -98,7 +98,7 @@ export default function HistoryPage() {
           </div>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[2rem] border border-border bg-white shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
           <div className="border-b border-border bg-slate-50/50 px-6 py-4">
             <p className="text-xs text-muted">
               Showing <span className="font-semibold text-foreground">{filtered.length}</span> record{filtered.length !== 1 ? "s" : ""}
@@ -127,7 +127,7 @@ export default function HistoryPage() {
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted">
                   {req.etaMinutes != null && (
-                    <span className="flex items-center gap-1 font-semibold text-accent bg-accent-soft px-3 py-1 rounded-xl border border-accent/20">
+                    <span className="flex items-center gap-1 font-semibold text-accent bg-accent-soft px-3 py-1 rounded-xl border border-accent/20 shadow-[0_2px_10px_rgba(26,155,181,0.15)]">
                       <Clock className="h-3.5 w-3.5" aria-hidden /> {req.etaMinutes} min ETA
                     </span>
                   )}
