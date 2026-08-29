@@ -86,7 +86,7 @@ export default function IncomingPatientsPage() {
           </span>
         </h2>
         {items.length === 0 ? (
-          <p className="rounded-[1.5rem] border-0 bg-[#eef6f4] px-4 py-8 text-center text-sm text-muted shadow-sm">
+          <p className="rounded-[1.5rem] border border-border bg-white/80 px-4 py-8 text-center text-sm text-muted shadow-sm backdrop-blur">
             {emptyMsg}
           </p>
         ) : (
@@ -94,7 +94,7 @@ export default function IncomingPatientsPage() {
             {items.map((req) => (
               <div
                 key={req.id}
-                className="rounded-[1.5rem] border-0 bg-[#eef6f4] p-5 sm:p-6 shadow-[0_16px_45px_rgba(15,61,53,0.1)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.18)] hover:-translate-y-0.5 transition-all duration-300"
+                className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -110,31 +110,31 @@ export default function IncomingPatientsPage() {
                       {new Date(req.createdAt).toLocaleString()}
                     </p>
                   </div>
-                  <span className="rounded-full border-0 bg-white px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide text-muted shadow-2xs">
+                  <span className="rounded-full border border-border bg-slate-50 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide text-muted shadow-2xs">
                     {statusLabel(req.status)}
                   </span>
                 </div>
 
                 <div className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
-                  <div className="flex items-start gap-2 rounded-[1.25rem] border-0 bg-white p-3.5 text-muted shadow-[0_4px_16px_rgba(15,61,53,0.06)]">
+                  <div className="flex items-start gap-2 rounded-[1.25rem] border border-border bg-[#f7fbfa] p-3.5 text-muted shadow-2xs">
                     <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
                     {req.locationLabel}
                   </div>
                   {req.etaMinutes != null && (
-                    <div className="flex items-center gap-2 rounded-[1.25rem] border-0 bg-accent-soft p-3.5 font-semibold text-accent shadow-[0_8px_24px_rgba(26,155,181,0.18)]">
+                    <div className="flex items-center gap-2 rounded-[1.25rem] border border-accent/20 bg-accent-soft p-3.5 font-semibold text-accent shadow-2xs">
                       <Clock className="h-4 w-4 text-accent" aria-hidden />
                       ETA {req.etaMinutes} min
                     </div>
                   )}
                   {req.acceptedBy && (
-                    <div className="flex items-center gap-2 rounded-[1.25rem] border-0 bg-white p-3.5 text-muted shadow-[0_4px_16px_rgba(15,61,53,0.06)]">
+                    <div className="flex items-center gap-2 rounded-[1.25rem] border border-border bg-[#f7fbfa] p-3.5 text-muted shadow-2xs">
                       <UserCheck className="h-4 w-4 text-primary" aria-hidden />
                       {req.acceptedBy}
                     </div>
                   )}
                 </div>
 
-                <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3 border-t border-black/5 pt-3.5 text-xs text-muted">
+                <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3.5 text-xs text-muted">
                   <div className="flex flex-wrap gap-4">
                     <span>
                       <Activity className="inline h-3.5 w-3.5 text-primary mr-1" aria-hidden /> Blood:{" "}
@@ -165,7 +165,7 @@ export default function IncomingPatientsPage() {
                         setSelectedReq(req);
                         setTelemetryOpen(true);
                       }}
-                      className="flex items-center gap-1 rounded-xl border-0 bg-white px-2.5 py-1 text-[11px] font-bold text-rose-800 hover:bg-rose-50 transition shadow-[0_4px_14px_rgba(217,53,74,0.15)]"
+                      className="flex items-center gap-1 rounded-xl border border-rose-200 bg-white px-2.5 py-1 text-[11px] font-bold text-rose-800 hover:bg-rose-50 transition shadow-2xs"
                     >
                       <Activity className="h-3.5 w-3.5 text-rose-600 animate-pulse" />
                       <span>Telemetry</span>
@@ -177,10 +177,10 @@ export default function IncomingPatientsPage() {
                         setSelectedReq(req);
                         setBedOpen(true);
                       }}
-                      className="flex items-center gap-1 rounded-xl border-0 bg-white px-2.5 py-1 text-[11px] font-bold text-foreground hover:bg-primary-soft hover:text-primary transition shadow-[0_4px_14px_rgba(15,61,53,0.08)]"
+                      className="flex items-center gap-1 rounded-xl border border-border bg-white px-2.5 py-1 text-[11px] font-bold text-foreground hover:bg-primary-soft hover:text-primary hover:border-primary/30 transition shadow-2xs"
                     >
                       <Bed className="h-3.5 w-3.5 text-primary" />
-                      <span>{req.allocatedBed ? "Change Bed" : "Allocate Bay"}</span>
+                      <span>Bay</span>
                     </button>
 
                     <button
@@ -189,7 +189,7 @@ export default function IncomingPatientsPage() {
                         setSelectedReq(req);
                         setCommsOpen(true);
                       }}
-                      className="flex items-center gap-1 rounded-xl border-0 bg-white px-2.5 py-1 text-[11px] font-bold text-foreground hover:bg-primary-soft hover:text-primary transition shadow-[0_4px_14px_rgba(15,61,53,0.08)]"
+                      className="flex items-center gap-1 rounded-xl border border-border bg-white px-2.5 py-1 text-[11px] font-bold text-foreground hover:bg-primary-soft hover:text-primary hover:border-primary/30 transition shadow-2xs"
                     >
                       <Radio className="h-3.5 w-3.5 text-primary" />
                       <span>Radio</span>
@@ -201,7 +201,7 @@ export default function IncomingPatientsPage() {
                         setSelectedReq(req);
                         setBloodOpen(true);
                       }}
-                      className="flex items-center gap-1 rounded-xl border-0 bg-white px-2.5 py-1 text-[11px] font-bold text-rose-900 hover:bg-rose-50 transition shadow-[0_4px_14px_rgba(217,53,74,0.15)]"
+                      className="flex items-center gap-1 rounded-xl border border-rose-200 bg-white px-2.5 py-1 text-[11px] font-bold text-rose-900 hover:bg-rose-50 transition shadow-2xs"
                     >
                       <Droplet className="h-3.5 w-3.5 text-rose-600" />
                       <span>Blood</span>

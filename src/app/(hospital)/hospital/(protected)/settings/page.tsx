@@ -82,7 +82,7 @@ function InputRow({ label, value, type = "text", onChange, icon: Icon }: {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            "h-11 w-full rounded-2xl border-0 bg-white pr-4 text-sm text-foreground shadow-[0_4px_14px_rgba(15,61,53,0.06)] outline-none placeholder:text-muted",
+            "h-11 w-full rounded-2xl border border-border bg-white pr-4 text-sm text-foreground shadow-2xs outline-none placeholder:text-muted",
             "focus:ring-2 focus:ring-primary/20 transition-all",
             Icon ? "pl-10" : "pl-4",
           )}
@@ -162,7 +162,7 @@ export default function SettingsPage() {
               "flex items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all duration-200",
               tab === value
                 ? "bg-primary text-white shadow-sm"
-                : "text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
+                : "text-muted hover:bg-primary-soft hover:text-primary",
             )}
           >
             <Icon className="h-4 w-4 shrink-0" aria-hidden />
@@ -175,7 +175,7 @@ export default function SettingsPage() {
       </nav>
 
       {/* Panel */}
-      <div className="min-w-0 flex-1 rounded-[2rem] border-0 bg-[#eef6f4] p-6 sm:p-8 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300">
+      <div className="min-w-0 flex-1 rounded-[2rem] border border-border bg-white/80 p-6 sm:p-8 shadow-sm backdrop-blur">
         {tab === "profile" && (
           <div className="space-y-5">
             <div>
@@ -186,7 +186,7 @@ export default function SettingsPage() {
                 Manage your facility and contact information.
               </p>
             </div>
-            <div className="rounded-[1.25rem] border-0 bg-white px-4 py-3.5 text-sm text-muted shadow-[0_4px_16px_rgba(15,61,53,0.06)]">
+            <div className="rounded-[1.25rem] border border-border bg-white px-4 py-3.5 text-sm text-muted shadow-2xs">
               <strong className="text-foreground">Facility:</strong> {account?.hospitalName}
               <span className="ml-2 text-xs text-muted/70 font-mono">(ID: {account?.hospitalId})</span>
             </div>
@@ -209,7 +209,7 @@ export default function SettingsPage() {
                 Choose what events trigger alerts.
               </p>
             </div>
-            <div className="divide-y divide-black/5 rounded-[1.25rem] border-0 bg-white px-4 shadow-[0_6px_20px_rgba(15,61,53,0.06)]">
+            <div className="divide-y divide-border rounded-[1.25rem] border border-border bg-white px-4 shadow-2xs">
               <Toggle label="SOS / Emergency Requests" description="New ambulance requests from patients" checked={notifSOS} onChange={setNotifSOS} />
               <Toggle label="Status Updates" description="Accepted, en route, arrived events" checked={notifStatus} onChange={setNotifStatus} />
               <Toggle label="Email Notifications" description="Send summaries to work email" checked={notifEmail} onChange={setNotifEmail} />
@@ -220,7 +220,7 @@ export default function SettingsPage() {
                 onChange={setNotifSound}
               />
             </div>
-            <div className="flex items-center gap-2 rounded-[1.25rem] border-0 bg-white px-4 py-3 text-sm text-muted shadow-[0_4px_14px_rgba(15,61,53,0.06)]">
+            <div className="flex items-center gap-2 rounded-[1.25rem] border border-border bg-white px-4 py-3 text-sm text-muted shadow-2xs">
               <Volume2 className="h-4 w-4 text-primary" aria-hidden />
               Push notification support requires backend integration.
             </div>
@@ -235,7 +235,7 @@ export default function SettingsPage() {
                 Account security and access controls.
               </p>
             </div>
-            <div className="divide-y divide-black/5 rounded-[1.25rem] border-0 bg-white px-4 shadow-[0_6px_20px_rgba(15,61,53,0.06)]">
+            <div className="divide-y divide-border rounded-[1.25rem] border border-border bg-white px-4 shadow-2xs">
               <Toggle label="Two-Factor Authentication" description="Require OTP on every sign-in" checked={twoFactor} onChange={setTwoFactor} />
               <Toggle label="Session Activity Alerts" description="Alert when a new login occurs" checked={sessionAlert} onChange={setSessionAlert} />
             </div>
@@ -258,7 +258,7 @@ export default function SettingsPage() {
                 Appearance and layout preferences.
               </p>
             </div>
-            <div className="divide-y divide-black/5 rounded-[1.25rem] border-0 bg-white px-4 shadow-[0_6px_20px_rgba(15,61,53,0.06)]">
+            <div className="divide-y divide-border rounded-[1.25rem] border border-border bg-white px-4 shadow-2xs">
               <Toggle
                 label="Dark Mode"
                 description="Use dark theme for the hospital portal"
@@ -272,7 +272,7 @@ export default function SettingsPage() {
                 onChange={handleToggleCompactView}
               />
             </div>
-            <div className="flex items-center gap-2 rounded-[1.25rem] border-0 bg-emerald-100/70 px-4 py-3 text-sm text-emerald-900 shadow-[0_4px_16px_rgba(5,150,105,0.1)]">
+            <div className="flex items-center gap-2 rounded-[1.25rem] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 shadow-2xs">
               <Sun className="h-4 w-4 shrink-0 text-emerald-700" aria-hidden />
               <span>
                 Theme preferences are active and saved directly to your browser session.
@@ -282,7 +282,7 @@ export default function SettingsPage() {
         )}
 
         {/* Save button */}
-        <div className="mt-6 flex items-center gap-3 border-t border-black/5 pt-5">
+        <div className="mt-6 flex items-center gap-3 border-t border-border pt-5">
           <Button
             type="button"
             variant="primary"

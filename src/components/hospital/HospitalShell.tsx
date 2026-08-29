@@ -90,16 +90,16 @@ function NavLink({
       href={href}
       onClick={onClick}
       className={cn(
-        "group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
+        "flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
         active
-          ? "bg-primary text-white shadow-[0_4px_16px_rgba(13,143,122,0.35)] translate-x-0.5"
-          : "text-white/70 hover:bg-white/10 hover:text-white hover:translate-x-0.5",
+          ? "bg-primary text-white shadow-sm"
+          : "text-muted hover:bg-primary-soft hover:text-foreground",
       )}
     >
       <Icon
         className={cn(
           "h-4 w-4 shrink-0 transition-colors",
-          active ? "text-white" : "text-white/60 group-hover:text-white",
+          active ? "text-white" : "text-muted",
         )}
         aria-hidden
       />
@@ -128,18 +128,18 @@ function Sidebar({
   }
 
   return (
-    <div className="flex h-full flex-col bg-[#0b1f2a] shadow-xl">
+    <div className="flex h-full flex-col border-r border-border bg-white/80 backdrop-blur shadow-sm">
       {/* Brand */}
       <div className="flex items-center justify-between px-5 pb-4 pt-5">
         <div>
           <Link
             href="/hospital"
             onClick={onClose}
-            className="font-display text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-90"
+            className="font-display text-2xl font-bold tracking-tight text-foreground transition-opacity hover:opacity-90"
           >
             ZIVAN
           </Link>
-          <p className="mt-0.5 text-[11px] font-medium uppercase tracking-widest text-white/40">
+          <p className="mt-0.5 text-xs text-muted">
             Hospital Portal
           </p>
         </div>
@@ -147,7 +147,7 @@ function Sidebar({
           <button
             onClick={onClose}
             aria-label="Close menu"
-            className="rounded-lg p-1.5 text-white/50 transition-all hover:bg-white/10 hover:text-white"
+            className="rounded-lg p-1.5 text-muted transition-all hover:bg-primary-soft hover:text-foreground"
           >
             <X className="h-5 w-5" />
           </button>
@@ -156,11 +156,11 @@ function Sidebar({
 
       {/* Facility badge */}
       {account && (
-        <div className="mx-4 mb-4 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 shadow-inner hover:bg-white/10 transition-colors duration-200">
-          <p className="truncate text-xs font-bold text-white">
+        <div className="mx-4 mb-4 rounded-2xl border border-border bg-[#f7fbfa] px-3.5 py-3 shadow-2xs">
+          <p className="truncate text-xs font-bold text-foreground">
             {account.hospitalName}
           </p>
-          <p className="mt-0.5 truncate text-[11px] text-white/50">
+          <p className="mt-0.5 truncate text-[11px] text-muted">
             {account.contactName}
           </p>
         </div>
@@ -170,7 +170,7 @@ function Sidebar({
       <nav className="flex-1 overflow-y-auto px-3 pb-4" aria-label="Hospital portal navigation">
         {navSections.map((section) => (
           <div key={section.label} className="mb-5">
-            <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.15em] text-white/35">
+            <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.15em] text-muted/70">
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -191,18 +191,18 @@ function Sidebar({
       </nav>
 
       {/* User footer */}
-      <div className="border-t border-white/10 p-4">
+      <div className="border-t border-border p-4">
         {account && (
-          <div className="mb-3">
-            <p className="truncate text-sm font-semibold text-white">
+          <div className="mb-3 rounded-2xl border border-border bg-[#f7fbfa] p-3">
+            <p className="truncate text-sm font-semibold text-foreground">
               {account.contactName}
             </p>
-            <p className="truncate text-xs text-white/50">{account.email}</p>
+            <p className="truncate text-xs text-muted">{account.email}</p>
           </div>
         )}
         <button
           onClick={onLogout}
-          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white/60 transition-all hover:bg-rose-500/20 hover:text-rose-200 hover:shadow-xs active:scale-[0.98]"
+          className="flex w-full items-center gap-2 rounded-xl border border-border bg-white px-3 py-2 text-sm font-semibold text-muted shadow-2xs transition-all hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 active:scale-[0.98]"
         >
           <LogOut className="h-4 w-4" aria-hidden />
           Sign out
@@ -217,7 +217,7 @@ function NotificationBell({ count = 0 }: { count?: number }) {
     <Link
       href="/hospital/notifications"
       aria-label={`Notifications${count > 0 ? `, ${count} unread` : ""}`}
-      className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-600 shadow-2xs transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
+      className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-muted shadow-2xs transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm hover:-translate-y-0.5 active:scale-95"
     >
       <Bell className="h-4 w-4" aria-hidden />
       {count > 0 && (
@@ -316,12 +316,12 @@ export function HospitalShell({
         {/* Main content area */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-0 bg-[#eef6f4]/90 px-4 py-3.5 backdrop-blur-md sm:px-6 shadow-[0_6px_24px_rgba(15,61,53,0.06)]">
+          <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-white/80 px-4 py-3.5 backdrop-blur-md sm:px-6 shadow-sm">
             <div className="flex items-center gap-3">
               {/* Mobile hamburger */}
               <button
                 type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border-0 bg-white text-muted shadow-xs transition hover:bg-primary-soft hover:text-primary lg:hidden"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-muted shadow-2xs transition hover:bg-primary-soft hover:text-primary lg:hidden"
                 aria-label={mobileOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileOpen}
                 onClick={() => setMobileOpen((v) => !v)}
@@ -355,7 +355,7 @@ export function HospitalShell({
                   if (next) hospitalAudio.playRadioBeep();
                   setMobileOpen((v) => v); // trigger re-render
                 }}
-                className="flex h-10 w-10 items-center justify-center rounded-2xl border-0 bg-white text-muted shadow-xs transition hover:bg-primary-soft hover:text-primary"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-white text-muted shadow-2xs transition hover:bg-primary-soft hover:text-primary"
                 title={hospitalAudio.isEnabled() ? "Sound alerts enabled" : "Sound alerts muted"}
               >
                 {hospitalAudio.isEnabled() ? (

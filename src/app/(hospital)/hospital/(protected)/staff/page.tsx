@@ -64,7 +64,7 @@ export default function StaffPage() {
   return (
     <div className="space-y-5">
       {/* Summary division */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border-0 bg-[#eef6f4] p-6 shadow-[0_18px_48px_rgba(13,143,122,0.14)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.22)] transition-all duration-300">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-border bg-white/80 p-6 shadow-sm backdrop-blur">
         <div className="flex items-center gap-3.5">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-xs shadow-primary/25">
             <Users className="h-6 w-6" aria-hidden />
@@ -92,26 +92,26 @@ export default function StaffPage() {
             type="button"
             onClick={() => setFilterRole(r)}
             className={cn(
-              "rounded-full border-0 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
+              "rounded-full border px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
               filterRole === r
-                ? "bg-primary text-white shadow-sm"
-                : "bg-white text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
+                ? "border-primary bg-primary text-white shadow-sm"
+                : "border-border bg-white text-muted hover:bg-primary-soft hover:text-primary",
             )}
           >
             {r === "all" ? "All Roles" : r}
           </button>
         ))}
-        <div className="ml-1 h-6 w-px bg-slate-300" />
+        <div className="ml-1 h-6 w-px bg-border" />
         {(["all", "active", "off-duty", "on-leave"] as const).map((s) => (
           <button
             key={s}
             type="button"
             onClick={() => setFilterStatus(s)}
             className={cn(
-              "rounded-full border-0 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
+              "rounded-full border px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
               filterStatus === s
-                ? "bg-primary text-white shadow-sm"
-                : "bg-white text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
+                ? "border-primary bg-primary text-white shadow-sm"
+                : "border-border bg-white text-muted hover:bg-primary-soft hover:text-primary",
             )}
           >
             {s === "all" ? "All Status" : s.replace("-", " ")}
@@ -126,7 +126,7 @@ export default function StaffPage() {
           return (
             <div
               key={member.id}
-              className="rounded-[1.5rem] border-0 bg-[#eef6f4] p-5 sm:p-6 shadow-[0_14px_40px_rgba(15,61,53,0.08)] hover:shadow-[0_20px_50px_rgba(13,143,122,0.18)] hover:-translate-y-0.5 transition-all duration-300"
+              className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">

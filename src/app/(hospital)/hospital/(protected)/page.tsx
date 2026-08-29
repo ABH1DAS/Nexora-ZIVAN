@@ -78,26 +78,14 @@ function StatCard({
   tone?: "amber" | "sky" | "emerald" | "default";
 }) {
   const iconTones = {
-    amber: "bg-amber-100 text-amber-600 shadow-2xs shadow-amber-500/20",
-    sky: "bg-accent-soft text-accent shadow-2xs shadow-accent/20",
-    emerald: "bg-primary-soft text-primary shadow-2xs shadow-primary/20",
+    amber: "bg-amber-100 text-amber-600 shadow-2xs",
+    sky: "bg-accent-soft text-accent shadow-2xs",
+    emerald: "bg-primary-soft text-primary shadow-2xs",
     default: "bg-slate-100 text-muted shadow-2xs",
   };
 
-  const cardGlows = {
-    amber: "shadow-[0_14px_38px_rgba(245,158,11,0.18)] hover:shadow-[0_20px_48px_rgba(245,158,11,0.28)]",
-    sky: "shadow-[0_14px_38px_rgba(26,155,181,0.18)] hover:shadow-[0_20px_48px_rgba(26,155,181,0.28)]",
-    emerald: "shadow-[0_14px_38px_rgba(13,143,122,0.18)] hover:shadow-[0_20px_48px_rgba(13,143,122,0.28)]",
-    default: "shadow-[0_14px_38px_rgba(15,61,53,0.1)] hover:shadow-[0_20px_48px_rgba(15,61,53,0.16)]",
-  };
-
   return (
-    <div
-      className={cn(
-        "rounded-[1.5rem] border-0 bg-[#eef6f4] p-5 hover:-translate-y-0.5 transition-all duration-300",
-        cardGlows[tone],
-      )}
-    >
+    <div className="rounded-[1.5rem] border border-border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md duration-300">
       <div className="flex items-start justify-between">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">{label}</p>
         <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${iconTones[tone]}`}>
@@ -165,7 +153,7 @@ export default function HospitalDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Hero section */}
-      <section className="rounded-[2rem] border-0 bg-gradient-to-br from-[#ebf5f2] via-[#e2f0ed] to-[#d6edf3] p-6 sm:p-8 shadow-[0_20px_50px_rgba(13,143,122,0.18)] hover:shadow-[0_26px_60px_rgba(13,143,122,0.25)] transition-all duration-300">
+      <section className="rounded-[2rem] border border-border bg-gradient-to-br from-white via-[#f3faf8] to-[#e8f6fb] p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-sm font-bold text-primary uppercase tracking-wider">Operational Console</p>
@@ -176,7 +164,7 @@ export default function HospitalDashboardPage() {
               Real-time emergency dispatch, incoming patient triage, and ambulance fleet coordination.
             </p>
           </div>
-          <div className="rounded-[1.5rem] bg-[#0f2420] px-5 py-4 text-white shadow-[0_14px_35px_rgba(15,36,32,0.45)]">
+          <div className="rounded-[1.5rem] bg-[#0f2420] px-5 py-4 text-white shadow-sm">
             <p className="text-xs uppercase tracking-wide text-white/60 font-semibold">Active Queue</p>
             <p className="mt-1 font-display text-3xl font-bold text-emerald-400">
               🚑 {pendingCount + activeCount} units
@@ -197,7 +185,7 @@ export default function HospitalDashboardPage() {
       </div>
 
       {/* Demo banner division */}
-      <div className="flex items-start gap-3 rounded-[1.5rem] border-0 bg-[#fcf5e8] px-5 py-3.5 text-sm text-amber-950 shadow-[0_12px_32px_rgba(245,158,11,0.16)] hover:shadow-[0_16px_40px_rgba(245,158,11,0.24)] transition-all duration-300">
+      <div className="flex items-start gap-3 rounded-[1.5rem] border border-amber-200 bg-[#fcf5e8] px-5 py-3.5 text-sm text-amber-950 shadow-sm">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden />
         <div className="flex-1">
           <p className="font-semibold">Live Operational Sync Active</p>
@@ -207,7 +195,7 @@ export default function HospitalDashboardPage() {
         </div>
         <button
           onClick={() => exportRequestsToCSV(requests)}
-          className="flex items-center gap-1.5 rounded-xl border-0 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 shadow-[0_4px_14px_rgba(245,158,11,0.2)] hover:bg-amber-50 hover:shadow-[0_6px_20px_rgba(245,158,11,0.3)] transition"
+          className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 shadow-2xs hover:bg-amber-50 transition"
         >
           <Download className="h-3.5 w-3.5" />
           Export CSV
@@ -218,10 +206,10 @@ export default function HospitalDashboardPage() {
         <div
           role="status"
           className={cn(
-            "flex items-center justify-between rounded-[1.25rem] border-0 px-4 py-3 text-sm shadow-[0_10px_28px_rgba(13,143,122,0.15)] animate-in fade-in duration-200",
+            "flex items-center justify-between rounded-[1.25rem] border px-4 py-3 text-sm shadow-sm animate-in fade-in duration-200",
             notice.type === "success"
-              ? "bg-primary-soft text-primary"
-              : "bg-slate-100 text-slate-700",
+              ? "border-primary/30 bg-primary-soft text-primary"
+              : "border-border bg-slate-100 text-slate-700",
           )}
         >
           <span>{notice.msg}</span>
@@ -240,10 +228,10 @@ export default function HospitalDashboardPage() {
         {/* Left: Request list division */}
         <section
           aria-label="Ambulance requests"
-          className="rounded-[2rem] border-0 bg-[#eef6f4] p-5 sm:p-6 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300 lg:col-span-2"
+          className="rounded-[2rem] border border-border bg-white/80 p-5 shadow-sm backdrop-blur sm:p-6 lg:col-span-2"
         >
           {/* Filter tabs */}
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-black/5 pb-3">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
             <div className="flex flex-wrap gap-1.5">
               {(
                 [
@@ -260,8 +248,8 @@ export default function HospitalDashboardPage() {
                   className={cn(
                     "rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200",
                     filter === key
-                      ? "bg-primary text-white shadow-xs"
-                      : "bg-white/80 text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
+                      ? "bg-primary text-white shadow-sm"
+                      : "bg-white text-muted border border-border hover:bg-primary-soft hover:text-primary",
                   )}
                 >
                   {label}
@@ -271,7 +259,7 @@ export default function HospitalDashboardPage() {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="rounded-[1.5rem] border-0 bg-white/60 py-12 text-center shadow-xs">
+            <div className="rounded-[1.5rem] border border-border bg-white py-12 text-center shadow-sm">
               <Ambulance className="mx-auto h-8 w-8 text-slate-400" aria-hidden />
               <p className="mt-3 text-sm font-semibold text-muted">No requests here</p>
               <p className="mt-1 text-xs text-muted/70">
@@ -287,10 +275,10 @@ export default function HospitalDashboardPage() {
                     type="button"
                     onClick={() => setSelectedId(req.id)}
                     className={cn(
-                      "w-full rounded-[1.25rem] border-0 p-4 text-left transition-all duration-300",
+                      "w-full rounded-[1.25rem] border p-4 text-left transition-all duration-200",
                       selectedId === req.id
-                        ? "bg-primary text-white shadow-[0_12px_32px_rgba(13,143,122,0.35)] -translate-y-0.5"
-                        : "bg-white shadow-[0_6px_20px_rgba(15,61,53,0.07)] hover:shadow-[0_12px_30px_rgba(13,143,122,0.18)] hover:-translate-y-0.5",
+                        ? "border-primary bg-primary text-white shadow-md -translate-y-0.5"
+                        : "border-border bg-white shadow-2xs hover:border-primary/40 hover:bg-primary-soft/30 hover:-translate-y-0.5",
                     )}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -304,7 +292,7 @@ export default function HospitalDashboardPage() {
                       </div>
                       <span
                         className={cn(
-                          "shrink-0 rounded-full border-0 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide shadow-2xs",
+                          "shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide",
                           selectedId === req.id
                             ? "bg-white/20 text-white"
                             : toneForStatus(req.status),
@@ -323,7 +311,7 @@ export default function HospitalDashboardPage() {
         {/* Right: Request detail division */}
         <section
           aria-label="Request details"
-          className="rounded-[2rem] border-0 bg-[#eef6f4] p-5 sm:p-6 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300 lg:col-span-3"
+          className="rounded-[2rem] border border-border bg-white/80 p-5 shadow-sm backdrop-blur sm:p-6 lg:col-span-3"
         >
           {!selected ? (
             <div className="flex h-64 items-center justify-center text-sm text-muted">
@@ -332,7 +320,7 @@ export default function HospitalDashboardPage() {
           ) : (
             <div className="space-y-5">
               {/* Header */}
-              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-black/5 pb-4">
+              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border pb-4">
                 <div>
                   <div className="flex items-center gap-2">
                     <h2 className="font-display text-xl font-bold text-foreground">
@@ -340,7 +328,7 @@ export default function HospitalDashboardPage() {
                     </h2>
                     <span
                       className={cn(
-                        "rounded-full border-0 px-3 py-0.5 text-xs font-bold uppercase tracking-wide shadow-2xs",
+                        "rounded-full px-3 py-0.5 text-xs font-bold uppercase tracking-wide",
                         toneForStatus(selected.status),
                       )}
                     >
@@ -362,7 +350,7 @@ export default function HospitalDashboardPage() {
 
               {/* Patient info card */}
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="flex items-center gap-3 rounded-2xl border-0 bg-white p-3.5 shadow-[0_6px_20px_rgba(15,61,53,0.06)] hover:shadow-[0_10px_26px_rgba(13,143,122,0.12)] transition">
+                <div className="flex items-center gap-3 rounded-2xl border border-border bg-white p-3.5 shadow-2xs hover:border-primary/40 transition">
                   <MapPin className="h-5 w-5 shrink-0 text-primary" aria-hidden />
                   <div className="min-w-0">
                     <p className="text-xs text-muted">Pickup Location</p>
@@ -371,7 +359,7 @@ export default function HospitalDashboardPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 rounded-2xl border-0 bg-white p-3.5 shadow-[0_6px_20px_rgba(15,61,53,0.06)] hover:shadow-[0_10px_26px_rgba(13,143,122,0.12)] transition">
+                <div className="flex items-center gap-3 rounded-2xl border border-border bg-white p-3.5 shadow-2xs hover:border-primary/40 transition">
                   <Phone className="h-5 w-5 shrink-0 text-primary" aria-hidden />
                   <div className="min-w-0">
                     <p className="text-xs text-muted">Patient Phone</p>
@@ -383,7 +371,7 @@ export default function HospitalDashboardPage() {
               </div>
 
               {/* Emergency Health Profile */}
-              <div className="rounded-[1.25rem] border-0 bg-white p-4.5 text-sm shadow-[0_8px_24px_rgba(15,61,53,0.08)] hover:shadow-[0_12px_32px_rgba(13,143,122,0.14)] transition-all">
+              <div className="rounded-[1.25rem] border border-border bg-white p-4.5 text-sm shadow-2xs">
                 <div className="flex items-center justify-between mb-3">
                   <p className="font-semibold text-foreground">Emergency Health Profile</p>
                   {selected.allocatedBed && (
@@ -409,7 +397,7 @@ export default function HospitalDashboardPage() {
 
               {/* ETA & Assigned Bed info */}
               {selected.etaMinutes != null && (
-                <div className="flex items-center justify-between rounded-2xl border-0 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent shadow-[0_8px_24px_rgba(26,155,181,0.18)]">
+                <div className="flex items-center justify-between rounded-2xl border border-accent/20 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent shadow-2xs">
                   <div className="flex items-center gap-2">
                     <Clock3 className="h-4 w-4 shrink-0" aria-hidden />
                     ETA {selected.etaMinutes} minutes
@@ -430,7 +418,7 @@ export default function HospitalDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setTelemetryModalOpen(true)}
-                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border-0 bg-white p-2.5 text-xs font-semibold text-rose-800 hover:bg-rose-50 transition shadow-[0_6px_20px_rgba(217,53,74,0.12)] hover:shadow-[0_10px_28px_rgba(217,53,74,0.22)]"
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-rose-200 bg-white p-2.5 text-xs font-semibold text-rose-800 hover:bg-rose-50 transition shadow-2xs"
                 >
                   <Activity className="h-4 w-4 text-rose-600 animate-pulse" />
                   <span>Live Telemetry</span>
@@ -439,7 +427,7 @@ export default function HospitalDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setBedModalOpen(true)}
-                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border-0 bg-white p-2.5 text-xs font-semibold text-foreground hover:bg-primary-soft hover:text-primary transition shadow-[0_6px_20px_rgba(15,61,53,0.07)] hover:shadow-[0_10px_28px_rgba(13,143,122,0.18)]"
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-border bg-white p-2.5 text-xs font-semibold text-foreground hover:bg-primary-soft hover:text-primary hover:border-primary/40 transition shadow-2xs"
                 >
                   <Bed className="h-4 w-4 text-primary" />
                   <span>Allocate Bay</span>
@@ -448,7 +436,7 @@ export default function HospitalDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setCommsDrawerOpen(true)}
-                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border-0 bg-white p-2.5 text-xs font-semibold text-foreground hover:bg-primary-soft hover:text-primary transition shadow-[0_6px_20px_rgba(15,61,53,0.07)] hover:shadow-[0_10px_28px_rgba(13,143,122,0.18)]"
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-border bg-white p-2.5 text-xs font-semibold text-foreground hover:bg-primary-soft hover:text-primary hover:border-primary/40 transition shadow-2xs"
                 >
                   <Radio className="h-4 w-4 text-primary" />
                   <span>Radio Comms</span>
@@ -457,7 +445,7 @@ export default function HospitalDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setBloodModalOpen(true)}
-                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border-0 bg-white p-2.5 text-xs font-semibold text-rose-900 hover:bg-rose-50 transition shadow-[0_6px_20px_rgba(217,53,74,0.12)] hover:shadow-[0_10px_28px_rgba(217,53,74,0.22)]"
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-rose-200 bg-white p-2.5 text-xs font-semibold text-rose-900 hover:bg-rose-50 transition shadow-2xs"
                 >
                   <Droplet className="h-4 w-4 text-rose-600" />
                   <span>Blood Bank</span>
@@ -466,7 +454,7 @@ export default function HospitalDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setReportModalOpen(true)}
-                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border-0 bg-white p-2.5 text-xs font-semibold text-foreground hover:bg-slate-50 transition shadow-[0_6px_20px_rgba(15,61,53,0.07)] hover:shadow-[0_10px_28px_rgba(15,61,53,0.14)] col-span-2 sm:col-span-1"
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-border bg-white p-2.5 text-xs font-semibold text-foreground hover:bg-slate-50 transition shadow-2xs col-span-2 sm:col-span-1"
                 >
                   <FileText className="h-4 w-4 text-slate-600" />
                   <span>Incident Report</span>

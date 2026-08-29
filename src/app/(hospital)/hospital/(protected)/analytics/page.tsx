@@ -39,10 +39,10 @@ interface StatCardProps {
 
 function StatCard({ label, value, sub, icon: Icon, color }: StatCardProps) {
   return (
-    <div className="rounded-[1.5rem] border-0 bg-[#eef6f4] p-5 shadow-[0_14px_38px_rgba(15,61,53,0.1)] hover:shadow-[0_20px_48px_rgba(13,143,122,0.18)] hover:-translate-y-0.5 transition-all duration-300">
+    <div className="rounded-[1.5rem] border border-border bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
       <div className="flex items-start justify-between">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">{label}</p>
-        <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${color} shadow-xs`}>
+        <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${color} shadow-2xs`}>
           <Icon className="h-5 w-5" aria-hidden />
         </div>
       </div>
@@ -203,7 +203,7 @@ export default function AnalyticsPage() {
       {/* Main Graphs Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* 1. Request Status Breakdown Graph */}
-        <div className="rounded-[2rem] border-0 bg-[#eef6f4] p-6 sm:p-7 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300">
+        <div className="rounded-[2rem] border border-border bg-white/80 p-6 sm:p-7 shadow-sm backdrop-blur">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold uppercase tracking-widest text-muted">
@@ -260,7 +260,7 @@ export default function AnalyticsPage() {
             ].map(({ label, val, icon: Icon, color }) => (
               <div
                 key={label}
-                className="rounded-[1.25rem] border-0 bg-white p-3 shadow-[0_6px_20px_rgba(15,61,53,0.07)] hover:shadow-[0_10px_28px_rgba(13,143,122,0.14)] hover:-translate-y-0.5 transition-all"
+                className="rounded-[1.25rem] border border-border bg-white p-3 shadow-2xs hover:border-primary/40 hover:-translate-y-0.5 transition-all"
               >
                 <Icon className={`mx-auto h-4 w-4 ${color}`} aria-hidden />
                 <p className="mt-1.5 font-display text-lg font-semibold text-foreground">{val}</p>
@@ -271,7 +271,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* 2. Priority Distribution Graph */}
-        <div className="rounded-[2rem] border-0 bg-[#eef6f4] p-6 sm:p-7 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300">
+        <div className="rounded-[2rem] border border-border bg-white/80 p-6 sm:p-7 shadow-sm backdrop-blur">
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-bold uppercase tracking-widest text-muted">
@@ -326,7 +326,7 @@ export default function AnalyticsPage() {
             ].map(({ label, val, color }) => (
               <div
                 key={label}
-                className="rounded-[1.25rem] border-0 bg-white p-3 text-center shadow-[0_6px_20px_rgba(15,61,53,0.07)] hover:shadow-[0_10px_28px_rgba(13,143,122,0.14)] transition-all"
+                className="rounded-[1.25rem] border border-border bg-white p-3 text-center shadow-2xs hover:border-primary/40 transition-all"
               >
                 <div className="flex items-center justify-center gap-1.5">
                   <span className={`h-2.5 w-2.5 rounded-full ${color.split(" ")[0]}`} />
@@ -340,7 +340,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* 3. Activity Trend / Timeline Graph Section */}
-      <div className="rounded-[2rem] border-0 bg-[#eef6f4] p-6 sm:p-7 shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300">
+      <div className="rounded-[2rem] border border-border bg-white/80 p-6 sm:p-7 shadow-sm backdrop-blur">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-sm font-bold uppercase tracking-widest text-muted">

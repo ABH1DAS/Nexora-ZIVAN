@@ -36,7 +36,7 @@ export default function LiveTrackingPage() {
   return (
     <div className="space-y-6">
       {/* Map visualizer container */}
-      <div className="relative overflow-hidden rounded-[2rem] border-0 bg-[#eef6f4] shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300">
+      <div className="relative overflow-hidden rounded-[2rem] border border-border bg-white shadow-sm">
         <div className="h-80 sm:h-96 w-full bg-radial from-slate-200/60 via-slate-100/50 to-slate-200/70 flex items-center justify-center p-6">
           {/* Map pins for active requests */}
           {requests.length > 0 ? (
@@ -51,10 +51,10 @@ export default function LiveTrackingPage() {
                   }}
                 >
                   <div className="relative">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg shadow-primary/30 hover:scale-110 transition-transform">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-md hover:scale-110 transition-transform">
                       <Ambulance className="h-5 w-5" aria-hidden />
                     </div>
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl bg-white/95 backdrop-blur-xs px-3 py-1 text-xs font-semibold text-foreground shadow-md border-0">
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl bg-white/95 backdrop-blur-xs px-3 py-1 text-xs font-semibold text-foreground shadow-sm border border-border">
                       {req.patientName}
                     </div>
                     <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 h-2 w-2 -translate-y-full">
@@ -65,7 +65,7 @@ export default function LiveTrackingPage() {
               ))}
               {/* Hospital base marker */}
               <div className="absolute" style={{ left: "50%", top: "50%" }}>
-                <div className="flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg shadow-primary/30">
+                <div className="flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-md">
                   <MapPin className="h-4.5 w-4.5" aria-hidden />
                 </div>
               </div>
@@ -84,12 +84,12 @@ export default function LiveTrackingPage() {
         </div>
 
         {/* Map overlay badge */}
-        <div className="absolute left-4 top-4 flex items-center gap-2 rounded-xl border-0 bg-white/95 px-3.5 py-2 text-xs font-semibold text-foreground shadow-md backdrop-blur-sm">
+        <div className="absolute left-4 top-4 flex items-center gap-2 rounded-xl border border-border bg-white/95 px-3.5 py-2 text-xs font-semibold text-foreground shadow-sm backdrop-blur-sm">
           <Radio className="h-3.5 w-3.5 text-primary animate-pulse" aria-hidden />
           Live Tracking · {requests.length} active unit{requests.length !== 1 ? "s" : ""}
         </div>
 
-        <div className="absolute right-4 top-4 rounded-xl border-0 bg-amber-50/95 px-3.5 py-2 text-xs font-semibold text-amber-800 shadow-md backdrop-blur-sm">
+        <div className="absolute right-4 top-4 rounded-xl border border-amber-200 bg-amber-50/95 px-3.5 py-2 text-xs font-semibold text-amber-800 shadow-sm backdrop-blur-sm">
           Demo — real GPS via backend integration
         </div>
       </div>
@@ -106,7 +106,7 @@ export default function LiveTrackingPage() {
               return (
                 <div
                   key={req.id}
-                  className="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border-0 bg-[#eef6f4] p-4.5 sm:p-5 shadow-[0_14px_40px_rgba(15,61,53,0.08)] hover:shadow-[0_20px_50px_rgba(13,143,122,0.18)] hover:-translate-y-0.5 transition-all duration-300"
+                  className="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-border bg-white p-4.5 sm:p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-xs shadow-primary/25">
@@ -121,16 +121,16 @@ export default function LiveTrackingPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     {req.etaMinutes != null && (
-                      <span className="text-sm font-semibold text-accent bg-accent-soft px-3 py-1 rounded-xl border-0 shadow-xs">
+                      <span className="text-sm font-semibold text-accent bg-accent-soft px-3 py-1 rounded-xl border border-accent/20 shadow-2xs">
                         ETA {req.etaMinutes} min
                       </span>
                     )}
                     <span
                       className={cn(
-                        "rounded-full border-0 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide shadow-2xs",
+                        "rounded-full border px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide shadow-2xs",
                         req.status === "en_route"
-                          ? "bg-accent-soft text-accent"
-                          : "bg-primary-soft text-primary",
+                          ? "bg-accent-soft text-accent border-accent/20"
+                          : "bg-primary-soft text-primary border-primary/20",
                       )}
                     >
                       {statusLabel(req.status)}

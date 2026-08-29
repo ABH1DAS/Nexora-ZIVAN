@@ -59,24 +59,24 @@ export function BedAllocationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border-0 bg-[#eef6f4] shadow-[0_25px_70px_rgba(13,143,122,0.28)] flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-border bg-white shadow-xl flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between border-0 bg-gradient-to-r from-slate-900 via-[#0f2420] to-slate-900 px-6 py-4 text-white">
+        <div className="flex items-center justify-between border-b border-border bg-[#f7fbfa] px-6 py-4 text-foreground">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary shadow-xs shadow-primary/40">
-              <Bed className="h-5 w-5 text-white" aria-hidden />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-white shadow-2xs">
+              <Bed className="h-5 w-5" aria-hidden />
             </div>
             <div>
-              <h3 className="font-display text-lg font-bold">Allocate ER / Trauma Bay</h3>
-              <p className="text-xs text-slate-300">
-                Patient: <strong className="text-white">{request.patientName}</strong> ({request.priority.toUpperCase()} priority)
+              <h3 className="font-display text-lg font-bold text-foreground">Allocate ER / Trauma Bay</h3>
+              <p className="text-xs text-muted">
+                Patient: <strong className="text-foreground">{request.patientName}</strong> ({request.priority.toUpperCase()} priority)
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-slate-400 hover:bg-white/10 hover:text-white transition"
+            className="rounded-full p-2 text-muted hover:bg-slate-100 hover:text-foreground transition"
           >
             <X className="h-5 w-5" />
           </button>
@@ -96,10 +96,10 @@ export function BedAllocationModal({
                   key={bed.id}
                   onClick={() => setSelectedBed(bed.name)}
                   className={cn(
-                    "cursor-pointer flex items-center justify-between rounded-2xl border-0 p-4 transition-all duration-200",
+                    "cursor-pointer flex items-center justify-between rounded-2xl border p-4 transition-all duration-200",
                     isSelected
-                      ? "bg-primary-soft shadow-[0_8px_24px_rgba(13,143,122,0.2)] ring-2 ring-primary"
-                      : "bg-white hover:bg-white/90 shadow-[0_4px_16px_rgba(15,61,53,0.06)] hover:shadow-[0_8px_24px_rgba(13,143,122,0.14)]",
+                      ? "border-primary bg-primary-soft/50 shadow-2xs ring-2 ring-primary"
+                      : "border-border bg-white hover:bg-slate-50/70 shadow-2xs",
                   )}
                 >
                   <div className="flex items-start gap-3">
@@ -116,9 +116,9 @@ export function BedAllocationModal({
                   </div>
                   <span
                     className={cn(
-                      "rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
-                      bed.type === "Critical" ? "bg-emergency-soft text-emergency" :
-                      bed.type === "Urgent" ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-700"
+                      "rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+                      bed.type === "Critical" ? "border-rose-200 bg-rose-50 text-rose-700" :
+                      bed.type === "Urgent" ? "border-amber-200 bg-amber-50 text-amber-700" : "border-slate-200 bg-slate-50 text-slate-700"
                     )}
                   >
                     {bed.type}
@@ -129,7 +129,7 @@ export function BedAllocationModal({
           </div>
 
           {/* Bay Readiness Checklist */}
-          <div className="rounded-[1.25rem] border border-border bg-slate-50/70 p-4 space-y-2 text-xs text-muted">
+          <div className="rounded-[1.25rem] border border-border bg-[#f7fbfa] p-4 space-y-2 text-xs text-muted">
             <p className="font-semibold text-foreground flex items-center gap-1.5">
               <CheckCircle2 className="h-4 w-4 text-primary" />
               Automated Prep Protocols on Allocation:
