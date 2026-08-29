@@ -381,15 +381,6 @@ export function HospitalShell({
                   </div>
                 </div>
               )}
-
-              {/* Quick patient portal link */}
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 rounded-2xl border border-border bg-white/90 px-3.5 py-2 text-xs font-semibold text-foreground shadow-2xs transition-all duration-200 hover:bg-primary-soft hover:text-primary hover:shadow-xs hover:-translate-y-0.5"
-              >
-                <span>Patient Portal</span>
-                <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-              </Link>
             </div>
           </header>
 

@@ -325,7 +325,7 @@ export default function CommandCenterPage() {
           </div>
 
           {/* Blood Bank Rapid Match HUD */}
-          <div className="rounded-[2rem] border border-border bg-white p-6 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
+          <div className="rounded-[2rem] border border-rose-200/80 bg-white p-6 shadow-[0_16px_45px_rgba(217,53,74,0.12)] hover:shadow-[0_22px_55px_rgba(217,53,74,0.2)] transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-sm font-bold uppercase tracking-widest text-muted flex items-center gap-2">
                 <Activity className="h-4 w-4 text-rose-500" />
@@ -335,7 +335,7 @@ export default function CommandCenterPage() {
                 Live Transfusion Hub
               </span>
             </div>
-            <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="grid grid-cols-4 gap-2.5 text-center">
               {[
                 { g: "O+", u: 14 },
                 { g: "O-", u: 4 },
@@ -351,10 +351,10 @@ export default function CommandCenterPage() {
                   <div
                     key={b.g}
                     className={cn(
-                      "rounded-2xl border p-2.5 shadow-2xs transition-all duration-200",
+                      "rounded-2xl border p-2.5 transition-all duration-300 hover:-translate-y-0.5",
                       isLow
-                        ? "border-rose-600 bg-rose-600 text-white shadow-sm shadow-rose-600/20"
-                        : "border-rose-200 bg-white text-rose-600 hover:border-rose-300"
+                        ? "border-rose-600 bg-rose-600 text-white shadow-[0_8px_24px_rgba(217,53,74,0.35)] hover:shadow-[0_12px_32px_rgba(217,53,74,0.45)]"
+                        : "border-rose-200 bg-white text-rose-600 shadow-[0_8px_24px_rgba(217,53,74,0.12)] hover:shadow-[0_12px_30px_rgba(217,53,74,0.22)] hover:border-rose-300"
                     )}
                   >
                     <span

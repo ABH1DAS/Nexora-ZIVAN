@@ -71,11 +71,11 @@ export function BloodBankMatcher({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_25px_70px_rgba(15,61,53,0.25)] flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_25px_70px_rgba(217,53,74,0.22)] flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border bg-gradient-to-r from-slate-900 via-[#0f2420] to-slate-900 px-6 py-4 text-white">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-500 shadow-xs shadow-rose-500/40">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-500 shadow-lg shadow-rose-500/40">
               <Droplet className="h-5 w-5 text-white" aria-hidden />
             </div>
             <div>
@@ -98,10 +98,10 @@ export function BloodBankMatcher({
           {/* Main Group Highlight */}
           <div
             className={cn(
-              "flex items-center justify-between rounded-2xl border p-4 shadow-sm transition-all",
+              "flex items-center justify-between rounded-2xl border p-4.5 transition-all duration-300",
               directStock.units >= 3
-                ? "border-rose-200 bg-white text-rose-600"
-                : "border-rose-600 bg-rose-600 text-white shadow-md shadow-rose-600/20"
+                ? "border-rose-200 bg-white text-rose-600 shadow-[0_12px_32px_rgba(217,53,74,0.18)] hover:shadow-[0_18px_42px_rgba(217,53,74,0.28)]"
+                : "border-rose-600 bg-rose-600 text-white shadow-[0_14px_36px_rgba(217,53,74,0.35)] hover:shadow-[0_20px_48px_rgba(217,53,74,0.45)]"
             )}
           >
             <div className="flex items-center gap-3">
@@ -109,8 +109,8 @@ export function BloodBankMatcher({
                 className={cn(
                   "flex h-12 w-12 items-center justify-center rounded-2xl font-display text-xl font-bold shadow-xs",
                   directStock.units >= 3
-                    ? "bg-rose-50 text-rose-600 border border-rose-200"
-                    : "bg-white text-rose-600"
+                    ? "bg-rose-50 text-rose-600 border border-rose-200 shadow-[0_4px_14px_rgba(217,53,74,0.15)]"
+                    : "bg-white text-rose-600 shadow-[0_4px_14px_rgba(255,255,255,0.3)]"
                 )}
               >
                 {bloodGroup}
@@ -142,15 +142,15 @@ export function BloodBankMatcher({
               </p>
               <div className="flex items-center gap-2 text-[10px] font-semibold">
                 <span className="flex items-center gap-1 text-rose-600">
-                  <span className="h-2 w-2 rounded-full border border-rose-400 bg-white" /> Available (Red Text)
+                  <span className="h-2 w-2 rounded-full border border-rose-400 bg-white shadow-[0_0_8px_rgba(217,53,74,0.4)]" /> Available (Red Text)
                 </span>
                 <span className="flex items-center gap-1 text-rose-600">
-                  <span className="h-2 w-2 rounded-full bg-rose-600" /> Low/Out (Red BG)
+                  <span className="h-2 w-2 rounded-full bg-rose-600 shadow-[0_0_8px_rgba(217,53,74,0.6)]" /> Low/Out (Red BG)
                 </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-4 gap-2.5">
               {Object.entries(BLOOD_INVENTORY).map(([group, info]) => {
                 const isCompatible = matchingGroups.includes(group);
                 const isLowOrOut = info.units < 3;
@@ -159,10 +159,10 @@ export function BloodBankMatcher({
                   <div
                     key={group}
                     className={cn(
-                      "rounded-xl border p-2.5 text-center transition-all duration-200",
+                      "rounded-2xl border p-3 text-center transition-all duration-300 hover:-translate-y-0.5",
                       isLowOrOut
-                        ? "border-rose-600 bg-rose-600 text-white shadow-sm shadow-rose-600/20"
-                        : "border-rose-200 bg-white text-rose-600 shadow-2xs hover:border-rose-300",
+                        ? "border-rose-600 bg-rose-600 text-white shadow-[0_8px_24px_rgba(217,53,74,0.3)] hover:shadow-[0_12px_32px_rgba(217,53,74,0.45)]"
+                        : "border-rose-200 bg-white text-rose-600 shadow-[0_8px_24px_rgba(217,53,74,0.12)] hover:shadow-[0_12px_30px_rgba(217,53,74,0.22)] hover:border-rose-300",
                       !isCompatible && "opacity-60"
                     )}
                   >
@@ -205,7 +205,7 @@ export function BloodBankMatcher({
 
           {/* Reservation Status Alert */}
           {reserved ? (
-            <div className="flex items-start gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs text-emerald-800 shadow-sm animate-in fade-in duration-200">
+            <div className="flex items-start gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-xs text-emerald-800 shadow-[0_10px_28px_rgba(5,150,105,0.15)] animate-in fade-in duration-200">
               <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
               <div>
                 <strong className="block font-semibold">2 Units Packed Red Blood Cells (PRBC) Reserved</strong>
@@ -213,7 +213,7 @@ export function BloodBankMatcher({
               </div>
             </div>
           ) : (
-            <div className="flex items-start gap-2.5 rounded-2xl border border-border bg-slate-50 p-3.5 text-xs text-muted">
+            <div className="flex items-start gap-2.5 rounded-2xl border border-border bg-slate-50 p-3.5 text-xs text-muted shadow-[0_4px_16px_rgba(15,61,53,0.04)]">
               <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <span>Reserving units flags the transfusion medicine team and prepares rapid infusers.</span>
             </div>
