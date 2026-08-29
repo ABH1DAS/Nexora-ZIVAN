@@ -18,7 +18,6 @@ import {
 import {
   type FormEvent,
   useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -90,8 +89,6 @@ export default function HospitalLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [verified, setVerified] = useState(false);
-
-  const emailRef = useRef<HTMLInputElement>(null);
 
   // Redirect if already logged in
   useEffect(() => {

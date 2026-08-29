@@ -1,10 +1,9 @@
 "use client";
 
 import { useHospitalAuth } from "@/lib/hospitalAuth";
-import { subscribeAmbulanceRequests } from "@/lib/ambulanceStore";
+import { subscribeAmbulanceRequests, statusLabel } from "@/lib/ambulanceStore";
 import { cn } from "@/lib/utils";
 import type { AmbulanceRequest } from "@/data/ambulanceRequests";
-import { statusLabel } from "@/lib/ambulanceStore";
 import { useEffect, useState } from "react";
 import {
   AlertTriangle,
