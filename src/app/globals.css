@@ -1,0 +1,283 @@
+@import "tailwindcss";
+
+:root {
+  --background: #eaf2ef;
+  --foreground: #0f1f1c;
+  --muted: #4e6660;
+  --card: rgba(228, 239, 235, 0.95);
+  --card-solid: #e2ece8;
+  --border: transparent;
+  --primary: #0d8f7a;
+  --primary-dark: #0a6b5c;
+  --primary-soft: #c8ece4;
+  --accent: #1a9bb5;
+  --accent-soft: #d3eff5;
+  --emergency: #d9354a;
+  --emergency-dark: #b01f32;
+  --emergency-soft: #fcd5da;
+  --warning: #d97706;
+  --success: #059669;
+  --score: #0d8f7a;
+  --glass: rgba(230, 241, 237, 0.75);
+  --shadow: 0 20px 50px rgba(13, 143, 122, 0.16);
+  --shadow-sm: 0 12px 34px rgba(15, 61, 53, 0.12);
+  --radius: 1.5rem;
+  --radius-sm: 1rem;
+  --radius-lg: 2rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-card: var(--card-solid);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-emergency: var(--emergency);
+  --color-emergency-dark: var(--emergency-dark);
+  --color-emergency-soft: var(--emergency-soft);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: -0.03em;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--primary) 28%, white);
+  color: var(--foreground);
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow: var(--shadow-sm);
+}
+
+.surface {
+  background: var(--card-solid);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.bg-atmosphere {
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(26, 155, 181, 0.22), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 95% 5%, rgba(13, 143, 122, 0.2), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(217, 53, 74, 0.08), transparent 55%),
+    linear-gradient(180deg, #eaf2ef 0%, #dfeedb 40%, #e8f1ee 100%);
+}
+
+.bg-mesh {
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(13, 143, 122, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(26, 155, 181, 0.07) 0%, transparent 35%),
+    linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.4) 100%);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+  70% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+.animate-float {
+  animation: float-soft 6s ease-in-out infinite;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+.animate-breathe {
+  animation: breathe 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-pulse-ring,
+  .animate-breathe {
+    animation: none;
+  }
+}
+
+/* Hospital Portal Dark Mode System */
+.hospital-dark {
+  --background: #0a1614;
+  --foreground: #f0faf7;
+  --muted: #8ba39c;
+  --card-solid: #0e201c;
+  --border: rgba(13, 143, 122, 0.22);
+  --primary-soft: rgba(13, 143, 122, 0.2);
+  --accent-soft: rgba(26, 155, 181, 0.2);
+  --emergency-soft: rgba(217, 53, 74, 0.2);
+  color-scheme: dark;
+}
+
+.hospital-dark .bg-white {
+  background-color: #0e201c !important;
+  color: #f0faf7;
+}
+
+.hospital-dark .bg-white\/90,
+.hospital-dark .bg-white\/80,
+.hospital-dark .bg-white\/70 {
+  background-color: rgba(14, 32, 28, 0.92) !important;
+  color: #f0faf7;
+}
+
+.hospital-dark .bg-slate-50,
+.hospital-dark .bg-slate-50\/80,
+.hospital-dark .bg-slate-50\/70,
+.hospital-dark .bg-slate-50\/60,
+.hospital-dark .bg-slate-50\/50,
+.hospital-dark .bg-slate-100 {
+  background-color: #132a25 !important;
+  color: #d4e8e2;
+}
+
+.hospital-dark .text-foreground {
+  color: #f0faf7 !important;
+}
+
+.hospital-dark .text-muted {
+  color: #8ba39c !important;
+}
+
+.hospital-dark .border-border,
+.hospital-dark .border-slate-200,
+.hospital-dark .border-slate-200\/80 {
+  border-color: rgba(13, 143, 122, 0.22) !important;
+}
+
+.hospital-dark input,
+.hospital-dark textarea,
+.hospital-dark select {
+  background-color: #132a25 !important;
+  color: #f0faf7 !important;
+  border-color: rgba(13, 143, 122, 0.25) !important;
+}
+
+.hospital-dark .bg-atmosphere {
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(26, 155, 181, 0.15), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 95% 5%, rgba(13, 143, 122, 0.15), transparent 50%),
+    linear-gradient(180deg, #071310 0%, #0a1815 40%, #081512 100%) !important;
+}
+
+/* Hospital Portal Compact View System */
+.hospital-compact .p-6,
+.hospital-compact .sm\:p-8,
+.hospital-compact .sm\:p-7 {
+  padding: 1rem !important;
+}
+
+.hospital-compact .p-5 {
+  padding: 0.85rem !important;
+}
+
+.hospital-compact .space-y-6 > * + * {
+  margin-top: 0.75rem !important;
+}
+
+.hospital-compact .space-y-5 > * + * {
+  margin-top: 0.65rem !important;
+}
+
+.hospital-compact .gap-6 {
+  gap: 0.75rem !important;
+}
+
+.hospital-compact .gap-4 {
+  gap: 0.5rem !important;
+}
