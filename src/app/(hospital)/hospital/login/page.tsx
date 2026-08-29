@@ -124,7 +124,7 @@ export default function HospitalLoginPage() {
       return;
     }
 
-    router.push("/hospital");
+    router.replace("/hospital");
   }
 
   function fillDemo(acc: (typeof HOSPITAL_ACCOUNTS)[number]) {

@@ -256,7 +256,7 @@ export function HospitalShell({
 
   function handleLogout() {
     logout();
-    router.push("/hospital/login");
+    router.replace("/hospital/login");
   }
 
   // Derive current page title from pathname

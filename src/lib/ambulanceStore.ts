@@ -460,14 +460,14 @@ export function loginHospitalStaff(
 }
 
 export function getHospitalSession(): HospitalAccount | null {
-  if (!canUseStorage()) return HOSPITAL_ACCOUNTS[1];
+  if (!canUseStorage()) return null;
   try {
     const raw = localStorage.getItem(HOSPITAL_SESSION_KEY);
-    if (!raw) return HOSPITAL_ACCOUNTS[1];
+    if (!raw) return null;
     const parsed = JSON.parse(raw) as HospitalAccount;
-    return parsed?.id ? parsed : HOSPITAL_ACCOUNTS[1];
+    return parsed?.id ? parsed : null;
   } catch {
-    return HOSPITAL_ACCOUNTS[1];
+    return null;
   }
 }
 
