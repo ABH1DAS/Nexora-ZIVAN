@@ -1,0 +1,319 @@
+/**
+ * Consolidated Hospital Portal Mock Data
+ * Exported from ZIVAN Hospital / Provider Portal
+ */
+
+// 1. HOSPITAL ACCOUNTS & AUTHENTICATION CREDENTIALS
+export interface HospitalAccount {
+  id: string;
+  hospitalId: string;
+  hospitalName: string;
+  email: string;
+  password: string;
+  contactName: string;
+}
+
+export const HOSPITAL_ACCOUNTS: HospitalAccount[] = [
+  {
+    id: "staff-city",
+    hospitalId: "city-hospital",
+    hospitalName: "City Hospital",
+    email: "dispatch@cityhospital.demo",
+    password: "hospital123",
+    contactName: "City Dispatch Desk",
+  },
+  {
+    id: "staff-northside",
+    hospitalId: "northside",
+    hospitalName: "Northside Medical",
+    email: "er@northside.demo",
+    password: "hospital123",
+    contactName: "Northside ER Desk",
+  },
+];
+
+// 2. HOSPITAL FACILITIES & DIRECTORY
+export interface HospitalFacility {
+  id: string;
+  name: string;
+  type: "hospital" | "clinic" | "pharmacy";
+  distanceKm: number;
+  address: string;
+  open: boolean;
+  phone?: string;
+  rating?: number;
+  accreditation?: string;
+}
+
+export const HOSPITALS: HospitalFacility[] = [
+  {
+    id: "city-hospital",
+    name: "City Hospital",
+    type: "hospital",
+    distanceKm: 2.4,
+    address: "12 Lake Avenue",
+    open: true,
+    phone: "+91 11-XXXX-XXXX",
+    rating: 4.6,
+    accreditation: "NABH Accredited",
+  },
+  {
+    id: "care-clinic",
+    name: "Care Clinic",
+    type: "clinic",
+    distanceKm: 3.1,
+    address: "88 Green Park Road",
+    open: true,
+    phone: "+91 11-XXXX-XXXX",
+    rating: 4.4,
+    accreditation: "NABH Accredited",
+  },
+  {
+    id: "health-pharmacy",
+    name: "Health Pharmacy",
+    type: "pharmacy",
+    distanceKm: 1.2,
+    address: "4 Market Street",
+    open: true,
+    phone: "+91 11-XXXX-XXXX",
+    rating: 4.7,
+    accreditation: "Licensed Pharmacy",
+  },
+  {
+    id: "northside",
+    name: "Northside Medical",
+    type: "hospital",
+    distanceKm: 4.6,
+    address: "221 Riverfront Blvd",
+    open: true,
+    phone: "+91 11-XXXX-XXXX",
+    rating: 4.5,
+    accreditation: "NABH Accredited",
+  },
+];
+
+// 3. AMBULANCE REQUESTS (SAMPLE SOS DISPATCHES)
+export type AmbulanceRequestStatus =
+  | "searching"
+  | "accepted"
+  | "declined"
+  | "en_route"
+  | "arrived"
+  | "cancelled";
+
+export interface AmbulanceRequest {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  patientName: string;
+  patientPhone?: string;
+  locationLabel: string;
+  coordinates: { lat: number; lng: number };
+  hospitalId: string;
+  hospitalName: string;
+  status: AmbulanceRequestStatus;
+  priority: "critical" | "urgent" | "standard";
+  notes: string;
+  bloodGroup?: string;
+  allergies?: string[];
+  medications?: string[];
+  etaMinutes?: number;
+  acceptedBy?: string;
+  demo: true;
+}
+
+export const MOCK_AMBULANCE_REQUESTS: AmbulanceRequest[] = [
+  {
+    id: "amb_sample_01",
+    createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+    updatedAt: new Date().toISOString(),
+    patientName: "Rahul Sharma",
+    patientPhone: "+91 98111 22334",
+    locationLabel: "Near Lake Avenue, Block C · Demo pin",
+    coordinates: { lat: 28.6139, lng: 77.209 },
+    hospitalId: "city-hospital",
+    hospitalName: "City Hospital",
+    status: "en_route",
+    priority: "critical",
+    notes: "Severe shortness of breath and chest tightness reported.",
+    bloodGroup: "O+",
+    allergies: ["Penicillin", "Peanuts"],
+    medications: ["Amlodipine 5mg"],
+    etaMinutes: 8,
+    acceptedBy: "City Dispatch Desk",
+    demo: true,
+  },
+  {
+    id: "amb_sample_02",
+    createdAt: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+    updatedAt: new Date().toISOString(),
+    patientName: "Ananya Deshmukh",
+    patientPhone: "+91 98222 44556",
+    locationLabel: "Riverfront Park, Gate 2 · Demo pin",
+    coordinates: { lat: 28.6185, lng: 77.215 },
+    hospitalId: "city-hospital",
+    hospitalName: "City Hospital",
+    status: "searching",
+    priority: "urgent",
+    notes: "Fall injury with suspected ankle fracture.",
+    bloodGroup: "B+",
+    allergies: ["Sulfa drugs"],
+    medications: ["Thyroxine 50mcg"],
+    demo: true,
+  },
+  {
+    id: "amb_sample_03",
+    createdAt: new Date(Date.now() - 1000 * 60 * 90).toISOString(),
+    updatedAt: new Date().toISOString(),
+    patientName: "Kunal Verma",
+    patientPhone: "+91 98333 66778",
+    locationLabel: "Market Complex, Sector 4 · Demo pin",
+    coordinates: { lat: 28.6092, lng: 77.201 },
+    hospitalId: "city-hospital",
+    hospitalName: "City Hospital",
+    status: "arrived",
+    priority: "standard",
+    notes: "Acute abdominal pain, stabilized on arrival.",
+    bloodGroup: "A+",
+    allergies: ["None"],
+    medications: ["None"],
+    etaMinutes: 0,
+    acceptedBy: "City Dispatch Desk",
+    demo: true,
+  },
+];
+
+// 4. AMBULANCE FLEET UNITS
+export interface MockAmbulance {
+  id: string;
+  callSign: string;
+  driver: string;
+  status: "available" | "dispatched" | "returning" | "maintenance";
+  currentRequestId?: string;
+}
+
+export const MOCK_FLEET: MockAmbulance[] = [
+  { id: "amb-01", callSign: "ALPHA-1", driver: "Rajan Kumar", status: "available" },
+  { id: "amb-02", callSign: "BRAVO-2", driver: "Priya Singh", status: "dispatched", currentRequestId: "amb_sample_01" },
+  { id: "amb-03", callSign: "CHARLIE-3", driver: "Arjun Mehta", status: "maintenance" },
+  { id: "amb-04", callSign: "DELTA-4", driver: "Sunita Rao", status: "returning" },
+];
+
+// 5. HOSPITAL STAFF DIRECTORY
+export type StaffRole = "Doctor" | "Nurse" | "Dispatcher" | "Admin";
+export type StaffStatus = "active" | "off-duty" | "on-leave";
+
+export interface StaffMember {
+  id: string;
+  name: string;
+  role: StaffRole;
+  department: string;
+  email: string;
+  phone: string;
+  status: StaffStatus;
+  shift: string;
+}
+
+export const MOCK_STAFF: StaffMember[] = [
+  {
+    id: "s1",
+    name: "Dr. Amrita Sharma",
+    role: "Doctor",
+    department: "Emergency",
+    email: "a.sharma@cityhospital.demo",
+    phone: "+91 98XXX 00001",
+    status: "active",
+    shift: "Morning",
+  },
+  {
+    id: "s2",
+    name: "Vikram Nair",
+    role: "Dispatcher",
+    department: "Command Centre",
+    email: "v.nair@cityhospital.demo",
+    phone: "+91 98XXX 00002",
+    status: "active",
+    shift: "Morning",
+  },
+  {
+    id: "s3",
+    name: "Priya Singh",
+    role: "Nurse",
+    department: "ICU",
+    email: "p.singh@cityhospital.demo",
+    phone: "+91 98XXX 00003",
+    status: "active",
+    shift: "Evening",
+  },
+  {
+    id: "s4",
+    name: "Arjun Mehta",
+    role: "Dispatcher",
+    department: "Command Centre",
+    email: "a.mehta@cityhospital.demo",
+    phone: "+91 98XXX 00004",
+    status: "off-duty",
+    shift: "Night",
+  },
+  {
+    id: "s5",
+    name: "Dr. Sonal Patel",
+    role: "Doctor",
+    department: "General Medicine",
+    email: "s.patel@cityhospital.demo",
+    phone: "+91 98XXX 00005",
+    status: "on-leave",
+    shift: "—",
+  },
+  {
+    id: "s6",
+    name: "Sunita Rao",
+    role: "Nurse",
+    department: "Trauma",
+    email: "s.rao@cityhospital.demo",
+    phone: "+91 98XXX 00006",
+    status: "active",
+    shift: "Morning",
+  },
+  {
+    id: "s7",
+    name: "Rahul Gupta",
+    role: "Admin",
+    department: "Administration",
+    email: "r.gupta@cityhospital.demo",
+    phone: "+91 98XXX 00007",
+    status: "active",
+    shift: "Morning",
+  },
+];
+
+// 6. HOSPITAL DEPARTMENTS & BED CAPACITIES
+export interface HospitalDepartment {
+  name: string;
+  head: string;
+  beds: number;
+  available: number;
+}
+
+export const HOSPITAL_DEPARTMENTS: HospitalDepartment[] = [
+  { name: "Emergency / Trauma", head: "Dr. Amrita Sharma", beds: 24, available: 8 },
+  { name: "ICU", head: "Dr. Vikram Nair", beds: 12, available: 3 },
+  { name: "General Medicine", head: "Dr. Sonal Patel", beds: 60, available: 22 },
+  { name: "Cardiology", head: "Dr. Rahul Gupta", beds: 20, available: 7 },
+  { name: "Paediatrics", head: "Dr. Meera Joshi", beds: 18, available: 10 },
+  { name: "Orthopaedics", head: "Dr. Arjun Reddy", beds: 16, available: 5 },
+];
+
+// 7. HOSPITAL SERVICES LIST
+export const HOSPITAL_SERVICES: string[] = [
+  "24/7 Emergency Services",
+  "Advanced Cardiac Care",
+  "Trauma Centre",
+  "Blood Bank",
+  "Radiology & CT Scan",
+  "Pathology Lab",
+  "ICU & NICU",
+  "Dialysis Unit",
+  "Pharmacy",
+  "Ambulance Service",
+];
