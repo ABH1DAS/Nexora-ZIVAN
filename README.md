@@ -12,7 +12,7 @@
 
 Instead of using multiple disconnected applications, ZIVAN helps users:
 
-**Track → Analyze → Improve → Protect → Respond**
+**Track → Analyze → Improve → Protect → Respond** 
 
 ---
 
