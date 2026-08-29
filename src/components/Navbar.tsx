@@ -1,5 +1,6 @@
 "use client";
 
+import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -49,12 +50,7 @@ export function Navbar() {
         className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-[4.5rem] sm:px-6 lg:px-8"
         aria-label="Primary"
       >
-        <Link
-          href="/"
-          className="font-display text-2xl font-bold tracking-tight text-foreground"
-        >
-          ZIVAN
-        </Link>
+        <Logo size="sm" priority />
 
         <ul className="hidden items-center gap-1 lg:flex">
           {links.map((link) => (

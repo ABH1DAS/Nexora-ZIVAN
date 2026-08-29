@@ -1,15 +1,11 @@
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-atmosphere">
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
-        <Link
-          href="/"
-          className="font-display text-2xl font-bold tracking-tight text-foreground"
-        >
-          ZIVAN
-        </Link>
+        <Logo size="sm" priority />
         <Link
           href="/"
           className="text-sm font-semibold text-muted transition hover:text-foreground"
@@ -23,3 +19,4 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     </div>
   );
 }
+

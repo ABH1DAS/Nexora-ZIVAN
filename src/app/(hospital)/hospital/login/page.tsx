@@ -1,5 +1,6 @@
 "use client";
 
+import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
 import { useHospitalAuth } from "@/lib/hospitalAuth";
 import { HOSPITAL_ACCOUNTS } from "@/data/ambulanceRequests";
@@ -8,7 +9,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
-  Building2,
   CheckCircle2,
   Eye,
   EyeOff,
@@ -140,14 +140,7 @@ export default function HospitalLoginPage() {
     <div className="flex min-h-screen flex-col bg-atmosphere text-foreground">
       {/* Top bar */}
       <header className="flex items-center justify-between px-6 py-4 sm:px-10">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-xs shadow-primary/30">
-            <Building2 className="h-5 w-5 text-white" aria-hidden />
-          </div>
-          <span className="font-display text-xl font-bold tracking-tight text-foreground">
-            ZIVAN
-          </span>
-        </div>
+        <Logo size="sm" subtitle="Hospital Portal" priority />
         <Link
           href="/"
           className="text-sm font-semibold text-muted transition hover:text-primary"

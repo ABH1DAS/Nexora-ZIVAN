@@ -25,7 +25,7 @@ import { useEffect, useState } from "react";
 export default function DashboardDevicesPage() {
   const [band, setBand] = useState<FitnessBand | null>(null);
   const [vitals, setVitals] = useState<LiveVitals>(getLiveVitals());
-  const [selected, setSelected] = useState(FITNESS_BAND_OPTIONS[0].id);
+  const [selected, setSelected] = useState<string>(FITNESS_BAND_OPTIONS[0].id);
   const [message, setMessage] = useState<string | null>(null);
   const [simulating, setSimulating] = useState(false);
 
