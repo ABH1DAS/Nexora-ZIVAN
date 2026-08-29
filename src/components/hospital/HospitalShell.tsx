@@ -1,6 +1,5 @@
 "use client";
 
-import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
 import { useHospitalAuth } from "@/lib/hospitalAuth";
 import { usePathname, useRouter } from "next/navigation";
@@ -132,13 +131,18 @@ function Sidebar({
     <div className="flex h-full flex-col bg-[#0b1f2a] shadow-xl">
       {/* Brand */}
       <div className="flex items-center justify-between px-5 pb-4 pt-5">
-        <Logo
-          href="/hospital"
-          variant="hospital"
-          size="sm"
-          subtitle="Hospital Portal"
-          onClick={onClose}
-        />
+        <div>
+          <Link
+            href="/hospital"
+            onClick={onClose}
+            className="font-display text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-90"
+          >
+            ZIVAN
+          </Link>
+          <p className="mt-0.5 text-[11px] font-medium uppercase tracking-widest text-white/40">
+            Hospital Portal
+          </p>
+        </div>
         {onClose && (
           <button
             onClick={onClose}

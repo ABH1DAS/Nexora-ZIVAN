@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Logo } from "@/components/ui/Logo";
 
 const columns = [
   {
@@ -44,7 +43,7 @@ export function Footer() {
     <footer className="border-t border-border bg-[#0c1f1b] text-white">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 md:grid-cols-[1.2fr_2fr] lg:px-8">
         <div>
-          <Logo variant="white" size="md" />
+          <p className="font-display text-3xl font-bold tracking-tight">ZIVAN</p>
           <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/70">
             Your health. Your journey.
           </p>

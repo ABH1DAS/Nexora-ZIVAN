@@ -1,6 +1,5 @@
 "use client";
 
-import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -96,7 +95,10 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-atmosphere">
       <div className="mx-auto flex min-h-screen max-w-[1440px]">
         <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-white/80 p-5 backdrop-blur lg:flex">
-          <Logo size="sm" subtitle="Health dashboard" />
+          <Link href="/" className="font-display text-2xl font-bold tracking-tight">
+            ZIVAN
+          </Link>
+          <p className="mt-1 text-xs text-muted">Your health dashboard</p>
           <div className="mt-8 flex-1">{nav}</div>
           <div className="rounded-2xl border border-border bg-[#f7fbfa] p-3">
             <p className="truncate text-sm font-semibold">{user.name}</p>
