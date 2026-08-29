@@ -350,7 +350,7 @@ function mapSupabaseToLocal(remote: SupabaseEmergencyRecord): AmbulanceRequest {
     hospitalName: remote.hospital_name || "City Super-Specialty Hospital",
     hospitalCategory: remote.hospital_id?.startsWith("govt") ? "government" : "private",
     status: remote.status as AmbulanceRequestStatus,
-    priority: remote.priority || "critical",
+    priority: (remote.priority as "critical" | "urgent" | "standard") || "critical",
     ambulanceType: (remote.ambulance_type as AmbulanceType) || "government",
     doctorSpecialization: remote.doctor_specialization || "Emergency Medicine",
     estimatedPrivateFare: remote.estimated_private_fare,
