@@ -28,7 +28,7 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="rounded-[1.5rem] border border-border bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+    <div className="rounded-[1.5rem] border-0 bg-white p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
       <div className="flex items-start justify-between">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">{label}</p>
         <div className={`flex h-10 w-10 items-center justify-center rounded-2xl shadow-xs ${color}`}>

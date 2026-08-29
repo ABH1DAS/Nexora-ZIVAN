@@ -67,14 +67,14 @@ export default function AmbulancesPage() {
       {/* Fleet summary */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Available", count: counts.available, color: "text-primary", bg: "bg-primary-soft/80 border-primary/20 hover:border-primary/40" },
-          { label: "Dispatched", count: counts.dispatched, color: "text-accent", bg: "bg-accent-soft/80 border-accent/20 hover:border-accent/40" },
-          { label: "Maintenance", count: counts.maintenance, color: "text-muted", bg: "bg-slate-50/80 border-border hover:border-border" },
+          { label: "Available", count: counts.available, color: "text-primary", bg: "bg-primary-soft/80" },
+          { label: "Dispatched", count: counts.dispatched, color: "text-accent", bg: "bg-accent-soft/80" },
+          { label: "Maintenance", count: counts.maintenance, color: "text-muted", bg: "bg-slate-50/80" },
         ].map(({ label, count, color, bg }) => (
           <div
             key={label}
             className={cn(
-              "rounded-[1.5rem] border p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300",
+              "rounded-[1.5rem] border-0 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300",
               bg,
             )}
           >

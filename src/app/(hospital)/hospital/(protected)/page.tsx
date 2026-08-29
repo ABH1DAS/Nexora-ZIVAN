@@ -46,11 +46,11 @@ function StatCard({
   tone?: "default" | "amber" | "sky" | "emerald" | "rose";
 }) {
   const tones = {
-    default: "bg-white border-border text-foreground hover:border-primary/30",
-    amber: "bg-amber-50/80 border-amber-200/90 text-amber-900 hover:border-amber-300",
-    sky: "bg-accent-soft/80 border-accent/20 text-accent hover:border-accent/40",
-    emerald: "bg-primary-soft/80 border-primary/20 text-primary-dark hover:border-primary/40",
-    rose: "bg-emergency-soft/80 border-emergency/20 text-emergency-dark hover:border-emergency/40",
+    default: "bg-white text-foreground",
+    amber: "bg-amber-50/80 text-amber-900",
+    sky: "bg-accent-soft/80 text-accent",
+    emerald: "bg-primary-soft/80 text-primary-dark",
+    rose: "bg-emergency-soft/80 text-emergency-dark",
   };
   const iconTones = {
     default: "text-muted",
@@ -62,7 +62,7 @@ function StatCard({
   return (
     <div
       className={cn(
-        "rounded-[1.5rem] border p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300",
+        "rounded-[1.5rem] border-0 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300",
         tones[tone],
       )}
     >
