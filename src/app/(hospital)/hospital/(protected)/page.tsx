@@ -163,27 +163,14 @@ export default function HospitalDashboardPage() {
               Real-time emergency dispatch, incoming patient triage, and ambulance fleet coordination.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <Link
-              href="/hospital/command-center"
-              className="flex items-center gap-2 rounded-[1.5rem] bg-gradient-to-r from-emerald-600 to-teal-700 px-5 py-4 text-white shadow-[0_12px_30px_rgba(13,143,122,0.3)] hover:shadow-[0_16px_40px_rgba(13,143,122,0.4)] hover:-translate-y-0.5 transition-all"
-            >
-              <Monitor className="h-5 w-5 animate-pulse" />
-              <div>
-                <p className="text-[10px] uppercase font-bold tracking-wider text-teal-200">Full Screen HUD</p>
-                <p className="font-display text-base font-bold">ER Command Board</p>
-              </div>
-            </Link>
-
-            <div className="rounded-[1.5rem] bg-[#0f2420] px-5 py-4 text-white shadow-[0_12px_30px_rgba(15,36,32,0.35)]">
-              <p className="text-xs uppercase tracking-wide text-white/60">Active Queue</p>
-              <p className="mt-1 font-display text-3xl font-bold">
-                🚑 {pendingCount + activeCount} units
-              </p>
-              <p className="mt-1 text-sm text-teal-200">
-                {pendingCount} incoming SOS
-              </p>
-            </div>
+          <div className="rounded-[1.5rem] bg-[#0f2420] px-5 py-4 text-white shadow-[0_12px_30px_rgba(15,36,32,0.35)]">
+            <p className="text-xs uppercase tracking-wide text-white/60">Active Queue</p>
+            <p className="mt-1 font-display text-3xl font-bold">
+              🚑 {pendingCount + activeCount} units
+            </p>
+            <p className="mt-1 text-sm text-teal-200">
+              {pendingCount} incoming SOS
+            </p>
           </div>
         </div>
       </section>

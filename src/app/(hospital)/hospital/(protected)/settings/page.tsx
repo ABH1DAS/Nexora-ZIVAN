@@ -3,7 +3,7 @@
 import { useHospitalAuth } from "@/lib/hospitalAuth";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Bell,
   Building2,
@@ -116,7 +116,34 @@ export default function SettingsPage() {
   const [darkMode, setDarkMode] = useState(false);
   const [compactView, setCompactView] = useState(false);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setDarkMode(localStorage.getItem("zivan-hospital-dark") === "true");
+    setCompactView(localStorage.getItem("zivan-hospital-compact") === "true");
+  }, []);
+
+  const handleToggleDarkMode = (val: boolean) => {
+    setDarkMode(val);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("zivan-hospital-dark", val ? "true" : "false");
+      window.dispatchEvent(new Event("zivan-hospital-display-updated"));
+    }
+  };
+
+  const handleToggleCompactView = (val: boolean) => {
+    setCompactView(val);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("zivan-hospital-compact", val ? "true" : "false");
+      window.dispatchEvent(new Event("zivan-hospital-display-updated"));
+    }
+  };
+
   function handleSave() {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("zivan-hospital-dark", darkMode ? "true" : "false");
+      localStorage.setItem("zivan-hospital-compact", compactView ? "true" : "false");
+      window.dispatchEvent(new Event("zivan-hospital-display-updated"));
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
@@ -233,20 +260,22 @@ export default function SettingsPage() {
             <div className="divide-y divide-border rounded-[1.25rem] border border-border bg-slate-50/80 px-4 shadow-2xs">
               <Toggle
                 label="Dark Mode"
-                description="Use dark theme for the portal"
+                description="Use dark theme for the hospital portal"
                 checked={darkMode}
-                onChange={setDarkMode}
+                onChange={handleToggleDarkMode}
               />
               <Toggle
                 label="Compact View"
                 description="Reduce padding for denser information display"
                 checked={compactView}
-                onChange={setCompactView}
+                onChange={handleToggleCompactView}
               />
             </div>
-            <div className="flex items-center gap-2 rounded-[1.25rem] border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-800 shadow-2xs">
-              <Sun className="h-4 w-4 shrink-0" aria-hidden />
-              Dark mode and compact view are UI preference placeholders. Full theming is a Phase 2 feature.
+            <div className="flex items-center gap-2 rounded-[1.25rem] border border-emerald-200/80 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-800 shadow-2xs">
+              <Sun className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
+              <span>
+                Theme preferences are active and saved directly to your browser session.
+              </span>
             </div>
           </div>
         )}

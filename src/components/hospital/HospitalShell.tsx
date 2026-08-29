@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useHospitalAuth } from "@/lib/hospitalAuth";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Activity,
   Ambulance,
@@ -240,6 +240,23 @@ export function HospitalShell({
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [compactView, setCompactView] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const readPrefs = () => {
+      setDarkMode(localStorage.getItem("zivan-hospital-dark") === "true");
+      setCompactView(localStorage.getItem("zivan-hospital-compact") === "true");
+    };
+    readPrefs();
+    window.addEventListener("zivan-hospital-display-updated", readPrefs);
+    window.addEventListener("storage", readPrefs);
+    return () => {
+      window.removeEventListener("zivan-hospital-display-updated", readPrefs);
+      window.removeEventListener("storage", readPrefs);
+    };
+  }, []);
 
   function handleLogout() {
     logout();
@@ -260,7 +277,13 @@ export function HospitalShell({
   }
 
   return (
-    <div className="min-h-screen bg-atmosphere text-foreground">
+    <div
+      className={cn(
+        "min-h-screen transition-colors duration-300",
+        darkMode ? "hospital-dark bg-[#0a1614] text-slate-100" : "bg-atmosphere text-foreground",
+        compactView && "hospital-compact",
+      )}
+    >
       <div className="flex min-h-screen">
         {/* Desktop sidebar */}
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 lg:block xl:w-64">
@@ -341,16 +364,6 @@ export function HospitalShell({
                   <VolumeX className="h-4 w-4 text-muted" />
                 )}
               </button>
-
-              {/* Quick Command Center Link */}
-              <Link
-                href="/hospital/command-center"
-                className="hidden md:flex items-center gap-1.5 rounded-2xl border border-border bg-white/90 px-3 py-2 text-xs font-semibold text-foreground shadow-2xs hover:bg-slate-900 hover:text-white transition"
-                title="Open ER Command Big Board"
-              >
-                <Monitor className="h-3.5 w-3.5 text-primary" />
-                <span>Big Board</span>
-              </Link>
 
               <NotificationBell count={notificationCount} />
 

@@ -190,3 +190,94 @@ h4,
     animation: none;
   }
 }
+
+/* Hospital Portal Dark Mode System */
+.hospital-dark {
+  --background: #0a1614;
+  --foreground: #f0faf7;
+  --muted: #8ba39c;
+  --card-solid: #0e201c;
+  --border: rgba(13, 143, 122, 0.22);
+  --primary-soft: rgba(13, 143, 122, 0.2);
+  --accent-soft: rgba(26, 155, 181, 0.2);
+  --emergency-soft: rgba(217, 53, 74, 0.2);
+  color-scheme: dark;
+}
+
+.hospital-dark .bg-white {
+  background-color: #0e201c !important;
+  color: #f0faf7;
+}
+
+.hospital-dark .bg-white\/90,
+.hospital-dark .bg-white\/80,
+.hospital-dark .bg-white\/70 {
+  background-color: rgba(14, 32, 28, 0.92) !important;
+  color: #f0faf7;
+}
+
+.hospital-dark .bg-slate-50,
+.hospital-dark .bg-slate-50\/80,
+.hospital-dark .bg-slate-50\/70,
+.hospital-dark .bg-slate-50\/60,
+.hospital-dark .bg-slate-50\/50,
+.hospital-dark .bg-slate-100 {
+  background-color: #132a25 !important;
+  color: #d4e8e2;
+}
+
+.hospital-dark .text-foreground {
+  color: #f0faf7 !important;
+}
+
+.hospital-dark .text-muted {
+  color: #8ba39c !important;
+}
+
+.hospital-dark .border-border,
+.hospital-dark .border-slate-200,
+.hospital-dark .border-slate-200\/80 {
+  border-color: rgba(13, 143, 122, 0.22) !important;
+}
+
+.hospital-dark input,
+.hospital-dark textarea,
+.hospital-dark select {
+  background-color: #132a25 !important;
+  color: #f0faf7 !important;
+  border-color: rgba(13, 143, 122, 0.25) !important;
+}
+
+.hospital-dark .bg-atmosphere {
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(26, 155, 181, 0.15), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 95% 5%, rgba(13, 143, 122, 0.15), transparent 50%),
+    linear-gradient(180deg, #071310 0%, #0a1815 40%, #081512 100%) !important;
+}
+
+/* Hospital Portal Compact View System */
+.hospital-compact .p-6,
+.hospital-compact .sm\:p-8,
+.hospital-compact .sm\:p-7 {
+  padding: 1rem !important;
+}
+
+.hospital-compact .p-5 {
+  padding: 0.85rem !important;
+}
+
+.hospital-compact .space-y-6 > * + * {
+  margin-top: 0.75rem !important;
+}
+
+.hospital-compact .space-y-5 > * + * {
+  margin-top: 0.65rem !important;
+}
+
+.hospital-compact .gap-6 {
+  gap: 0.75rem !important;
+}
+
+.hospital-compact .gap-4 {
+  gap: 0.5rem !important;
+}
