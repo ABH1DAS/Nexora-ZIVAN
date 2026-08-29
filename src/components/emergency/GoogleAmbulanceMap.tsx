@@ -39,9 +39,9 @@ interface GoogleAmbulanceMapProps {
   onLocationDetected?: (coords: Coordinates, address: string) => void;
 }
 
-const DEFAULT_PATIENT_COORDS: Coordinates = { lat: 28.6139, lng: 77.2090 };
-const DEFAULT_HOSPITAL_COORDS: Coordinates = { lat: 28.5729, lng: 77.1743 };
-const DEFAULT_AMBULANCE_COORDS: Coordinates = { lat: 28.5950, lng: 77.1920 };
+const DEFAULT_PATIENT_COORDS: Coordinates = { lat: 26.1722, lng: 91.7594 };
+const DEFAULT_HOSPITAL_COORDS: Coordinates = { lat: 26.1557, lng: 91.7706 };
+const DEFAULT_AMBULANCE_COORDS: Coordinates = { lat: 26.1640, lng: 91.7670 };
 
 function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
@@ -110,16 +110,16 @@ function getAmbulanceIconSvg() {
 
 export function GoogleAmbulanceMap({
   patientCoords: initialPatientCoords = DEFAULT_PATIENT_COORDS,
-  patientLabel: initialPatientLabel = "742 Evergreen Terrace, Sector 14",
+  patientLabel: initialPatientLabel = "GS Road, Ulubari / Bhangagarh, Guwahati, Assam 781007",
   ambulanceCoords = DEFAULT_AMBULANCE_COORDS,
   ambulanceId = "AMB-01",
   ambulanceType = "government",
   driverName = "Rajesh Kumar (Paramedic Leader)",
-  vehicleNumber = "DL-01-EV-4892",
+  vehicleNumber = "AS-01-EV-4892",
   hospitalCoords = DEFAULT_HOSPITAL_COORDS,
-  hospitalName = "City Super-Specialty Hospital",
+  hospitalName = "GMCH Emergency Trauma Center",
   status = "AMBULANCE EN ROUTE",
-  etaMinutes = 8,
+  etaMinutes = 6,
   nearbyHospitals = defaultHospitals,
   onSelectHospital,
   onLocationDetected,
