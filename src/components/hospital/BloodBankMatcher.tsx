@@ -96,55 +96,107 @@ export function BloodBankMatcher({
         {/* Body */}
         <div className="overflow-y-auto p-6 space-y-4">
           {/* Main Group Highlight */}
-          <div className="flex items-center justify-between rounded-2xl border border-rose-200 bg-rose-50/70 p-4 shadow-sm">
+          <div
+            className={cn(
+              "flex items-center justify-between rounded-2xl border p-4 shadow-sm transition-all",
+              directStock.units >= 3
+                ? "border-rose-200 bg-white text-rose-600"
+                : "border-rose-600 bg-rose-600 text-white shadow-md shadow-rose-600/20"
+            )}
+          >
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-600 text-white font-display text-xl font-bold shadow-xs">
+              <div
+                className={cn(
+                  "flex h-12 w-12 items-center justify-center rounded-2xl font-display text-xl font-bold shadow-xs",
+                  directStock.units >= 3
+                    ? "bg-rose-50 text-rose-600 border border-rose-200"
+                    : "bg-white text-rose-600"
+                )}
+              >
                 {bloodGroup}
               </div>
               <div>
-                <p className="text-sm font-bold text-rose-950">Direct Match Units Available</p>
-                <p className="text-xs text-rose-700">
-                  Status: <strong className="font-semibold">{directStock.status} Inventory</strong>
+                <p className={cn("text-sm font-bold", directStock.units >= 3 ? "text-rose-700" : "text-white")}>
+                  Direct Match Blood Stock
+                </p>
+                <p className={cn("text-xs font-medium", directStock.units >= 3 ? "text-rose-600/80" : "text-white/80")}>
+                  Status: {directStock.units >= 3 ? "Available In Bank" : "CRITICAL / LOW STOCK"}
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <span className="font-display text-2xl font-bold text-rose-950">
+              <span className={cn("font-display text-2xl font-bold block", directStock.units >= 3 ? "text-rose-600" : "text-white")}>
                 {directStock.units}
               </span>
-              <span className="block text-[10px] uppercase font-bold text-rose-600">Units in Bank</span>
+              <span className={cn("block text-[10px] uppercase font-bold", directStock.units >= 3 ? "text-rose-600" : "text-white/90")}>
+                Units in Bank
+              </span>
             </div>
           </div>
 
           {/* Compatible Donors Breakdown */}
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-muted mb-2">
-              Compatible Donor Groups for {bloodGroup}:
-            </p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold uppercase tracking-wider text-muted">
+                Blood Inventory &amp; Compatibility ({bloodGroup}):
+              </p>
+              <div className="flex items-center gap-2 text-[10px] font-semibold">
+                <span className="flex items-center gap-1 text-rose-600">
+                  <span className="h-2 w-2 rounded-full border border-rose-400 bg-white" /> Available (Red Text)
+                </span>
+                <span className="flex items-center gap-1 text-rose-600">
+                  <span className="h-2 w-2 rounded-full bg-rose-600" /> Low/Out (Red BG)
+                </span>
+              </div>
+            </div>
+
             <div className="grid grid-cols-4 gap-2">
               {Object.entries(BLOOD_INVENTORY).map(([group, info]) => {
                 const isCompatible = matchingGroups.includes(group);
+                const isLowOrOut = info.units < 3;
+
                 return (
                   <div
                     key={group}
                     className={cn(
-                      "rounded-xl border p-2.5 text-center transition",
-                      isCompatible
-                        ? "border-emerald-300 bg-emerald-50/60 shadow-2xs"
-                        : "border-slate-200 bg-slate-50 opacity-40"
+                      "rounded-xl border p-2.5 text-center transition-all duration-200",
+                      isLowOrOut
+                        ? "border-rose-600 bg-rose-600 text-white shadow-sm shadow-rose-600/20"
+                        : "border-rose-200 bg-white text-rose-600 shadow-2xs hover:border-rose-300",
+                      !isCompatible && "opacity-60"
                     )}
                   >
-                    <span className="font-display font-bold text-sm text-foreground block">
+                    <span
+                      className={cn(
+                        "font-display font-bold text-base block leading-tight",
+                        isLowOrOut ? "text-white" : "text-rose-600"
+                      )}
+                    >
                       {group}
                     </span>
-                    <span className="text-[11px] text-muted block">
-                      {info.units} units
+                    <span
+                      className={cn(
+                        "text-[11px] font-semibold block mt-0.5",
+                        isLowOrOut ? "text-white/90" : "text-rose-600"
+                      )}
+                    >
+                      {info.units} {info.units === 1 ? "unit" : "units"}
                     </span>
-                    {isCompatible && (
-                      <span className="mt-1 inline-block text-[9px] font-bold uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded-full">
-                        Match
-                      </span>
-                    )}
+                    <div className="mt-1 flex items-center justify-center gap-1">
+                      {isLowOrOut ? (
+                        <span className="text-[9px] font-bold uppercase bg-white/20 text-white px-1.5 py-0.5 rounded-full border border-white/30">
+                          Low Stock
+                        </span>
+                      ) : isCompatible ? (
+                        <span className="text-[9px] font-bold uppercase text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded-full">
+                          Match
+                        </span>
+                      ) : (
+                        <span className="text-[9px] font-medium text-rose-500">
+                          Available
+                        </span>
+                      )}
+                    </div>
                   </div>
                 );
               })}

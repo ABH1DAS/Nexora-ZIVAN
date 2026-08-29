@@ -326,10 +326,15 @@ export default function CommandCenterPage() {
 
           {/* Blood Bank Rapid Match HUD */}
           <div className="rounded-[2rem] border border-border bg-white p-6 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-muted mb-4 flex items-center gap-2">
-              <Activity className="h-4 w-4 text-rose-500" />
-              Blood Bank Live Stock
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold uppercase tracking-widest text-muted flex items-center gap-2">
+                <Activity className="h-4 w-4 text-rose-500" />
+                Blood Bank Live Stock
+              </h2>
+              <span className="text-[10px] font-semibold text-rose-600">
+                Live Transfusion Hub
+              </span>
+            </div>
             <div className="grid grid-cols-4 gap-2 text-center">
               {[
                 { g: "O+", u: 14 },
@@ -340,12 +345,47 @@ export default function CommandCenterPage() {
                 { g: "B-", u: 2 },
                 { g: "AB+", u: 8 },
                 { g: "AB-", u: 1 },
-              ].map((b) => (
-                <div key={b.g} className="rounded-2xl border border-border bg-slate-50/80 p-2.5 shadow-2xs hover:border-primary/30 transition">
-                  <span className="text-xs font-bold text-rose-600 block">{b.g}</span>
-                  <span className="text-[11px] font-mono font-semibold text-foreground">{b.u} units</span>
-                </div>
-              ))}
+              ].map((b) => {
+                const isLow = b.u < 3;
+                return (
+                  <div
+                    key={b.g}
+                    className={cn(
+                      "rounded-2xl border p-2.5 shadow-2xs transition-all duration-200",
+                      isLow
+                        ? "border-rose-600 bg-rose-600 text-white shadow-sm shadow-rose-600/20"
+                        : "border-rose-200 bg-white text-rose-600 hover:border-rose-300"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "text-xs font-bold block",
+                        isLow ? "text-white" : "text-rose-600"
+                      )}
+                    >
+                      {b.g}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-[11px] font-mono font-semibold block mt-0.5",
+                        isLow ? "text-white/90" : "text-rose-600"
+                      )}
+                    >
+                      {b.u} {b.u === 1 ? "unit" : "units"}
+                    </span>
+                    <span
+                      className={cn(
+                        "mt-1 inline-block text-[8px] font-bold uppercase px-1.5 py-0.2 rounded-full",
+                        isLow
+                          ? "bg-white/20 text-white border border-white/30"
+                          : "bg-rose-50 text-rose-700 border border-rose-200"
+                      )}
+                    >
+                      {isLow ? "Low" : "Ready"}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
