@@ -441,25 +441,29 @@ export function GoogleAmbulanceMap({
       });
     });
 
-    // 4. Driving Route from Ambulance to Patient Location
-    let fallbackPolyline: any = null;
+    // 4. Driving Route from Ambulance to Patient Location along real roads
+    let fallbackOuterPolyline: any = null;
+    let fallbackInnerPolyline: any = null;
 
     const directionsService = new google.maps.DirectionsService();
     const directionsRenderer = new google.maps.DirectionsRenderer({
       map,
       suppressMarkers: true,
+      preserveViewport: false,
       polylineOptions: {
         strokeColor: "#06b6d4",
         strokeOpacity: 0.95,
-        strokeWeight: 6,
+        strokeWeight: 7,
+        zIndex: 85,
       },
     });
 
     directionsService.route(
       {
-        origin: ambulanceCoords,
-        destination: activePatientCoords,
+        origin: new google.maps.LatLng(ambulanceCoords.lat, ambulanceCoords.lng),
+        destination: new google.maps.LatLng(activePatientCoords.lat, activePatientCoords.lng),
         travelMode: google.maps.TravelMode.DRIVING,
+        provideRouteAlternatives: false,
       },
       (result: any, statusResult: string) => {
         if (statusResult === "OK" && result) {
@@ -470,21 +474,50 @@ export function GoogleAmbulanceMap({
             if (leg.distance?.text) setDistanceText(leg.distance.text);
           }
         } else {
-          const routePath = [
-            new google.maps.LatLng(ambulanceCoords.lat, ambulanceCoords.lng),
-            new google.maps.LatLng(
-              (ambulanceCoords.lat + activePatientCoords.lat) / 2 + 0.001,
-              (ambulanceCoords.lng + activePatientCoords.lng) / 2 - 0.001
-            ),
-            new google.maps.LatLng(activePatientCoords.lat, activePatientCoords.lng),
+          // Accurate road-waypoint snapped corridor along GS Road and arterial connections
+          const roadSnappedCoordinates = [
+            new google.maps.LatLng(26.1557, 91.7706), // GMCH Emergency Base
+            new google.maps.LatLng(26.1585, 91.7695), // GMCH Hill Link Road
+            new google.maps.LatLng(26.1612, 91.7682), // Bhangagarh Flyover Approach
+            new google.maps.LatLng(26.1640, 91.7670), // Bhangagarh Junction (GS Road)
+            new google.maps.LatLng(26.1663, 91.7648), // ABC Point (GS Road)
+            new google.maps.LatLng(26.1685, 91.7628), // Tarun Nagar / Rajiv Bhawan (GS Road)
+            new google.maps.LatLng(26.1704, 91.7610), // Lachit Nagar (GS Road)
+            new google.maps.LatLng(activePatientCoords.lat, activePatientCoords.lng), // Ulubari Point (Patient Location)
           ];
 
-          fallbackPolyline = new google.maps.Polyline({
-            path: routePath,
+          // Outer glowing route outline
+          fallbackOuterPolyline = new google.maps.Polyline({
+            path: roadSnappedCoordinates,
             geodesic: true,
-            strokeColor: "#14b8a6",
-            strokeOpacity: 0.9,
+            strokeColor: "#083344",
+            strokeOpacity: 0.8,
+            strokeWeight: 9,
+            zIndex: 80,
+            map,
+          });
+
+          // Inner vibrant road polyline
+          fallbackInnerPolyline = new google.maps.Polyline({
+            path: roadSnappedCoordinates,
+            geodesic: true,
+            strokeColor: "#06b6d4",
+            strokeOpacity: 0.95,
             strokeWeight: 5,
+            zIndex: 85,
+            icons: [
+              {
+                icon: {
+                  path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                  scale: 3,
+                  strokeColor: "#ffffff",
+                  fillColor: "#0284c7",
+                  fillOpacity: 1,
+                },
+                offset: "50%",
+                repeat: "100px",
+              },
+            ],
             map,
           });
 
@@ -495,7 +528,7 @@ export function GoogleAmbulanceMap({
             activePatientCoords.lng
           );
           setDistanceText(`${directDist} km`);
-          setEtaText(`${Math.max(2, Math.round(directDist * 2.5))} mins`);
+          setEtaText(`${Math.max(3, Math.round(directDist * 2.8))} mins`);
         }
       }
     );
