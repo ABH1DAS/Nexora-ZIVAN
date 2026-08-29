@@ -14,12 +14,22 @@ import {
   Shield,
   Activity,
   LocateFixed,
+  Route,
+  ChevronDown,
+  ChevronUp,
+  Car,
 } from "lucide-react";
 import { hospitals as defaultHospitals, type Hospital } from "@/data/hospitals";
 
 export interface Coordinates {
   lat: number;
   lng: number;
+}
+
+interface RouteStep {
+  instruction: string;
+  distance: string;
+  duration: string;
 }
 
 interface GoogleAmbulanceMapProps {
@@ -134,7 +144,15 @@ export function GoogleAmbulanceMap({
   const [gpsDetecting, setGpsDetecting] = useState(false);
 
   const [etaText, setEtaText] = useState(`${etaMinutes} mins`);
-  const [distanceText, setDistanceText] = useState("4.2 km");
+  const [distanceText, setDistanceText] = useState("1.2 km");
+  const [routeSteps, setRouteSteps] = useState<RouteStep[]>([
+    { instruction: "Head north on GS Road from Bhangagarh Base", distance: "400 m", duration: "1 min" },
+    { instruction: "Continue straight across Bhangagarh Flyover on GS Road", distance: "500 m", duration: "1 min" },
+    { instruction: "Pass ABC Bus Stop & merge left towards Ulubari Point", distance: "300 m", duration: "1 min" },
+    { instruction: "Arrive at Patient SOS Coordinates (GS Road, Ulubari)", distance: "0 m", duration: "0 min" },
+  ]);
+  const [showSteps, setShowSteps] = useState(false);
+
   const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
   const [filterCategory, setFilterCategory] = useState<"all" | "government" | "private">("all");
   const [mapType, setMapType] = useState<"roadmap" | "satellite">("roadmap");
@@ -238,7 +256,9 @@ export function GoogleAmbulanceMap({
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry`;
     script.async = true;
     script.defer = true;
-    script.onload = () => setMapsLoaded(true);
+    script.onload = () => {
+      setMapsLoaded(true);
+    };
     document.head.appendChild(script);
   }, [apiKey]);
 
@@ -251,67 +271,19 @@ export function GoogleAmbulanceMap({
       { elementType: "geometry", stylers: [{ color: "#1e293b" }] },
       { elementType: "labels.text.stroke", stylers: [{ color: "#0f172a" }] },
       { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
-
-      // Completely remove all distracting non-emergency POIs (hotels, restaurants, shops, cafes)
-      {
-        featureType: "poi",
-        elementType: "labels",
-        stylers: [{ visibility: "off" }],
-      },
-      {
-        featureType: "poi",
-        elementType: "labels.icon",
-        stylers: [{ visibility: "off" }],
-      },
-      {
-        featureType: "poi.business",
-        stylers: [{ visibility: "off" }],
-      },
-      {
-        featureType: "poi.attraction",
-        stylers: [{ visibility: "off" }],
-      },
-      {
-        featureType: "poi.place_of_worship",
-        stylers: [{ visibility: "off" }],
-      },
-      {
-        featureType: "poi.school",
-        stylers: [{ visibility: "off" }],
-      },
-      {
-        featureType: "poi.sports_complex",
-        stylers: [{ visibility: "off" }],
-      },
-      {
-        featureType: "transit.station.bus",
-        stylers: [{ visibility: "off" }],
-      },
-      {
-        featureType: "administrative.locality",
-        elementType: "labels.text.fill",
-        stylers: [{ color: "#f8fafc" }],
-      },
-      {
-        featureType: "road",
-        elementType: "geometry",
-        stylers: [{ color: "#334155" }],
-      },
-      {
-        featureType: "road",
-        elementType: "geometry.stroke",
-        stylers: [{ color: "#1e293b" }],
-      },
-      {
-        featureType: "road.highway",
-        elementType: "geometry",
-        stylers: [{ color: "#475569" }],
-      },
-      {
-        featureType: "water",
-        elementType: "geometry",
-        stylers: [{ color: "#0f172a" }],
-      },
+      { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+      { featureType: "poi", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+      { featureType: "poi.business", stylers: [{ visibility: "off" }] },
+      { featureType: "poi.attraction", stylers: [{ visibility: "off" }] },
+      { featureType: "poi.place_of_worship", stylers: [{ visibility: "off" }] },
+      { featureType: "poi.school", stylers: [{ visibility: "off" }] },
+      { featureType: "poi.sports_complex", stylers: [{ visibility: "off" }] },
+      { featureType: "transit.station.bus", stylers: [{ visibility: "off" }] },
+      { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#f8fafc" }] },
+      { featureType: "road", elementType: "geometry", stylers: [{ color: "#334155" }] },
+      { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1e293b" }] },
+      { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#475569" }] },
+      { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f172a" }] },
     ];
 
     const map = new google.maps.Map(mapRef.current, {
@@ -319,7 +291,7 @@ export function GoogleAmbulanceMap({
         lat: (activePatientCoords.lat + ambulanceCoords.lat) / 2,
         lng: (activePatientCoords.lng + ambulanceCoords.lng) / 2,
       },
-      zoom: 13,
+      zoom: 14,
       mapTypeId: mapType,
       disableDefaultUI: false,
       zoomControl: true,
@@ -382,9 +354,10 @@ export function GoogleAmbulanceMap({
       content: `
         <div style="color: #0f172a; padding: 6px; font-family: sans-serif;">
           <strong style="color: #0f766e; font-size: 13px;">🚑 Ambulance Unit (${vehicleNumber})</strong>
-          <p style="margin: 4px 0 0; font-size: 11px;"><b>Paramedic:</b> ${driverName}</p>
+          <p style="margin: 4px 0 0; font-size: 11px;"><b>Transport Mode:</b> Emergency Road Transport (DRIVING)</p>
+          <p style="margin: 2px 0 0; font-size: 11px;"><b>Paramedic:</b> ${driverName}</p>
           <p style="margin: 2px 0 0; font-size: 11px;"><b>Status:</b> ${status}</p>
-          <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#ccfbf1; color:#115e59; padding: 2px 6px; border-radius: 4px;">LIVE GPS TELEMETRY</span>
+          <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#ccfbf1; color:#115e59; padding: 2px 6px; border-radius: 4px;">ROAD TRANSPORT DISPATCH</span>
         </div>
       `,
     });
@@ -393,7 +366,7 @@ export function GoogleAmbulanceMap({
       ambulanceInfoWindow.open(map, ambulanceMarker);
     });
 
-    // 3. Nearby Hospitals Markers with custom Hospital Cross icons
+    // 3. Nearby Hospitals Markers
     filteredHospitals.forEach((hosp) => {
       if (!hosp.coordinates) return;
       const hospLatLng = new google.maps.LatLng(hosp.coordinates.lat, hosp.coordinates.lng);
@@ -441,7 +414,7 @@ export function GoogleAmbulanceMap({
       });
     });
 
-    // 4. Driving Route from Ambulance to Patient Location along real roads
+    // 4. Proper Road Transport Route (DRIVING mode along road grid)
     let fallbackOuterPolyline: any = null;
     let fallbackInnerPolyline: any = null;
 
@@ -451,7 +424,7 @@ export function GoogleAmbulanceMap({
       suppressMarkers: true,
       preserveViewport: false,
       polylineOptions: {
-        strokeColor: "#06b6d4",
+        strokeColor: "#0284c7",
         strokeOpacity: 0.95,
         strokeWeight: 7,
         zIndex: 85,
@@ -472,21 +445,28 @@ export function GoogleAmbulanceMap({
           if (leg) {
             if (leg.duration?.text) setEtaText(leg.duration.text);
             if (leg.distance?.text) setDistanceText(leg.distance.text);
+
+            if (leg.steps && leg.steps.length > 0) {
+              const formattedSteps: RouteStep[] = leg.steps.map((s: any) => ({
+                instruction: s.instructions ? s.instructions.replace(/<[^>]*>?/gm, "") : "Follow road route",
+                distance: s.distance?.text || "",
+                duration: s.duration?.text || "",
+              }));
+              setRouteSteps(formattedSteps);
+            }
           }
         } else {
-          // Accurate road-waypoint snapped corridor along GS Road and arterial connections
           const roadSnappedCoordinates = [
-            new google.maps.LatLng(26.1557, 91.7706), // GMCH Emergency Base
-            new google.maps.LatLng(26.1585, 91.7695), // GMCH Hill Link Road
-            new google.maps.LatLng(26.1612, 91.7682), // Bhangagarh Flyover Approach
-            new google.maps.LatLng(26.1640, 91.7670), // Bhangagarh Junction (GS Road)
-            new google.maps.LatLng(26.1663, 91.7648), // ABC Point (GS Road)
-            new google.maps.LatLng(26.1685, 91.7628), // Tarun Nagar / Rajiv Bhawan (GS Road)
-            new google.maps.LatLng(26.1704, 91.7610), // Lachit Nagar (GS Road)
-            new google.maps.LatLng(activePatientCoords.lat, activePatientCoords.lng), // Ulubari Point (Patient Location)
+            new google.maps.LatLng(26.1557, 91.7706),
+            new google.maps.LatLng(26.1585, 91.7695),
+            new google.maps.LatLng(26.1612, 91.7682),
+            new google.maps.LatLng(26.1640, 91.7670),
+            new google.maps.LatLng(26.1663, 91.7648),
+            new google.maps.LatLng(26.1685, 91.7628),
+            new google.maps.LatLng(26.1704, 91.7610),
+            new google.maps.LatLng(activePatientCoords.lat, activePatientCoords.lng),
           ];
 
-          // Outer glowing route outline
           fallbackOuterPolyline = new google.maps.Polyline({
             path: roadSnappedCoordinates,
             geodesic: true,
@@ -497,13 +477,12 @@ export function GoogleAmbulanceMap({
             map,
           });
 
-          // Inner vibrant road polyline
           fallbackInnerPolyline = new google.maps.Polyline({
             path: roadSnappedCoordinates,
             geodesic: true,
-            strokeColor: "#06b6d4",
+            strokeColor: "#0284c7",
             strokeOpacity: 0.95,
-            strokeWeight: 5,
+            strokeWeight: 6,
             zIndex: 85,
             icons: [
               {
@@ -511,11 +490,11 @@ export function GoogleAmbulanceMap({
                   path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
                   scale: 3,
                   strokeColor: "#ffffff",
-                  fillColor: "#0284c7",
+                  fillColor: "#38bdf8",
                   fillOpacity: 1,
                 },
                 offset: "50%",
-                repeat: "100px",
+                repeat: "90px",
               },
             ],
             map,
@@ -573,7 +552,7 @@ export function GoogleAmbulanceMap({
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-teal-300">
-                Hospital GPS Network · {filteredHospitals.length} Hospitals
+                Road Transport Dispatch · {filteredHospitals.length} Hospitals
               </span>
             </div>
             <p className="text-xs font-bold text-white flex items-center gap-1.5 truncate max-w-xs sm:max-w-md">
@@ -650,7 +629,11 @@ export function GoogleAmbulanceMap({
           <div className="relative h-full w-full bg-[#0a1120] p-6 flex flex-col justify-between overflow-hidden">
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-40" />
 
-            <div className="absolute left-[25%] top-[65%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-10">
+            <svg className="absolute inset-0 h-full w-full pointer-events-none opacity-60">
+              <line x1="22%" y1="72%" x2="54%" y2="46%" stroke="#0284c7" strokeWidth="5" strokeDasharray="6 6" />
+            </svg>
+
+            <div className="absolute left-[22%] top-[72%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-10">
               <div className="relative flex items-center justify-center">
                 <span className="absolute h-10 w-10 rounded-full bg-rose-500/40 animate-ping" />
                 <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-600 text-white shadow-[0_0_20px_rgba(239,68,68,0.8)]">
@@ -658,11 +641,11 @@ export function GoogleAmbulanceMap({
                 </div>
               </div>
               <span className="mt-1.5 rounded-md bg-slate-900/90 px-2 py-0.5 text-[10px] font-bold text-rose-300 border border-rose-500/40 shadow">
-                You (Current GPS)
+                You (26.1722, 91.7594)
               </span>
             </div>
 
-            <div className="absolute left-[65%] top-[35%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-10">
+            <div className="absolute left-[54%] top-[46%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-10">
               <div className="relative flex items-center justify-center">
                 <span className="absolute h-12 w-12 rounded-full bg-teal-500/40 animate-ping" />
                 <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500 text-slate-950 font-bold shadow-[0_0_25px_rgba(20,184,166,0.9)]">
@@ -670,34 +653,73 @@ export function GoogleAmbulanceMap({
                 </div>
               </div>
               <span className="mt-1.5 rounded-md bg-slate-900/90 px-2 py-0.5 text-[10px] font-bold text-teal-300 border border-teal-500/40 shadow">
-                {vehicleNumber} ({ambulanceType.toUpperCase()})
+                {vehicleNumber} (Emergency Road Transport)
               </span>
             </div>
 
-            <div className="absolute left-[50%] top-[25%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-10">
+            <div className="absolute left-[62%] top-[18%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-10">
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white font-bold shadow-[0_0_15px_rgba(37,99,235,0.8)] border border-white/20">
                 🏥
               </div>
               <span className="mt-1 rounded-md bg-slate-900/90 px-2 py-0.5 text-[9px] font-bold text-blue-300 border border-blue-500/30">
-                AIIMS Central (34 Beds)
+                GMCH Trauma (45 Beds Free)
               </span>
             </div>
           </div>
         )}
 
-        <div className="absolute top-4 left-4 z-20 flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/95 px-4 py-2 backdrop-blur-md shadow-xl">
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
-          <span className="text-xs font-bold text-white">
-            Live ETA: <span className="text-amber-300 font-mono">{etaText}</span> ({distanceText})
-          </span>
+        <div className="absolute top-4 left-4 z-20 flex flex-col gap-1.5">
+          <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/95 px-4 py-2 backdrop-blur-md shadow-xl">
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
+            <div className="flex items-center gap-2 text-xs font-bold text-white">
+              <Car className="h-4 w-4 text-sky-400" />
+              <span>Road Transit: <strong className="text-amber-300 font-mono">{etaText}</strong> ({distanceText})</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowSteps((s) => !s)}
+            className="flex items-center justify-between gap-2 rounded-xl border border-sky-500/30 bg-sky-950/80 px-3 py-1.5 text-[11px] font-bold text-sky-300 hover:bg-sky-900 transition shadow-lg backdrop-blur-md"
+          >
+            <span className="flex items-center gap-1.5">
+              <Route className="h-3.5 w-3.5" />
+              Turn-by-Turn Road Guidance ({routeSteps.length} steps)
+            </span>
+            {showSteps ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          </button>
         </div>
+
+        {showSteps && (
+          <div className="absolute top-24 left-4 z-30 max-w-sm rounded-2xl border border-white/15 bg-slate-900/95 p-3.5 shadow-2xl backdrop-blur-md text-xs text-white max-h-56 overflow-y-auto space-y-2">
+            <div className="flex items-center justify-between border-b border-white/10 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-teal-300">
+              <span>🛣️ Road Transport Route Guidance</span>
+              <span>Fast Corridor</span>
+            </div>
+            {routeSteps.map((step, idx) => (
+              <div key={idx} className="flex items-start gap-2 text-[11px]">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-sky-500/20 text-[10px] font-bold text-sky-300 border border-sky-500/30">
+                  {idx + 1}
+                </span>
+                <div className="flex-1">
+                  <p className="font-semibold text-slate-200">{step.instruction}</p>
+                  {step.distance && (
+                    <span className="text-[10px] text-slate-400">
+                      {step.distance} • {step.duration}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="border-t border-white/10 bg-slate-900/95 p-4 backdrop-blur-md">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
             <Building2 className="h-3.5 w-3.5 text-teal-400" />
-            Nearby Hospitals Sorted by Proximity
+            Nearby Hospitals Sorted by Road Travel Proximity
           </span>
           <span className="text-[10px] text-teal-400 font-semibold">
             Click any hospital pin to view available beds & routing
