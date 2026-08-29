@@ -11,14 +11,28 @@ import {
   statusLabel,
   subscribeAmbulanceRequests,
 } from "@/lib/ambulanceStore";
+import { hospitalAudio } from "@/lib/hospitalAudio";
+import { exportRequestsToCSV } from "@/lib/exportUtils";
+import { LiveTelemetryModal } from "@/components/hospital/LiveTelemetryModal";
+import { BedAllocationModal } from "@/components/hospital/BedAllocationModal";
+import { AmbulanceCommsDrawer } from "@/components/hospital/AmbulanceCommsDrawer";
+import { BloodBankMatcher } from "@/components/hospital/BloodBankMatcher";
+import { IncidentReportModal } from "@/components/hospital/IncidentReportModal";
 import { cn } from "@/lib/utils";
 import {
   Activity,
   Ambulance,
+  Bed,
   CheckCircle2,
   Clock3,
+  Download,
+  Droplet,
+  FileText,
+  Heart,
   MapPin,
+  Monitor,
   Phone,
+  Radio,
   ShieldAlert,
   TrendingUp,
   XCircle,
@@ -41,36 +55,40 @@ function StatCard({
   tone = "default",
 }: {
   label: string;
-  value: number | string;
+  value: number;
   icon: React.ElementType;
-  tone?: "default" | "amber" | "sky" | "emerald" | "rose";
+  tone?: "amber" | "sky" | "emerald" | "default";
 }) {
-  const tones = {
-    default: "bg-white text-foreground shadow-[0_12px_32px_rgba(15,61,53,0.08)] hover:shadow-[0_18px_42px_rgba(15,61,53,0.14)]",
-    amber: "bg-amber-50/80 text-amber-900 shadow-[0_12px_32px_rgba(245,158,11,0.16)] hover:shadow-[0_18px_42px_rgba(245,158,11,0.25)]",
-    sky: "bg-accent-soft/80 text-accent shadow-[0_12px_32px_rgba(26,155,181,0.18)] hover:shadow-[0_18px_42px_rgba(26,155,181,0.28)]",
-    emerald: "bg-primary-soft/80 text-primary-dark shadow-[0_12px_32px_rgba(13,143,122,0.18)] hover:shadow-[0_18px_42px_rgba(13,143,122,0.28)]",
-    rose: "bg-emergency-soft/80 text-emergency-dark shadow-[0_12px_32px_rgba(217,53,74,0.18)] hover:shadow-[0_18px_42px_rgba(217,53,74,0.28)]",
-  };
   const iconTones = {
-    default: "text-muted",
-    amber: "text-amber-500",
-    sky: "text-accent",
-    emerald: "text-primary",
-    rose: "text-emergency",
+    amber: "bg-amber-100 text-amber-600 shadow-2xs shadow-amber-500/20",
+    sky: "bg-accent-soft text-accent shadow-2xs shadow-accent/20",
+    emerald: "bg-primary-soft text-primary shadow-2xs shadow-primary/20",
+    default: "bg-slate-100 text-muted shadow-2xs",
   };
+
+  const cardGlows = {
+    amber: "shadow-[0_12px_32px_rgba(245,158,11,0.16)] hover:shadow-[0_18px_42px_rgba(245,158,11,0.25)]",
+    sky: "shadow-[0_12px_32px_rgba(26,155,181,0.18)] hover:shadow-[0_18px_42px_rgba(26,155,181,0.28)]",
+    emerald: "shadow-[0_12px_32px_rgba(13,143,122,0.18)] hover:shadow-[0_18px_42px_rgba(13,143,122,0.28)]",
+    default: "shadow-[0_12px_32px_rgba(15,61,53,0.08)] hover:shadow-[0_18px_42px_rgba(15,61,53,0.14)]",
+  };
+
   return (
     <div
       className={cn(
-        "rounded-[1.5rem] border-0 p-5 hover:-translate-y-0.5 transition-all duration-300",
-        tones[tone],
+        "rounded-[1.5rem] border-0 bg-white p-5 hover:-translate-y-0.5 transition-all duration-300",
+        cardGlows[tone],
       )}
     >
       <div className="flex items-start justify-between">
         <p className="text-xs font-bold uppercase tracking-widest text-muted">{label}</p>
-        <Icon className={cn("h-5 w-5", iconTones[tone])} aria-hidden />
+        <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${iconTones[tone]}`}>
+          <Icon className="h-5 w-5" aria-hidden />
+        </div>
       </div>
-      <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground">{value}</p>
+      <p className="mt-3 font-display text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        {value}
+      </p>
     </div>
   );
 }
@@ -78,21 +96,27 @@ function StatCard({
 export default function HospitalDashboardPage() {
   const { account } = useHospitalAuth();
   const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
-  const [filter, setFilter] = useState<"all" | "searching" | "active" | "closed">("searching");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "active" | "pending" | "resolved">("all");
   const [notice, setNotice] = useState<{ msg: string; type: "success" | "info" } | null>(null);
+
+  // Modals state
+  const [telemetryModalOpen, setTelemetryModalOpen] = useState(false);
+  const [bedModalOpen, setBedModalOpen] = useState(false);
+  const [commsDrawerOpen, setCommsDrawerOpen] = useState(false);
+  const [bloodModalOpen, setBloodModalOpen] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
 
   useEffect(() => {
     if (!account) return;
     return subscribeAmbulanceRequests((all) => {
       const mine = all.filter((r) => r.hospitalId === account.hospitalId);
       setRequests(mine);
-      setSelectedId((prev) => {
-        if (prev && mine.some((r) => r.id === prev)) return prev;
-        return mine[0]?.id ?? null;
-      });
+      if (!selectedId && mine.length > 0) {
+        setSelectedId(mine[0].id);
+      }
     });
-  }, [account]);
+  }, [account, selectedId]);
 
   // Auto-dismiss notice
   useEffect(() => {
@@ -103,14 +127,18 @@ export default function HospitalDashboardPage() {
 
   const filtered = useMemo(() => {
     return requests.filter((r) => {
-      if (filter === "all") return true;
-      if (filter === "searching") return r.status === "searching";
       if (filter === "active") return ["accepted", "en_route"].includes(r.status);
-      return ["arrived", "declined", "cancelled"].includes(r.status);
+      if (filter === "pending") return r.status === "searching";
+      if (filter === "resolved") return ["arrived", "declined", "cancelled"].includes(r.status);
+      return true;
     });
-  }, [filter, requests]);
+  }, [requests, filter]);
 
-  const selected = requests.find((r) => r.id === selectedId) ?? null;
+  const selected = useMemo(
+    () => requests.find((r) => r.id === selectedId) ?? filtered[0] ?? null,
+    [requests, selectedId, filtered],
+  );
+
   const pendingCount = requests.filter((r) => r.status === "searching").length;
   const activeCount = requests.filter((r) => ["accepted", "en_route"].includes(r.status)).length;
   const resolvedCount = requests.filter((r) => ["arrived", "declined", "cancelled"].includes(r.status)).length;
@@ -135,14 +163,27 @@ export default function HospitalDashboardPage() {
               Real-time emergency dispatch, incoming patient triage, and ambulance fleet coordination.
             </p>
           </div>
-          <div className="rounded-[1.5rem] bg-[#0f2420] px-5 py-4 text-white shadow-[0_12px_30px_rgba(15,36,32,0.35)]">
-            <p className="text-xs uppercase tracking-wide text-white/60">Active Queue</p>
-            <p className="mt-1 font-display text-3xl font-bold">
-              🚑 {pendingCount + activeCount} units
-            </p>
-            <p className="mt-1 text-sm text-teal-200">
-              {pendingCount} incoming SOS
-            </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/hospital/command-center"
+              className="flex items-center gap-2 rounded-[1.5rem] bg-gradient-to-r from-emerald-600 to-teal-700 px-5 py-4 text-white shadow-[0_12px_30px_rgba(13,143,122,0.3)] hover:shadow-[0_16px_40px_rgba(13,143,122,0.4)] hover:-translate-y-0.5 transition-all"
+            >
+              <Monitor className="h-5 w-5 animate-pulse" />
+              <div>
+                <p className="text-[10px] uppercase font-bold tracking-wider text-teal-200">Full Screen HUD</p>
+                <p className="font-display text-base font-bold">ER Command Board</p>
+              </div>
+            </Link>
+
+            <div className="rounded-[1.5rem] bg-[#0f2420] px-5 py-4 text-white shadow-[0_12px_30px_rgba(15,36,32,0.35)]">
+              <p className="text-xs uppercase tracking-wide text-white/60">Active Queue</p>
+              <p className="mt-1 font-display text-3xl font-bold">
+                🚑 {pendingCount + activeCount} units
+              </p>
+              <p className="mt-1 text-sm text-teal-200">
+                {pendingCount} incoming SOS
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -158,65 +199,79 @@ export default function HospitalDashboardPage() {
       {/* Demo banner division */}
       <div className="flex items-start gap-3 rounded-[1.5rem] border border-amber-200/90 bg-amber-50/90 px-5 py-3.5 text-sm text-amber-900 shadow-[0_10px_26px_rgba(245,158,11,0.12)] hover:shadow-[0_14px_34px_rgba(245,158,11,0.18)] hover:border-amber-300 transition-all duration-300">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" aria-hidden />
-        <span>
-          Demo portal — accepting a request simulates live patient dispatch.{" "}
-          <Link href="/dashboard/emergency" className="font-semibold underline underline-offset-2 hover:text-amber-950">
-            Trigger a test SOS from Patient Portal →
-          </Link>
-        </span>
+        <div className="flex-1">
+          <p className="font-semibold">Live Operational Sync Active</p>
+          <p className="mt-0.5 text-xs text-amber-700">
+            Emergency requests triggered from the Member App arrive here in real-time. Status changes instantly update member tracking.
+          </p>
+        </div>
+        <button
+          onClick={() => exportRequestsToCSV(requests)}
+          className="flex items-center gap-1.5 rounded-xl border border-amber-300 bg-white/80 px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-white transition"
+        >
+          <Download className="h-3.5 w-3.5" />
+          Export CSV
+        </button>
       </div>
 
-      {/* Notice toast */}
       {notice && (
         <div
           role="status"
           className={cn(
-            "rounded-2xl border px-4 py-3.5 text-sm font-semibold shadow-md animate-in fade-in slide-in-from-top-2 duration-300",
+            "flex items-center justify-between rounded-[1.25rem] border px-4 py-3 text-sm animate-in fade-in duration-200",
             notice.type === "success"
-              ? "border-emerald-200 bg-emerald-50 text-emerald-800 shadow-[0_10px_30px_rgba(5,150,105,0.18)]"
-              : "border-sky-200 bg-sky-50 text-sky-800 shadow-[0_10px_30px_rgba(26,155,181,0.18)]",
+              ? "border-primary/20 bg-primary-soft text-primary"
+              : "border-slate-200 bg-slate-100 text-slate-700",
           )}
         >
-          {notice.msg}
+          <span>{notice.msg}</span>
+          <button
+            type="button"
+            onClick={() => setNotice(null)}
+            className="text-xs font-semibold underline opacity-70 hover:opacity-100"
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
-      {/* Request list + detail panel divisions */}
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.15fr]">
-        {/* LEFT — Request list */}
-        <section className="rounded-[2rem] border border-border bg-white/90 backdrop-blur p-5 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
-          <div className="mb-4 flex flex-wrap gap-2">
-            {(
-              [
-                ["searching", "Incoming"],
-                ["active", "Active"],
-                ["closed", "Closed"],
-                ["all", "All"],
-              ] as const
-            ).map(([id, lbl]) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setFilter(id)}
-                className={cn(
-                  "rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
-                  filter === id
-                    ? "bg-primary text-white shadow-sm"
-                    : "bg-slate-100 text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
-                )}
-              >
-                {lbl}
-                {id === "searching" && pendingCount > 0 && (
-                  <span className="ml-1.5 rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] text-white">
-                    {pendingCount}
-                  </span>
-                )}
-              </button>
-            ))}
+      {/* Two-column layout: Request list & Detail panel */}
+      <div className="grid gap-6 lg:grid-cols-5">
+        {/* Left: Request list division */}
+        <section
+          aria-label="Ambulance requests"
+          className="rounded-[2rem] border border-border bg-white p-5 sm:p-6 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300 lg:col-span-2"
+        >
+          {/* Filter tabs */}
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+            <div className="flex flex-wrap gap-1.5">
+              {(
+                [
+                  ["all", `All (${requests.length})`],
+                  ["pending", `SOS (${pendingCount})`],
+                  ["active", `Active (${activeCount})`],
+                  ["resolved", `Done (${resolvedCount})`],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setFilter(key)}
+                  className={cn(
+                    "rounded-full px-3 py-1 text-xs font-semibold transition-all duration-200",
+                    filter === key
+                      ? "bg-primary text-white shadow-xs"
+                      : "bg-slate-100 text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {filtered.length === 0 ? (
-            <div className="rounded-[1.5rem] border border-dashed border-border bg-slate-50/60 px-4 py-12 text-center">
+            <div className="rounded-[1.5rem] border border-dashed border-border py-12 text-center">
               <Ambulance className="mx-auto h-8 w-8 text-slate-300" aria-hidden />
               <p className="mt-3 text-sm font-semibold text-muted">No requests here</p>
               <p className="mt-1 text-xs text-muted/70">
@@ -235,22 +290,14 @@ export default function HospitalDashboardPage() {
                       "w-full rounded-[1.25rem] border p-4 text-left transition-all duration-200",
                       selectedId === req.id
                         ? "border-primary bg-primary text-white shadow-md shadow-primary/20"
-                        : "border-border bg-white hover:border-primary/40 hover:bg-slate-50/80 hover:shadow-xs hover:-translate-y-0.5",
+                        : "border-border bg-white hover:border-primary/40 hover:bg-slate-50/80 hover:shadow-xs",
                     )}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <p className="truncate font-semibold">{req.patientName}</p>
-                        <p
-                          className={cn(
-                            "mt-0.5 text-xs",
-                            selectedId === req.id ? "text-white/70" : "text-muted",
-                          )}
-                        >
-                          {new Date(req.createdAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                        <p className={cn("mt-0.5 text-xs", selectedId === req.id ? "text-white/70" : "text-muted")}>
+                          {new Date(req.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           {" · "}
                           {req.priority}
                         </p>
@@ -266,14 +313,6 @@ export default function HospitalDashboardPage() {
                         {statusLabel(req.status)}
                       </span>
                     </div>
-                    <p
-                      className={cn(
-                        "mt-2 truncate text-sm",
-                        selectedId === req.id ? "text-white/80" : "text-muted",
-                      )}
-                    >
-                      {req.locationLabel}
-                    </p>
                   </button>
                 </li>
               ))}
@@ -281,70 +320,84 @@ export default function HospitalDashboardPage() {
           )}
         </section>
 
-        {/* RIGHT — Detail panel */}
-        <section className="rounded-[2rem] border border-border bg-white/90 backdrop-blur p-6 sm:p-7 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
+        {/* Right: Request detail division */}
+        <section
+          aria-label="Request details"
+          className="rounded-[2rem] border border-border bg-white p-5 sm:p-6 shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300 lg:col-span-3"
+        >
           {!selected ? (
-            <div className="flex h-full min-h-[340px] flex-col items-center justify-center gap-3 text-center">
-              <Ambulance className="h-10 w-10 text-slate-200" aria-hidden />
-              <p className="text-sm font-semibold text-muted">
-                Select a request to view patient details
-              </p>
+            <div className="flex h-64 items-center justify-center text-sm text-muted">
+              Select a request from the queue to view details &amp; dispatch actions.
             </div>
           ) : (
             <div className="space-y-5">
               {/* Header */}
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border pb-4">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-muted">
-                    Request · {selected.id}
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-display text-xl font-bold text-foreground">
+                      {selected.patientName}
+                    </h2>
+                    <span
+                      className={cn(
+                        "rounded-full border px-3 py-0.5 text-xs font-bold uppercase tracking-wide shadow-2xs",
+                        toneForStatus(selected.status),
+                      )}
+                    >
+                      {statusLabel(selected.status)}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted">
+                    Request ID: <code className="font-mono text-foreground font-semibold">{selected.id}</code> · Priority:{" "}
+                    <strong className="capitalize text-foreground font-bold">{selected.priority}</strong>
                   </p>
-                  <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-foreground">
-                    {selected.patientName}
-                  </h2>
                 </div>
-                <span
-                  className={cn(
-                    "rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide shadow-2xs",
-                    toneForStatus(selected.status),
-                  )}
-                >
-                  {statusLabel(selected.status)}
-                </span>
+                <div className="text-right">
+                  <p className="text-xs text-muted">Received</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    {new Date(selected.createdAt).toLocaleTimeString()}
+                  </p>
+                </div>
               </div>
 
-              {/* Location + Contact */}
+              {/* Patient info card */}
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-[1.25rem] border border-border bg-slate-50/80 p-4 text-sm shadow-2xs hover:shadow-xs hover:border-primary/30 transition-all">
-                  <p className="mb-1.5 flex items-center gap-2 font-semibold text-foreground">
-                    <MapPin className="h-4 w-4 text-primary" aria-hidden />
-                    Location
-                  </p>
-                  <p className="text-muted">{selected.locationLabel}</p>
-                  <p className="mt-1 text-xs font-mono text-muted/70">
-                    {selected.coordinates.lat.toFixed(4)}, {selected.coordinates.lng.toFixed(4)}
-                  </p>
+                <div className="flex items-center gap-3 rounded-2xl border border-border bg-slate-50/80 p-3.5 shadow-2xs">
+                  <MapPin className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted">Pickup Location</p>
+                    <p className="truncate text-sm font-semibold text-foreground">
+                      {selected.locationLabel}
+                    </p>
+                  </div>
                 </div>
-                <div className="rounded-[1.25rem] border border-border bg-slate-50/80 p-4 text-sm shadow-2xs hover:shadow-xs hover:border-primary/30 transition-all">
-                  <p className="mb-1.5 flex items-center gap-2 font-semibold text-foreground">
-                    <Phone className="h-4 w-4 text-primary" aria-hidden />
-                    Contact
-                  </p>
-                  <p className="text-muted">{selected.patientPhone ?? "Not provided"}</p>
-                  <p className="mt-1 text-xs capitalize text-muted">
-                    Priority: <span className="font-semibold text-foreground">{selected.priority}</span>
-                  </p>
+                <div className="flex items-center gap-3 rounded-2xl border border-border bg-slate-50/80 p-3.5 shadow-2xs">
+                  <Phone className="h-5 w-5 shrink-0 text-primary" aria-hidden />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted">Patient Phone</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {selected.patientPhone ?? "+91 98XXX XXXXX (Demo)"}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Health profile */}
+              {/* Emergency Health Profile */}
               <div className="rounded-[1.25rem] border border-border bg-white p-4.5 text-sm shadow-xs hover:shadow-sm hover:border-primary/30 transition-all">
-                <p className="mb-3 font-semibold text-foreground">Emergency Health Profile</p>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="font-semibold text-foreground">Emergency Health Profile</p>
+                  {selected.allocatedBed && (
+                    <span className="rounded-full bg-primary-soft px-3 py-0.5 text-xs font-semibold text-primary">
+                      Bed: {selected.allocatedBed}
+                    </span>
+                  )}
+                </div>
                 <dl className="grid gap-2.5 sm:grid-cols-2">
                   {[
                     ["Blood group", selected.bloodGroup ?? "—"],
                     ["Allergies", selected.allergies?.join(", ") || "—"],
                     ["Medications", selected.medications?.join(", ") || "—"],
-                    ["Notes", selected.notes],
+                    ["Notes", selected.notes || "—"],
                   ].map(([dt, dd]) => (
                     <div key={dt}>
                       <dt className="text-xs text-muted">{dt}</dt>
@@ -354,16 +407,71 @@ export default function HospitalDashboardPage() {
                 </dl>
               </div>
 
-              {/* ETA */}
+              {/* ETA & Assigned Bed info */}
               {selected.etaMinutes != null && (
-                <div className="flex items-center gap-2 rounded-2xl border border-accent/25 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent shadow-xs">
-                  <Clock3 className="h-4 w-4 shrink-0" aria-hidden />
-                  ETA {selected.etaMinutes} minutes
-                  {selected.acceptedBy && (
-                    <span className="font-normal text-muted">· {selected.acceptedBy}</span>
+                <div className="flex items-center justify-between rounded-2xl border border-accent/25 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent shadow-xs">
+                  <div className="flex items-center gap-2">
+                    <Clock3 className="h-4 w-4 shrink-0" aria-hidden />
+                    ETA {selected.etaMinutes} minutes
+                    {selected.acceptedBy && (
+                      <span className="font-normal text-muted">· Dispatched by {selected.acceptedBy}</span>
+                    )}
+                  </div>
+                  {selected.allocatedBed && (
+                    <span className="text-xs text-foreground bg-white/70 px-2.5 py-1 rounded-xl border border-accent/20">
+                      📍 {selected.allocatedBed}
+                    </span>
                   )}
                 </div>
               )}
+
+              {/* Clinical Tools & Modals Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setTelemetryModalOpen(true)}
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-rose-200 bg-rose-50/60 p-2.5 text-xs font-semibold text-rose-800 hover:bg-rose-100/80 transition shadow-2xs"
+                >
+                  <Activity className="h-4 w-4 text-rose-600 animate-pulse" />
+                  <span>Live Telemetry</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBedModalOpen(true)}
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-border bg-slate-50 p-2.5 text-xs font-semibold text-foreground hover:bg-primary-soft hover:text-primary transition shadow-2xs"
+                >
+                  <Bed className="h-4 w-4 text-primary" />
+                  <span>Allocate Bay</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setCommsDrawerOpen(true)}
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-border bg-slate-50 p-2.5 text-xs font-semibold text-foreground hover:bg-primary-soft hover:text-primary transition shadow-2xs"
+                >
+                  <Radio className="h-4 w-4 text-primary" />
+                  <span>Radio Comms</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setBloodModalOpen(true)}
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-rose-200 bg-rose-50/40 p-2.5 text-xs font-semibold text-rose-900 hover:bg-rose-100 transition shadow-2xs"
+                >
+                  <Droplet className="h-4 w-4 text-rose-600" />
+                  <span>Blood Bank</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setReportModalOpen(true)}
+                  className="flex flex-col items-center justify-center gap-1.5 rounded-2xl border border-border bg-slate-50 p-2.5 text-xs font-semibold text-foreground hover:bg-slate-100 transition shadow-2xs col-span-2 sm:col-span-1"
+                >
+                  <FileText className="h-4 w-4 text-slate-600" />
+                  <span>Incident Report</span>
+                </button>
+              </div>
 
               {/* Action buttons */}
               <div className="flex flex-wrap gap-3 border-t border-border pt-5">
@@ -374,6 +482,7 @@ export default function HospitalDashboardPage() {
                       size="md"
                       onClick={() => {
                         acceptAmbulanceRequest(selected.id, account.contactName, 12);
+                        hospitalAudio.playDispatchChime();
                         flash("Request accepted. Ambulance dispatched. Member SOS view will update.");
                       }}
                     >
@@ -399,6 +508,7 @@ export default function HospitalDashboardPage() {
                     size="md"
                     onClick={() => {
                       markAmbulanceEnRoute(selected.id);
+                      hospitalAudio.playDispatchChime();
                       flash("Status updated — ambulance en route.");
                     }}
                   >
@@ -412,6 +522,7 @@ export default function HospitalDashboardPage() {
                     size="md"
                     onClick={() => {
                       markAmbulanceArrived(selected.id);
+                      hospitalAudio.playDispatchChime();
                       flash("Ambulance marked as arrived.");
                     }}
                   >
@@ -424,6 +535,37 @@ export default function HospitalDashboardPage() {
           )}
         </section>
       </div>
+
+      {/* Modals & Drawers */}
+      <LiveTelemetryModal
+        request={selected}
+        isOpen={telemetryModalOpen}
+        onClose={() => setTelemetryModalOpen(false)}
+      />
+
+      <BedAllocationModal
+        request={selected}
+        isOpen={bedModalOpen}
+        onClose={() => setBedModalOpen(false)}
+      />
+
+      <AmbulanceCommsDrawer
+        request={selected}
+        isOpen={commsDrawerOpen}
+        onClose={() => setCommsDrawerOpen(false)}
+      />
+
+      <BloodBankMatcher
+        request={selected}
+        isOpen={bloodModalOpen}
+        onClose={() => setBloodModalOpen(false)}
+      />
+
+      <IncidentReportModal
+        request={selected}
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+      />
     </div>
   );
 }

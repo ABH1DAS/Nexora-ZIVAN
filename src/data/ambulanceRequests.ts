@@ -24,6 +24,16 @@ export interface AmbulanceRequest {
   medications?: string[];
   etaMinutes?: number;
   acceptedBy?: string;
+  allocatedBed?: string;
+  vitals?: {
+    hr: number;
+    bp: string;
+    spo2: number;
+    rr: number;
+    temp: number;
+  };
+  handoverNotes?: string;
+  bloodCrossMatched?: boolean;
   demo: true;
 }
 

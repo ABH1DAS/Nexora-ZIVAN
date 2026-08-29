@@ -2,13 +2,17 @@
 
 import { useHospitalAuth } from "@/lib/hospitalAuth";
 import { subscribeAmbulanceRequests, statusLabel } from "@/lib/ambulanceStore";
+import { LiveTelemetryModal } from "@/components/hospital/LiveTelemetryModal";
+import { BloodBankMatcher } from "@/components/hospital/BloodBankMatcher";
 import { cn } from "@/lib/utils";
 import type { AmbulanceRequest } from "@/data/ambulanceRequests";
 import { useEffect, useState } from "react";
 import {
+  Activity,
   AlertTriangle,
   Ambulance,
   Clock3,
+  Droplet,
   MapPin,
   ShieldAlert,
 } from "lucide-react";
@@ -41,6 +45,9 @@ function StatusDot({ status }: { status: AmbulanceRequest["status"] }) {
 export default function EmergenciesPage() {
   const { account } = useHospitalAuth();
   const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
+  const [selectedReq, setSelectedReq] = useState<AmbulanceRequest | null>(null);
+  const [telemetryOpen, setTelemetryOpen] = useState(false);
+  const [bloodOpen, setBloodOpen] = useState(false);
 
   useEffect(() => {
     if (!account) return;
@@ -112,16 +119,49 @@ export default function EmergenciesPage() {
                         </div>
                       )}
                     </div>
-                    <div className="mt-3.5 flex flex-wrap gap-4 border-t border-border pt-3.5 text-xs text-muted">
-                      <span>
-                        Blood group: <strong className="text-foreground">{req.bloodGroup ?? "—"}</strong>
-                      </span>
-                      <span>
-                        Allergies:{" "}
-                        <strong className="text-foreground">
-                          {req.allergies?.join(", ") || "None"}
-                        </strong>
-                      </span>
+                    <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-3.5 text-xs text-muted">
+                      <div className="flex flex-wrap gap-4">
+                        <span>
+                          Blood group: <strong className="text-foreground">{req.bloodGroup ?? "—"}</strong>
+                        </span>
+                        <span>
+                          Allergies:{" "}
+                          <strong className="text-foreground">
+                            {req.allergies?.join(", ") || "None"}
+                          </strong>
+                        </span>
+                        {req.allocatedBed && (
+                          <span>
+                            Allocated Bay: <strong className="text-primary">{req.allocatedBed}</strong>
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedReq(req);
+                            setTelemetryOpen(true);
+                          }}
+                          className="flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50/70 px-2.5 py-1 text-[11px] font-bold text-rose-800 hover:bg-rose-100 transition shadow-2xs"
+                        >
+                          <Activity className="h-3.5 w-3.5 text-rose-600 animate-pulse" />
+                          <span>Telemetry</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedReq(req);
+                            setBloodOpen(true);
+                          }}
+                          className="flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50/40 px-2.5 py-1 text-[11px] font-bold text-rose-900 hover:bg-rose-100 transition shadow-2xs"
+                        >
+                          <Droplet className="h-3.5 w-3.5 text-rose-600" />
+                          <span>Blood Match</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -155,6 +195,19 @@ export default function EmergenciesPage() {
           )}
         </>
       )}
+
+      {/* Modals */}
+      <LiveTelemetryModal
+        request={selectedReq}
+        isOpen={telemetryOpen}
+        onClose={() => setTelemetryOpen(false)}
+      />
+
+      <BloodBankMatcher
+        request={selectedReq}
+        isOpen={bloodOpen}
+        onClose={() => setBloodOpen(false)}
+      />
     </div>
   );
 }

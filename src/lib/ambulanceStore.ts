@@ -13,11 +13,101 @@ function canUseStorage() {
   return typeof window !== "undefined";
 }
 
+const INITIAL_DEMO_REQUESTS: AmbulanceRequest[] = [
+  {
+    id: "amb_sample_01",
+    createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+    updatedAt: new Date().toISOString(),
+    patientName: "Rahul Sharma",
+    patientPhone: "+91 98111 22334",
+    locationLabel: "Near Lake Avenue, Block C · Demo pin",
+    coordinates: { lat: 28.6139, lng: 77.209 },
+    hospitalId: "city-hospital",
+    hospitalName: "City Hospital",
+    status: "en_route",
+    priority: "critical",
+    notes: "Severe shortness of breath, acute chest pain radiating to left arm.",
+    bloodGroup: "O+",
+    allergies: ["Penicillin", "Peanuts"],
+    medications: ["Amlodipine 5mg"],
+    etaMinutes: 7,
+    acceptedBy: "City Dispatch Desk",
+    allocatedBed: "Trauma Bay 01 (Resus)",
+    vitals: {
+      hr: 114,
+      bp: "142/92",
+      spo2: 93,
+      rr: 24,
+      temp: 37.8,
+    },
+    handoverNotes: "ECG shows ST-segment elevation. 300mg Aspirin administered en-route. High-flow O2 started at 4L/min.",
+    bloodCrossMatched: true,
+    demo: true,
+  },
+  {
+    id: "amb_sample_02",
+    createdAt: new Date(Date.now() - 1000 * 60 * 4).toISOString(),
+    updatedAt: new Date().toISOString(),
+    patientName: "Ananya Deshmukh",
+    patientPhone: "+91 98222 44556",
+    locationLabel: "Riverfront Park, Gate 2 · Demo pin",
+    coordinates: { lat: 28.6185, lng: 77.215 },
+    hospitalId: "city-hospital",
+    hospitalName: "City Hospital",
+    status: "searching",
+    priority: "urgent",
+    notes: "Fall injury with severe swelling and deformity in right ankle.",
+    bloodGroup: "B+",
+    allergies: ["Sulfa drugs"],
+    medications: ["Thyroxine 50mcg"],
+    vitals: {
+      hr: 88,
+      bp: "128/82",
+      spo2: 98,
+      rr: 18,
+      temp: 36.9,
+    },
+    demo: true,
+  },
+  {
+    id: "amb_sample_03",
+    createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
+    updatedAt: new Date().toISOString(),
+    patientName: "Kunal Verma",
+    patientPhone: "+91 98333 66778",
+    locationLabel: "Market Complex, Sector 4 · Demo pin",
+    coordinates: { lat: 28.6092, lng: 77.201 },
+    hospitalId: "city-hospital",
+    hospitalName: "City Hospital",
+    status: "arrived",
+    priority: "standard",
+    notes: "Acute abdominal pain, stabilized on arrival.",
+    bloodGroup: "A+",
+    allergies: ["None"],
+    medications: ["None"],
+    etaMinutes: 0,
+    acceptedBy: "City Dispatch Desk",
+    allocatedBed: "General Bed 12",
+    vitals: {
+      hr: 76,
+      bp: "118/76",
+      spo2: 99,
+      rr: 16,
+      temp: 36.7,
+    },
+    handoverNotes: "Ultrasound completed in ER triage. Handed over to Dr. Sonal Patel.",
+    demo: true,
+  },
+];
+
 function readRequests(): AmbulanceRequest[] {
   if (!canUseStorage()) return [];
   try {
     const raw = localStorage.getItem(AMBULANCE_REQUESTS_KEY);
-    if (!raw) return [];
+    if (!raw) {
+      localStorage.setItem(AMBULANCE_REQUESTS_KEY, JSON.stringify(INITIAL_DEMO_REQUESTS));
+      return INITIAL_DEMO_REQUESTS;
+    }
     return JSON.parse(raw) as AmbulanceRequest[];
   } catch {
     return [];
@@ -72,6 +162,13 @@ export function createAmbulanceRequest(input?: {
     bloodGroup: emergencyProfile.bloodGroup,
     allergies: emergencyProfile.allergies,
     medications: emergencyProfile.medications,
+    vitals: {
+      hr: 92,
+      bp: "125/80",
+      spo2: 97,
+      rr: 19,
+      temp: 37.1,
+    },
     demo: true,
   };
 
@@ -82,12 +179,7 @@ export function createAmbulanceRequest(input?: {
 
 export function updateAmbulanceRequest(
   id: string,
-  patch: Partial<
-    Pick<
-      AmbulanceRequest,
-      "status" | "etaMinutes" | "acceptedBy" | "notes" | "hospitalId" | "hospitalName"
-    >
-  >,
+  patch: Partial<AmbulanceRequest>,
 ): AmbulanceRequest | null {
   const requests = readRequests();
   const index = requests.findIndex((r) => r.id === id);
@@ -101,6 +193,18 @@ export function updateAmbulanceRequest(
   requests[index] = updated;
   writeRequests(requests);
   return updated;
+}
+
+export function assignBedToRequest(id: string, allocatedBed: string) {
+  return updateAmbulanceRequest(id, { allocatedBed });
+}
+
+export function setBloodCrossMatch(id: string, bloodCrossMatched: boolean) {
+  return updateAmbulanceRequest(id, { bloodCrossMatched });
+}
+
+export function updateHandoverNotes(id: string, handoverNotes: string) {
+  return updateAmbulanceRequest(id, { handoverNotes });
 }
 
 export function acceptAmbulanceRequest(

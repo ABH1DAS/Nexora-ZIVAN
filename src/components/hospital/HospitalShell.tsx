@@ -18,17 +18,34 @@ import {
   LogOut,
   MapPin,
   Menu,
+  Monitor,
+  Radio,
   Settings,
   ShieldAlert,
   Users,
+  Volume2,
+  VolumeX,
   X,
 } from "lucide-react";
+import { hospitalAudio } from "@/lib/hospitalAudio";
 
-const navSections = [
+interface NavSection {
+  label: string;
+  items: {
+    href: string;
+    label: string;
+    icon: React.ElementType;
+    badge?: string | number;
+    exact?: boolean;
+  }[];
+}
+
+const navSections: NavSection[] = [
   {
     label: "Operations",
     items: [
       { href: "/hospital", label: "Dashboard", icon: LayoutDashboard, exact: true },
+      { href: "/hospital/command-center", label: "Command Center", icon: Monitor },
       { href: "/hospital/emergencies", label: "Emergencies", icon: ShieldAlert },
       { href: "/hospital/ambulances", label: "Ambulances", icon: Ambulance },
       { href: "/hospital/live-tracking", label: "Live Tracking", icon: MapPin },
@@ -305,7 +322,36 @@ export function HospitalShell({
             </div>
 
             {/* Header right */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 sm:gap-2.5">
+              {/* Sound alert toggle */}
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !hospitalAudio.isEnabled();
+                  hospitalAudio.setEnabled(next);
+                  if (next) hospitalAudio.playRadioBeep();
+                  setMobileOpen((v) => v); // trigger re-render
+                }}
+                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-border bg-white text-muted shadow-2xs transition hover:bg-primary-soft hover:text-primary"
+                title={hospitalAudio.isEnabled() ? "Sound alerts enabled" : "Sound alerts muted"}
+              >
+                {hospitalAudio.isEnabled() ? (
+                  <Volume2 className="h-4 w-4 text-primary" />
+                ) : (
+                  <VolumeX className="h-4 w-4 text-muted" />
+                )}
+              </button>
+
+              {/* Quick Command Center Link */}
+              <Link
+                href="/hospital/command-center"
+                className="hidden md:flex items-center gap-1.5 rounded-2xl border border-border bg-white/90 px-3 py-2 text-xs font-semibold text-foreground shadow-2xs hover:bg-slate-900 hover:text-white transition"
+                title="Open ER Command Big Board"
+              >
+                <Monitor className="h-3.5 w-3.5 text-primary" />
+                <span>Big Board</span>
+              </Link>
+
               <NotificationBell count={notificationCount} />
 
               {/* Profile chip */}
@@ -326,10 +372,10 @@ export function HospitalShell({
               {/* Quick patient portal link */}
               <Link
                 href="/dashboard"
-                className="hidden items-center gap-1.5 rounded-2xl border border-border bg-white/90 px-3.5 py-2 text-xs font-semibold text-muted shadow-2xs transition-all duration-200 hover:border-primary/30 hover:bg-primary-soft hover:text-primary hover:shadow-xs hover:-translate-y-0.5 active:scale-95 sm:flex"
+                className="flex items-center gap-2 rounded-2xl border border-border bg-white/90 px-3.5 py-2 text-xs font-semibold text-foreground shadow-2xs transition-all duration-200 hover:bg-primary-soft hover:text-primary hover:shadow-xs hover:-translate-y-0.5"
               >
-                <ClipboardList className="h-3.5 w-3.5" aria-hidden />
-                Patient Portal
+                <span>Patient Portal</span>
+                <ChevronRight className="h-3.5 w-3.5" aria-hidden />
               </Link>
             </div>
           </header>

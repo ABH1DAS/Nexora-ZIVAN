@@ -1,12 +1,21 @@
 "use client";
 
 import { useHospitalAuth } from "@/lib/hospitalAuth";
-import { subscribeAmbulanceRequests } from "@/lib/ambulanceStore";
-import { statusLabel } from "@/lib/ambulanceStore";
+import { subscribeAmbulanceRequests, statusLabel } from "@/lib/ambulanceStore";
+import { exportRequestsToCSV } from "@/lib/exportUtils";
+import { IncidentReportModal } from "@/components/hospital/IncidentReportModal";
 import type { AmbulanceRequest } from "@/data/ambulanceRequests";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { Clock, History, MapPin, Search, SlidersHorizontal } from "lucide-react";
+import {
+  Clock,
+  Download,
+  FileText,
+  History,
+  MapPin,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 
 function toneForStatus(status: AmbulanceRequest["status"]) {
   if (status === "searching") return "bg-amber-100 text-amber-800 border-amber-200";
@@ -20,6 +29,7 @@ export default function HistoryPage() {
   const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | AmbulanceRequest["status"]>("all");
+  const [selectedReportReq, setSelectedReportReq] = useState<AmbulanceRequest | null>(null);
 
   useEffect(() => {
     if (!account) return;
@@ -52,7 +62,7 @@ export default function HistoryPage() {
 
   return (
     <div className="space-y-5">
-      {/* Search + filter bar */}
+      {/* Search + filter bar + CSV Export */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden />
@@ -64,24 +74,35 @@ export default function HistoryPage() {
             className="h-11 w-full rounded-2xl border border-border bg-white pl-10 pr-4 text-sm text-foreground shadow-xs outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/10 hover:border-primary/30 transition-all"
           />
         </div>
-        <div className="flex items-center gap-1.5">
-          <SlidersHorizontal className="h-4 w-4 shrink-0 text-muted" aria-hidden />
-          <div className="flex flex-wrap gap-1.5">
-            {statuses.map(({ value, label }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setFilterStatus(value)}
-                className={cn(
-                  "rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
-                  filterStatus === value
-                    ? "bg-primary text-white shadow-sm"
-                    : "bg-slate-100 text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
-                )}
-              >
-                {label}
-              </button>
-            ))}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => exportRequestsToCSV(filtered, `hospital-history-${filterStatus}.csv`)}
+            className="flex h-11 items-center gap-1.5 rounded-2xl border border-border bg-white px-4 text-xs font-semibold text-foreground shadow-2xs hover:bg-primary-soft hover:text-primary transition"
+          >
+            <Download className="h-4 w-4 text-primary" />
+            <span>Export CSV</span>
+          </button>
+
+          <div className="flex items-center gap-1.5">
+            <SlidersHorizontal className="h-4 w-4 shrink-0 text-muted" aria-hidden />
+            <div className="flex flex-wrap gap-1.5">
+              {statuses.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setFilterStatus(value)}
+                  className={cn(
+                    "rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
+                    filterStatus === value
+                      ? "bg-primary text-white shadow-sm"
+                      : "bg-slate-100 text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -99,10 +120,11 @@ export default function HistoryPage() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-[2rem] border border-border bg-white shadow-[0_16px_45px_rgba(15,61,53,0.08)] hover:shadow-[0_22px_55px_rgba(13,143,122,0.14)] transition-all duration-300">
-          <div className="border-b border-border bg-slate-50/50 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-border bg-slate-50/50 px-6 py-4">
             <p className="text-xs text-muted">
               Showing <span className="font-semibold text-foreground">{filtered.length}</span> record{filtered.length !== 1 ? "s" : ""}
             </p>
+            <span className="text-xs text-muted">Click report icon for printable summary</span>
           </div>
           <ul className="divide-y divide-border">
             {filtered.map((req) => (
@@ -116,13 +138,18 @@ export default function HistoryPage() {
                     <span className={cn("rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide shadow-2xs", toneForStatus(req.status))}>
                       {statusLabel(req.status)}
                     </span>
+                    {req.allocatedBed && (
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+                        {req.allocatedBed}
+                      </span>
+                    )}
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
                     <span className="font-mono">{req.id}</span>
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3 w-3 text-primary" aria-hidden /> {req.locationLabel}
                     </span>
-                    <span className="capitalize">{req.priority}</span>
+                    <span className="capitalize font-semibold text-foreground">{req.priority}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-muted">
@@ -132,12 +159,29 @@ export default function HistoryPage() {
                     </span>
                   )}
                   <span>{new Date(req.createdAt).toLocaleString()}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedReportReq(req)}
+                    className="flex items-center gap-1 rounded-xl border border-border bg-white px-2.5 py-1.5 text-xs font-semibold text-foreground hover:bg-primary-soft hover:text-primary transition shadow-2xs"
+                    title="View printable clinical incident report"
+                  >
+                    <FileText className="h-3.5 w-3.5 text-primary" />
+                    <span>Report</span>
+                  </button>
                 </div>
               </li>
             ))}
           </ul>
         </div>
       )}
+
+      {/* Incident Report Modal */}
+      <IncidentReportModal
+        request={selectedReportReq}
+        isOpen={Boolean(selectedReportReq)}
+        onClose={() => setSelectedReportReq(null)}
+      />
     </div>
   );
 }
+
