@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f8f7;
+  --background: #eaf2ef;
   --foreground: #0f1f1c;
-  --muted: #5b6f6a;
-  --card: rgba(255, 255, 255, 0.72);
-  --card-solid: #ffffff;
-  --border: rgba(15, 61, 53, 0.08);
+  --muted: #4e6660;
+  --card: rgba(228, 239, 235, 0.95);
+  --card-solid: #e2ece8;
+  --border: transparent;
   --primary: #0d8f7a;
   --primary-dark: #0a6b5c;
-  --primary-soft: #d8f3ee;
+  --primary-soft: #c8ece4;
   --accent: #1a9bb5;
-  --accent-soft: #e0f4f8;
+  --accent-soft: #d3eff5;
   --emergency: #d9354a;
   --emergency-dark: #b01f32;
-  --emergency-soft: #ffe8eb;
+  --emergency-soft: #fcd5da;
   --warning: #d97706;
   --success: #059669;
   --score: #0d8f7a;
-  --glass: rgba(255, 255, 255, 0.55);
-  --shadow: 0 18px 50px rgba(15, 61, 53, 0.08);
-  --shadow-sm: 0 8px 24px rgba(15, 61, 53, 0.06);
+  --glass: rgba(230, 241, 237, 0.75);
+  --shadow: 0 20px 50px rgba(13, 143, 122, 0.16);
+  --shadow-sm: 0 12px 34px rgba(15, 61, 53, 0.12);
   --radius: 1.5rem;
   --radius-sm: 1rem;
   --radius-lg: 2rem;
@@ -135,10 +135,10 @@ h4,
 
 .bg-atmosphere {
   background:
-    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(26, 155, 181, 0.18), transparent 55%),
-    radial-gradient(ellipse 70% 45% at 95% 5%, rgba(13, 143, 122, 0.16), transparent 50%),
-    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(217, 53, 74, 0.05), transparent 55%),
-    linear-gradient(180deg, #f7fbfa 0%, #eef6f4 40%, #f4f8f7 100%);
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(26, 155, 181, 0.22), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 95% 5%, rgba(13, 143, 122, 0.2), transparent 50%),
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(217, 53, 74, 0.08), transparent 55%),
+    linear-gradient(180deg, #eaf2ef 0%, #dfeedb 40%, #e8f1ee 100%);
 }
 
 .bg-mesh {
@@ -214,4 +214,95 @@ h4,
   .animate-breathe {
     animation: none;
   }
+}
+
+/* Hospital Portal Dark Mode System */
+.hospital-dark {
+  --background: #0a1614;
+  --foreground: #f0faf7;
+  --muted: #8ba39c;
+  --card-solid: #0e201c;
+  --border: rgba(13, 143, 122, 0.22);
+  --primary-soft: rgba(13, 143, 122, 0.2);
+  --accent-soft: rgba(26, 155, 181, 0.2);
+  --emergency-soft: rgba(217, 53, 74, 0.2);
+  color-scheme: dark;
+}
+
+.hospital-dark .bg-white {
+  background-color: #0e201c !important;
+  color: #f0faf7;
+}
+
+.hospital-dark .bg-white\/90,
+.hospital-dark .bg-white\/80,
+.hospital-dark .bg-white\/70 {
+  background-color: rgba(14, 32, 28, 0.92) !important;
+  color: #f0faf7;
+}
+
+.hospital-dark .bg-slate-50,
+.hospital-dark .bg-slate-50\/80,
+.hospital-dark .bg-slate-50\/70,
+.hospital-dark .bg-slate-50\/60,
+.hospital-dark .bg-slate-50\/50,
+.hospital-dark .bg-slate-100 {
+  background-color: #132a25 !important;
+  color: #d4e8e2;
+}
+
+.hospital-dark .text-foreground {
+  color: #f0faf7 !important;
+}
+
+.hospital-dark .text-muted {
+  color: #8ba39c !important;
+}
+
+.hospital-dark .border-border,
+.hospital-dark .border-slate-200,
+.hospital-dark .border-slate-200\/80 {
+  border-color: rgba(13, 143, 122, 0.22) !important;
+}
+
+.hospital-dark input,
+.hospital-dark textarea,
+.hospital-dark select {
+  background-color: #132a25 !important;
+  color: #f0faf7 !important;
+  border-color: rgba(13, 143, 122, 0.25) !important;
+}
+
+.hospital-dark .bg-atmosphere {
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(26, 155, 181, 0.15), transparent 55%),
+    radial-gradient(ellipse 70% 45% at 95% 5%, rgba(13, 143, 122, 0.15), transparent 50%),
+    linear-gradient(180deg, #071310 0%, #0a1815 40%, #081512 100%) !important;
+}
+
+/* Hospital Portal Compact View System */
+.hospital-compact .p-6,
+.hospital-compact .sm\:p-8,
+.hospital-compact .sm\:p-7 {
+  padding: 1rem !important;
+}
+
+.hospital-compact .p-5 {
+  padding: 0.85rem !important;
+}
+
+.hospital-compact .space-y-6 > * + * {
+  margin-top: 0.75rem !important;
+}
+
+.hospital-compact .space-y-5 > * + * {
+  margin-top: 0.65rem !important;
+}
+
+.hospital-compact .gap-6 {
+  gap: 0.75rem !important;
+}
+
+.hospital-compact .gap-4 {
+  gap: 0.5rem !important;
 }
