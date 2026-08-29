@@ -78,15 +78,15 @@ export default function NotificationsPage() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const iconMap = {
-    emergency: <ShieldAlert className="h-5 w-5 text-rose-500" aria-hidden />,
-    status: <Ambulance className="h-5 w-5 text-sky-500" aria-hidden />,
-    info: <Info className="h-5 w-5 text-slate-400" aria-hidden />,
+    emergency: <ShieldAlert className="h-5 w-5 text-emergency" aria-hidden />,
+    status: <Ambulance className="h-5 w-5 text-accent" aria-hidden />,
+    info: <Info className="h-5 w-5 text-primary" aria-hidden />,
   };
 
   const bgMap = {
-    emergency: "border-rose-200 bg-rose-50",
-    status: "border-sky-200 bg-sky-50",
-    info: "border-slate-200 bg-white",
+    emergency: "border-emergency/25 bg-emergency-soft/70",
+    status: "border-accent/25 bg-accent-soft/70",
+    info: "border-border bg-white",
   };
 
   return (
@@ -94,9 +94,9 @@ export default function NotificationsPage() {
       {/* Header controls */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h1 className="font-semibold text-[#0b1f2a]">Notifications</h1>
+          <h1 className="font-semibold text-foreground text-lg">Notifications</h1>
           {unreadCount > 0 && (
-            <span className="rounded-full bg-rose-500 px-2.5 py-0.5 text-xs font-bold text-white">
+            <span className="rounded-full bg-emergency px-2.5 py-0.5 text-xs font-bold text-white shadow-xs">
               {unreadCount} new
             </span>
           )}
@@ -108,10 +108,10 @@ export default function NotificationsPage() {
               type="button"
               onClick={() => setFilter(f)}
               className={cn(
-                "rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wide transition",
+                "rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
                 filter === f
-                  ? "bg-[#0b1f2a] text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200",
+                  ? "bg-primary text-white shadow-sm"
+                  : "bg-slate-100 text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
               )}
             >
               {f === "all" ? "All" : "Unread"}
@@ -122,53 +122,53 @@ export default function NotificationsPage() {
 
       {/* List */}
       {displayed.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-200 bg-white py-20 text-center shadow-xs">
+        <div className="flex flex-col items-center gap-4 rounded-[2rem] border border-dashed border-border bg-white/70 py-20 text-center shadow-xs">
           {filter === "unread" ? (
             <>
-              <BellOff className="h-10 w-10 text-slate-300" aria-hidden />
-              <p className="font-semibold text-slate-500">All caught up!</p>
-              <p className="text-sm text-slate-400">No unread notifications.</p>
+              <BellOff className="h-10 w-10 text-muted/60" aria-hidden />
+              <p className="font-semibold text-foreground">All caught up!</p>
+              <p className="text-sm text-muted">No unread notifications.</p>
             </>
           ) : (
             <>
-              <Bell className="h-10 w-10 text-slate-300" aria-hidden />
-              <p className="font-semibold text-slate-500">No notifications yet</p>
-              <p className="text-sm text-slate-400">
+              <Bell className="h-10 w-10 text-muted/60" aria-hidden />
+              <p className="font-semibold text-foreground">No notifications yet</p>
+              <p className="text-sm text-muted">
                 Notifications are generated from ambulance request events.
               </p>
             </>
           )}
         </div>
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           {displayed.map((notif) => (
             <div
               key={notif.id}
               className={cn(
-                "flex items-start gap-4 rounded-2xl border p-4.5 shadow-[0_4px_20px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-200",
+                "flex items-start gap-4 rounded-[1.5rem] border p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200",
                 bgMap[notif.type],
                 !notif.read && "ring-2 ring-offset-1",
-                notif.type === "emergency" && !notif.read && "ring-rose-200 shadow-sm",
-                notif.type === "status" && !notif.read && "ring-sky-200 shadow-sm",
+                notif.type === "emergency" && !notif.read && "ring-emergency/30 shadow-sm",
+                notif.type === "status" && !notif.read && "ring-accent/30 shadow-sm",
               )}
             >
               <div className="mt-0.5 shrink-0">{iconMap[notif.type]}</div>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-semibold text-[#0b1f2a]">{notif.title}</p>
+                  <p className="font-semibold text-foreground">{notif.title}</p>
                   <div className="flex items-center gap-2">
                     {!notif.read && (
-                      <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+                      <span className="h-2 w-2 rounded-full bg-emergency animate-pulse" />
                     )}
                     {notif.read && (
-                      <CheckCircle2 className="h-4 w-4 text-slate-300" aria-hidden />
+                      <CheckCircle2 className="h-4 w-4 text-primary" aria-hidden />
                     )}
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-muted">
                       {notif.time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
                 </div>
-                <p className="mt-1 text-sm text-slate-600 leading-relaxed">{notif.body}</p>
+                <p className="mt-1 text-sm text-muted leading-relaxed">{notif.body}</p>
               </div>
             </div>
           ))}

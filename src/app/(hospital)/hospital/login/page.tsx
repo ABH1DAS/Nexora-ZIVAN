@@ -137,20 +137,20 @@ export default function HospitalLoginPage() {
   if (loading) return null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f3f6f8]">
+    <div className="flex min-h-screen flex-col bg-atmosphere text-foreground">
       {/* Top bar */}
       <header className="flex items-center justify-between px-6 py-4 sm:px-10">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0b1f2a]">
-            <Building2 className="h-4 w-4 text-white" aria-hidden />
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-xs shadow-primary/30">
+            <Building2 className="h-5 w-5 text-white" aria-hidden />
           </div>
-          <span className="font-display text-lg font-bold tracking-tight text-[#0b1f2a]">
+          <span className="font-display text-xl font-bold tracking-tight text-foreground">
             ZIVAN
           </span>
         </div>
         <Link
           href="/"
-          className="text-sm font-semibold text-slate-500 transition hover:text-[#0b1f2a]"
+          className="text-sm font-semibold text-muted transition hover:text-primary"
         >
           ← Patient site
         </Link>
@@ -160,20 +160,20 @@ export default function HospitalLoginPage() {
       <main className="flex flex-1 items-center justify-center px-4 pb-16 pt-6">
         <div className="w-full max-w-md">
           {/* Main Card Division */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.09)] transition-all duration-300">
+          <div className="rounded-[2rem] border border-border bg-white/90 backdrop-blur-md p-8 shadow-[0_18px_50px_rgba(15,61,53,0.08)] hover:shadow-[0_24px_60px_rgba(15,61,53,0.12)] transition-all duration-300">
             {/* Icon + heading */}
             <div className="mb-6 flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#0b1f2a] shadow-md shadow-slate-900/20">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary shadow-md shadow-primary/25">
                 <ShieldCheck className="h-6 w-6 text-white" aria-hidden />
               </div>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
                   Hospital Portal
                 </p>
-                <h1 className="mt-0.5 font-display text-2xl font-semibold tracking-tight text-[#0b1f2a]">
+                <h1 className="mt-0.5 font-display text-2xl font-semibold tracking-tight text-foreground">
                   Staff Sign In
                 </h1>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-muted">
                   Access the dispatch &amp; patient management console.
                 </p>
               </div>
@@ -181,7 +181,7 @@ export default function HospitalLoginPage() {
 
             {/* Hospital verification indicator */}
             {verified && (
-              <div className="mb-5 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm animate-in fade-in duration-200">
+              <div className="mb-5 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 shadow-sm animate-in fade-in duration-200">
                 <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden />
                 Hospital account verified
               </div>
@@ -191,7 +191,7 @@ export default function HospitalLoginPage() {
             {error && (
               <div
                 role="alert"
-                className="mb-5 flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm animate-in fade-in duration-200"
+                className="mb-5 flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm animate-in fade-in duration-200"
               >
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
                 <span>{error}</span>
@@ -230,7 +230,7 @@ export default function HospitalLoginPage() {
                     type="button"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                     onClick={() => setShowPassword((v) => !v)}
-                    className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-400 transition hover:text-slate-700"
+                    className="flex h-10 w-10 items-center justify-center rounded-lg text-muted transition hover:text-foreground"
                   >
                     {showPassword ? (
                       <EyeOff className="h-4 w-4" aria-hidden />
@@ -243,12 +243,12 @@ export default function HospitalLoginPage() {
 
               {/* Remember me + forgot password */}
               <div className="flex items-center justify-between">
-                <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-600 select-none">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-muted select-none">
                   <input
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 accent-[#0b1f2a]"
+                    className="h-4 w-4 rounded border-border accent-primary"
                   />
                   Remember me
                 </label>
@@ -259,7 +259,7 @@ export default function HospitalLoginPage() {
                       "Contact your hospital administrator to reset your password.",
                     )
                   }
-                  className="text-sm font-semibold text-[#0b1f2a] transition hover:underline"
+                  className="text-sm font-semibold text-primary transition hover:underline"
                 >
                   Forgot password?
                 </button>
@@ -268,7 +268,7 @@ export default function HospitalLoginPage() {
               {/* Submit */}
               <Button
                 type="submit"
-                variant="hospital"
+                variant="primary"
                 size="lg"
                 disabled={submitting || !email || !password}
                 className="mt-2 w-full"
@@ -286,8 +286,8 @@ export default function HospitalLoginPage() {
           </div>
 
           {/* Demo credentials panel */}
-          <div className="mt-5 rounded-2xl border border-slate-200/80 bg-white/70 backdrop-blur-sm p-5 shadow-sm hover:shadow-md transition-all duration-300">
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+          <div className="mt-5 rounded-[1.5rem] border border-border bg-white/75 backdrop-blur-sm p-6 shadow-sm hover:shadow-md transition-all duration-300">
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-muted">
               Demo Accounts
             </p>
             <div className="space-y-2.5">
@@ -296,22 +296,22 @@ export default function HospitalLoginPage() {
                   key={acc.id}
                   type="button"
                   onClick={() => fillDemo(acc)}
-                  className="group flex w-full items-center justify-between rounded-xl border border-slate-200/70 bg-white px-4 py-3 text-left shadow-xs hover:border-[#0b1f2a]/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+                  className="group flex w-full items-center justify-between rounded-2xl border border-border bg-white px-4 py-3 text-left shadow-xs hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <div>
-                    <p className="text-sm font-semibold text-[#0b1f2a] group-hover:text-[#0b1f2a]">
+                    <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
                       {acc.hospitalName}
                     </p>
-                    <p className="mt-0.5 text-xs text-slate-500">{acc.email}</p>
+                    <p className="mt-0.5 text-xs text-muted">{acc.email}</p>
                   </div>
-                  <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600 group-hover:bg-[#0b1f2a] group-hover:text-white transition-colors duration-150">
+                  <span className="rounded-xl bg-primary-soft px-3 py-1 text-xs font-semibold text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-150">
                     Use
                   </span>
                 </button>
               ))}
             </div>
-            <p className="mt-3 text-[11px] text-slate-400">
-              Password for all demo accounts: <code className="font-mono font-bold text-slate-600">hospital123</code>
+            <p className="mt-3 text-[11px] text-muted">
+              Password for all demo accounts: <code className="font-mono font-bold text-foreground">hospital123</code>
             </p>
           </div>
         </div>

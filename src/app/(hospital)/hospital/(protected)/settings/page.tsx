@@ -40,18 +40,18 @@ function Toggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-start justify-between gap-4 py-3">
+    <div className="flex items-start justify-between gap-4 py-3.5">
       <div>
-        <p className="text-sm font-semibold text-slate-700">{label}</p>
-        {description && <p className="mt-0.5 text-xs text-slate-400">{description}</p>}
+        <p className="text-sm font-semibold text-foreground">{label}</p>
+        {description && <p className="mt-0.5 text-xs text-muted">{description}</p>}
       </div>
       <button
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={cn(
-          "relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0b1f2a] focus-visible:ring-offset-2",
-          checked ? "bg-[#0b1f2a]" : "bg-slate-200",
+          "relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+          checked ? "bg-primary" : "bg-slate-200",
         )}
       >
         <span
@@ -74,16 +74,16 @@ function InputRow({ label, value, type = "text", onChange, icon: Icon }: {
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-semibold text-slate-700">{label}</label>
+      <label className="mb-1.5 block text-sm font-semibold text-foreground">{label}</label>
       <div className="relative">
-        {Icon && <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />}
+        {Icon && <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-primary" aria-hidden />}
         <input
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            "h-11 w-full rounded-xl border border-slate-200/80 bg-slate-50/80 pr-4 text-sm text-[#0b1f2a] shadow-xs outline-none placeholder:text-slate-400",
-            "focus:border-[#0b1f2a] focus:bg-white focus:ring-2 focus:ring-[#0b1f2a]/10 hover:border-slate-300 transition-all",
+            "h-11 w-full rounded-2xl border border-border bg-slate-50/80 pr-4 text-sm text-foreground shadow-xs outline-none placeholder:text-muted",
+            "focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/10 hover:border-primary/30 transition-all",
             Icon ? "pl-10" : "pl-4",
           )}
         />
@@ -131,36 +131,36 @@ export default function SettingsPage() {
             type="button"
             onClick={() => setTab(value)}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
+              "flex items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all duration-200",
               tab === value
-                ? "bg-[#0b1f2a] text-white shadow-sm"
-                : "text-slate-600 hover:bg-slate-100/90 hover:text-[#0b1f2a] hover:shadow-2xs",
+                ? "bg-primary text-white shadow-sm"
+                : "text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
             )}
           >
             <Icon className="h-4 w-4 shrink-0" aria-hidden />
             <span className="hidden sm:block">{label}</span>
             {tab !== value && (
-              <ChevronRight className="ml-auto hidden h-3.5 w-3.5 text-slate-300 lg:block" aria-hidden />
+              <ChevronRight className="ml-auto hidden h-3.5 w-3.5 text-muted/60 lg:block" aria-hidden />
             )}
           </button>
         ))}
       </nav>
 
       {/* Panel */}
-      <div className="min-w-0 flex-1 rounded-2xl border border-slate-200/80 bg-white p-6 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.07)] transition-all duration-300">
+      <div className="min-w-0 flex-1 rounded-[2rem] border border-border bg-white p-6 sm:p-8 shadow-sm hover:shadow-md transition-all duration-300">
         {tab === "profile" && (
           <div className="space-y-5">
             <div>
-              <h2 className="font-display text-lg font-semibold text-[#0b1f2a]">
+              <h2 className="font-display text-lg font-semibold text-foreground">
                 Hospital Profile
               </h2>
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="mt-1 text-sm text-muted">
                 Manage your facility and contact information.
               </p>
             </div>
-            <div className="rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-sm text-slate-600 shadow-2xs">
-              <strong className="text-[#0b1f2a]">Facility:</strong> {account?.hospitalName}
-              <span className="ml-2 text-xs text-slate-400">(ID: {account?.hospitalId})</span>
+            <div className="rounded-[1.25rem] border border-border bg-slate-50/80 px-4 py-3 text-sm text-muted shadow-2xs">
+              <strong className="text-foreground">Facility:</strong> {account?.hospitalName}
+              <span className="ml-2 text-xs text-muted/70">(ID: {account?.hospitalId})</span>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <InputRow label="Contact Name" value={contactName} onChange={setContactName} icon={Building2} />
@@ -174,14 +174,14 @@ export default function SettingsPage() {
         {tab === "notifications" && (
           <div className="space-y-5">
             <div>
-              <h2 className="font-display text-lg font-semibold text-[#0b1f2a]">
+              <h2 className="font-display text-lg font-semibold text-foreground">
                 Notification Preferences
               </h2>
-              <p className="mt-1 text-sm text-slate-400">
+              <p className="mt-1 text-sm text-muted">
                 Choose what events trigger alerts.
               </p>
             </div>
-            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 shadow-2xs">
+            <div className="divide-y divide-border rounded-[1.25rem] border border-border bg-slate-50/80 px-4 shadow-2xs">
               <Toggle label="SOS / Emergency Requests" description="New ambulance requests from patients" checked={notifSOS} onChange={setNotifSOS} />
               <Toggle label="Status Updates" description="Accepted, en route, arrived events" checked={notifStatus} onChange={setNotifStatus} />
               <Toggle label="Email Notifications" description="Send summaries to work email" checked={notifEmail} onChange={setNotifEmail} />
@@ -192,8 +192,8 @@ export default function SettingsPage() {
                 onChange={setNotifSound}
               />
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white px-4 py-3 text-sm text-slate-500 shadow-2xs">
-              <Volume2 className="h-4 w-4 text-slate-400" aria-hidden />
+            <div className="flex items-center gap-2 rounded-[1.25rem] border border-border bg-white px-4 py-3 text-sm text-muted shadow-2xs">
+              <Volume2 className="h-4 w-4 text-primary" aria-hidden />
               Push notification support requires backend integration.
             </div>
           </div>
@@ -202,17 +202,17 @@ export default function SettingsPage() {
         {tab === "security" && (
           <div className="space-y-5">
             <div>
-              <h2 className="font-display text-lg font-semibold text-[#0b1f2a]">Security</h2>
-              <p className="mt-1 text-sm text-slate-400">
+              <h2 className="font-display text-lg font-semibold text-foreground">Security</h2>
+              <p className="mt-1 text-sm text-muted">
                 Account security and access controls.
               </p>
             </div>
-            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 shadow-2xs">
+            <div className="divide-y divide-border rounded-[1.25rem] border border-border bg-slate-50/80 px-4 shadow-2xs">
               <Toggle label="Two-Factor Authentication" description="Require OTP on every sign-in" checked={twoFactor} onChange={setTwoFactor} />
               <Toggle label="Session Activity Alerts" description="Alert when a new login occurs" checked={sessionAlert} onChange={setSessionAlert} />
             </div>
             <div>
-              <p className="mb-3 text-sm font-semibold text-slate-700">Change Password</p>
+              <p className="mb-3 text-sm font-semibold text-foreground">Change Password</p>
               <div className="space-y-3">
                 <InputRow label="Current Password" value="" type="password" onChange={() => {}} icon={Lock} />
                 <InputRow label="New Password" value="" type="password" onChange={() => {}} icon={Lock} />
@@ -225,12 +225,12 @@ export default function SettingsPage() {
         {tab === "display" && (
           <div className="space-y-5">
             <div>
-              <h2 className="font-display text-lg font-semibold text-[#0b1f2a]">Display</h2>
-              <p className="mt-1 text-sm text-slate-400">
+              <h2 className="font-display text-lg font-semibold text-foreground">Display</h2>
+              <p className="mt-1 text-sm text-muted">
                 Appearance and layout preferences.
               </p>
             </div>
-            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200/80 bg-slate-50/80 px-4 shadow-2xs">
+            <div className="divide-y divide-border rounded-[1.25rem] border border-border bg-slate-50/80 px-4 shadow-2xs">
               <Toggle
                 label="Dark Mode"
                 description="Use dark theme for the portal"
@@ -244,7 +244,7 @@ export default function SettingsPage() {
                 onChange={setCompactView}
               />
             </div>
-            <div className="flex items-center gap-2 rounded-xl border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-800 shadow-2xs">
+            <div className="flex items-center gap-2 rounded-[1.25rem] border border-amber-200/80 bg-amber-50/80 px-4 py-3 text-sm text-amber-800 shadow-2xs">
               <Sun className="h-4 w-4 shrink-0" aria-hidden />
               Dark mode and compact view are UI preference placeholders. Full theming is a Phase 2 feature.
             </div>
@@ -252,10 +252,10 @@ export default function SettingsPage() {
         )}
 
         {/* Save button */}
-        <div className="mt-6 flex items-center gap-3 border-t border-slate-100 pt-5">
+        <div className="mt-6 flex items-center gap-3 border-t border-border pt-5">
           <Button
             type="button"
-            variant="hospital"
+            variant="primary"
             size="md"
             onClick={handleSave}
           >

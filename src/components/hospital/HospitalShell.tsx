@@ -73,22 +73,22 @@ function NavLink({
       href={href}
       onClick={onClick}
       className={cn(
-        "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+        "group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200",
         active
-          ? "bg-white text-[#0b1f2a] shadow-md shadow-black/10 translate-x-0.5"
-          : "text-white/65 hover:bg-white/10 hover:text-white hover:translate-x-0.5",
+          ? "bg-primary text-white shadow-[0_4px_16px_rgba(13,143,122,0.35)] translate-x-0.5"
+          : "text-white/70 hover:bg-white/10 hover:text-white hover:translate-x-0.5",
       )}
     >
       <Icon
         className={cn(
           "h-4 w-4 shrink-0 transition-colors",
-          active ? "text-[#0b1f2a]" : "text-white/50 group-hover:text-white",
+          active ? "text-white" : "text-white/60 group-hover:text-white",
         )}
         aria-hidden
       />
       {label}
       {active && (
-        <ChevronRight className="ml-auto h-3.5 w-3.5 text-[#0b1f2a]/40" aria-hidden />
+        <ChevronRight className="ml-auto h-3.5 w-3.5 text-white/70" aria-hidden />
       )}
     </Link>
   );
@@ -243,7 +243,7 @@ export function HospitalShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#f3f6f8]">
+    <div className="min-h-screen bg-atmosphere text-foreground">
       <div className="flex min-h-screen">
         {/* Desktop sidebar */}
         <aside className="sticky top-0 hidden h-screen w-60 shrink-0 lg:block xl:w-64">
@@ -276,12 +276,12 @@ export function HospitalShell({
         {/* Main content area */}
         <div className="flex min-w-0 flex-1 flex-col">
           {/* Header */}
-          <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur-md sm:px-6">
+          <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-white/80 px-4 py-3.5 backdrop-blur-md sm:px-6">
             <div className="flex items-center gap-3">
               {/* Mobile hamburger */}
               <button
                 type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 lg:hidden"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-white text-muted transition hover:bg-primary-soft hover:text-primary lg:hidden"
                 aria-label={mobileOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileOpen}
                 onClick={() => setMobileOpen((v) => !v)}
@@ -295,10 +295,10 @@ export function HospitalShell({
 
               {/* Page title area */}
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                <p className="text-xs font-bold uppercase tracking-widest text-muted">
                   {account?.hospitalName ?? "Hospital Portal"}
                 </p>
-                <p className="font-display text-lg font-semibold leading-tight text-[#0b1f2a] sm:text-xl">
+                <p className="font-display text-lg font-semibold leading-tight text-foreground sm:text-xl">
                   {getPageTitle()}
                 </p>
               </div>
@@ -310,15 +310,15 @@ export function HospitalShell({
 
               {/* Profile chip */}
               {account && (
-                <div className="hidden items-center gap-2.5 rounded-xl border border-transparent px-2.5 py-1.5 transition-all duration-200 hover:border-slate-200/80 hover:bg-slate-50/80 sm:flex">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#0b1f2a] text-sm font-bold text-white shadow-xs">
+                <div className="hidden items-center gap-2.5 rounded-2xl border border-transparent px-3 py-1.5 transition-all duration-200 hover:border-border hover:bg-white/70 sm:flex">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white shadow-xs">
                     {account.contactName.charAt(0).toUpperCase()}
                   </div>
                   <div className="hidden xl:block">
-                    <p className="text-sm font-semibold text-[#0b1f2a] leading-tight">
+                    <p className="text-sm font-semibold text-foreground leading-tight">
                       {account.contactName}
                     </p>
-                    <p className="text-xs text-slate-500">{account.hospitalName}</p>
+                    <p className="text-xs text-muted">{account.hospitalName}</p>
                   </div>
                 </div>
               )}
@@ -326,7 +326,7 @@ export function HospitalShell({
               {/* Quick patient portal link */}
               <Link
                 href="/dashboard"
-                className="hidden items-center gap-1.5 rounded-xl border border-slate-200/80 bg-white px-3 py-2 text-xs font-semibold text-slate-600 shadow-2xs transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-xs hover:-translate-y-0.5 active:scale-95 sm:flex"
+                className="hidden items-center gap-1.5 rounded-2xl border border-border bg-white/90 px-3.5 py-2 text-xs font-semibold text-muted shadow-2xs transition-all duration-200 hover:border-primary/30 hover:bg-primary-soft hover:text-primary hover:shadow-xs hover:-translate-y-0.5 active:scale-95 sm:flex"
               >
                 <ClipboardList className="h-3.5 w-3.5" aria-hidden />
                 Patient Portal

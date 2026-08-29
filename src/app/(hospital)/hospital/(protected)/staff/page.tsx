@@ -64,18 +64,18 @@ export default function StaffPage() {
   return (
     <div className="space-y-5">
       {/* Summary division */}
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0b1f2a] shadow-xs shadow-slate-900/15">
-            <Users className="h-5 w-5 text-white" aria-hidden />
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-[2rem] border border-border bg-white/90 backdrop-blur p-6 shadow-sm hover:shadow-md transition-all duration-300">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-white shadow-xs shadow-primary/25">
+            <Users className="h-6 w-6" aria-hidden />
           </div>
           <div>
-            <p className="font-semibold text-[#0b1f2a]">{MOCK_STAFF.length} Staff Members</p>
-            <p className="text-xs text-slate-400">{activeCount} currently active</p>
+            <p className="font-semibold text-foreground text-lg">{MOCK_STAFF.length} Staff Members</p>
+            <p className="text-xs text-muted">{activeCount} currently on duty</p>
           </div>
         </div>
         <Button
-          variant="hospital-outline"
+          variant="outline"
           size="sm"
           onClick={() => alert("Staff management API will connect here.")}
         >
@@ -94,8 +94,8 @@ export default function StaffPage() {
             className={cn(
               "rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
               filterRole === r
-                ? "bg-[#0b1f2a] text-white shadow-xs"
-                : "bg-slate-100/80 text-slate-600 hover:bg-slate-200 hover:text-slate-900 hover:shadow-2xs",
+                ? "bg-primary text-white shadow-sm"
+                : "bg-slate-100 text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
             )}
           >
             {r === "all" ? "All Roles" : r}
@@ -110,8 +110,8 @@ export default function StaffPage() {
             className={cn(
               "rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
               filterStatus === s
-                ? "bg-[#0b1f2a] text-white shadow-xs"
-                : "bg-slate-100/80 text-slate-600 hover:bg-slate-200 hover:text-slate-900 hover:shadow-2xs",
+                ? "bg-primary text-white shadow-sm"
+                : "bg-slate-100 text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
             )}
           >
             {s === "all" ? "All Status" : s.replace("-", " ")}
@@ -126,22 +126,22 @@ export default function StaffPage() {
           return (
             <div
               key={member.id}
-              className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300"
+              className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0b1f2a] font-bold text-white shadow-xs">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary font-bold text-white shadow-xs shadow-primary/25">
                     {member.name.charAt(0)}
                   </div>
                   <div className="min-w-0">
-                    <p className="truncate font-semibold text-[#0b1f2a]">{member.name}</p>
-                    <p className="text-xs text-slate-400">{member.department}</p>
+                    <p className="truncate font-semibold text-foreground">{member.name}</p>
+                    <p className="text-xs text-muted">{member.department}</p>
                   </div>
                 </div>
                 <button
                   type="button"
                   aria-label="More options"
-                  className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                  className="rounded-lg p-1.5 text-muted transition hover:bg-slate-100 hover:text-foreground"
                 >
                   <MoreVertical className="h-4 w-4" aria-hidden />
                 </button>
@@ -151,22 +151,22 @@ export default function StaffPage() {
                 <span className={cn("rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide shadow-2xs", roleColors[member.role])}>
                   {member.role}
                 </span>
-                <span className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                <span className="flex items-center gap-1.5 text-xs text-muted font-medium">
                   <span className={cn("h-2 w-2 rounded-full", dot)} />
                   {label}
                 </span>
                 {member.shift !== "—" && (
-                  <span className="text-xs text-slate-400">· {member.shift} shift</span>
+                  <span className="text-xs text-muted">· {member.shift} shift</span>
                 )}
               </div>
 
-              <div className="mt-4 space-y-1.5 border-t border-slate-100 pt-3 text-xs text-slate-500">
+              <div className="mt-4 space-y-1.5 border-t border-border pt-3.5 text-xs text-muted">
                 <div className="flex items-center gap-2">
-                  <Mail className="h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden />
+                  <Mail className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
                   <span className="truncate">{member.email}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Phone className="h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden />
+                  <Phone className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
                   {member.phone}
                 </div>
               </div>
@@ -175,8 +175,8 @@ export default function StaffPage() {
         })}
       </div>
 
-      <div className="flex items-center gap-2.5 rounded-xl border border-slate-200/80 bg-white/80 p-3.5 text-sm text-slate-500 shadow-xs hover:shadow-sm hover:border-slate-300 transition-all">
-        <ShieldCheck className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+      <div className="flex items-center gap-2.5 rounded-[1.25rem] border border-border bg-white/80 p-4 text-sm text-muted shadow-xs hover:shadow-sm hover:border-primary/30 transition-all">
+        <ShieldCheck className="h-4 w-4 shrink-0 text-primary" aria-hidden />
         Staff data shown is demo/mock. Real staff management connects to the backend team's API.
       </div>
     </div>

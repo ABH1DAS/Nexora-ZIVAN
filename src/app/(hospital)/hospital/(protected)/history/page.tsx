@@ -55,17 +55,17 @@ export default function HistoryPage() {
       {/* Search + filter bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden />
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" aria-hidden />
           <input
             type="search"
             placeholder="Search by patient name, location, or ID…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-11 w-full rounded-xl border border-slate-200/80 bg-white pl-10 pr-4 text-sm text-slate-700 shadow-xs outline-none placeholder:text-slate-400 focus:border-[#0b1f2a] focus:ring-2 focus:ring-[#0b1f2a]/10 hover:border-slate-300 transition-all"
+            className="h-11 w-full rounded-2xl border border-border bg-white pl-10 pr-4 text-sm text-foreground shadow-xs outline-none placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/10 hover:border-primary/30 transition-all"
           />
         </div>
         <div className="flex items-center gap-1.5">
-          <SlidersHorizontal className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+          <SlidersHorizontal className="h-4 w-4 shrink-0 text-muted" aria-hidden />
           <div className="flex flex-wrap gap-1.5">
             {statuses.map(({ value, label }) => (
               <button
@@ -75,8 +75,8 @@ export default function HistoryPage() {
                 className={cn(
                   "rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-200",
                   filterStatus === value
-                    ? "bg-[#0b1f2a] text-white shadow-xs"
-                    : "bg-slate-100/80 text-slate-600 hover:bg-slate-200 hover:text-slate-900 hover:shadow-2xs",
+                    ? "bg-primary text-white shadow-sm"
+                    : "bg-slate-100 text-muted hover:bg-primary-soft hover:text-primary hover:shadow-2xs",
                 )}
               >
                 {label}
@@ -88,46 +88,46 @@ export default function HistoryPage() {
 
       {/* Results */}
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-white py-16 text-center shadow-xs">
-          <History className="h-10 w-10 text-slate-300" aria-hidden />
+        <div className="flex flex-col items-center gap-3 rounded-[2rem] border border-dashed border-border bg-white/70 py-16 text-center shadow-xs">
+          <History className="h-10 w-10 text-muted/60" aria-hidden />
           <div>
-            <p className="font-semibold text-slate-500">No records found</p>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="font-semibold text-foreground">No records found</p>
+            <p className="mt-1 text-sm text-muted">
               {search ? "Try a different search term." : "No ambulance requests have been made yet."}
             </p>
           </div>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300">
-          <div className="border-b border-slate-100 bg-slate-50/50 px-5 py-3.5">
-            <p className="text-xs text-slate-400">
-              Showing <span className="font-semibold text-slate-700">{filtered.length}</span> record{filtered.length !== 1 ? "s" : ""}
+        <div className="overflow-hidden rounded-[2rem] border border-border bg-white shadow-sm hover:shadow-md transition-all duration-300">
+          <div className="border-b border-border bg-slate-50/50 px-6 py-4">
+            <p className="text-xs text-muted">
+              Showing <span className="font-semibold text-foreground">{filtered.length}</span> record{filtered.length !== 1 ? "s" : ""}
             </p>
           </div>
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-border">
             {filtered.map((req) => (
               <li
                 key={req.id}
-                className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 transition-all duration-200 hover:bg-slate-50/80"
+                className="flex flex-wrap items-center justify-between gap-4 px-6 py-4.5 transition-all duration-200 hover:bg-slate-50/80"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-semibold text-[#0b1f2a]">{req.patientName}</p>
+                    <p className="font-semibold text-foreground">{req.patientName}</p>
                     <span className={cn("rounded-full border px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide shadow-2xs", toneForStatus(req.status))}>
                       {statusLabel(req.status)}
                     </span>
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-400">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
                     <span className="font-mono">{req.id}</span>
                     <span className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3" aria-hidden /> {req.locationLabel}
+                      <MapPin className="h-3 w-3 text-primary" aria-hidden /> {req.locationLabel}
                     </span>
                     <span className="capitalize">{req.priority}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-slate-400">
+                <div className="flex items-center gap-3 text-xs text-muted">
                   {req.etaMinutes != null && (
-                    <span className="flex items-center gap-1 font-semibold text-slate-600 bg-slate-100/70 px-2.5 py-1 rounded-lg">
+                    <span className="flex items-center gap-1 font-semibold text-accent bg-accent-soft px-3 py-1 rounded-xl border border-accent/20">
                       <Clock className="h-3.5 w-3.5" aria-hidden /> {req.etaMinutes} min ETA
                     </span>
                   )}

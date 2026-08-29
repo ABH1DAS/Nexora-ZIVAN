@@ -55,12 +55,12 @@ export default function IncomingPatientsPage() {
       <section>
         <h2 className={cn("mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-widest", accent)}>
           {title}
-          <span className="rounded-full bg-current/10 px-2 py-0.5 text-xs font-bold text-current">
+          <span className="rounded-full bg-current/10 px-2.5 py-0.5 text-xs font-bold text-current">
             {items.length}
           </span>
         </h2>
         {items.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-6 text-center text-sm text-slate-400">
+          <p className="rounded-[1.5rem] border border-dashed border-border bg-white/60 px-4 py-8 text-center text-sm text-muted">
             {emptyMsg}
           </p>
         ) : (
@@ -68,55 +68,55 @@ export default function IncomingPatientsPage() {
             {items.map((req) => (
               <div
                 key={req.id}
-                className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300"
+                className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-semibold text-[#0b1f2a]">{req.patientName}</p>
-                    <p className="mt-0.5 text-xs text-slate-400">
+                    <p className="font-semibold text-foreground">{req.patientName}</p>
+                    <p className="mt-0.5 text-xs text-muted">
                       {new Date(req.createdAt).toLocaleString()}
                     </p>
                   </div>
-                  <span className="rounded-full border border-slate-200/80 bg-slate-100/80 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-600 shadow-2xs">
+                  <span className="rounded-full border border-border bg-slate-100 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide text-muted shadow-2xs">
                     {statusLabel(req.status)}
                   </span>
                 </div>
 
                 <div className="mt-4 grid gap-3 text-sm sm:grid-cols-3">
-                  <div className="flex items-start gap-2 rounded-xl bg-slate-50/80 p-3 text-slate-600">
-                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+                  <div className="flex items-start gap-2 rounded-[1.25rem] bg-slate-50/80 p-3.5 text-muted">
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
                     {req.locationLabel}
                   </div>
                   {req.etaMinutes != null && (
-                    <div className="flex items-center gap-2 rounded-xl border border-sky-200/80 bg-sky-50/80 p-3 font-semibold text-sky-700">
-                      <Clock className="h-4 w-4 text-sky-500" aria-hidden />
+                    <div className="flex items-center gap-2 rounded-[1.25rem] border border-accent/25 bg-accent-soft p-3.5 font-semibold text-accent">
+                      <Clock className="h-4 w-4 text-accent" aria-hidden />
                       ETA {req.etaMinutes} min
                     </div>
                   )}
                   {req.acceptedBy && (
-                    <div className="flex items-center gap-2 rounded-xl bg-slate-50/80 p-3 text-slate-600">
-                      <UserCheck className="h-4 w-4 text-slate-400" aria-hidden />
+                    <div className="flex items-center gap-2 rounded-[1.25rem] bg-slate-50/80 p-3.5 text-muted">
+                      <UserCheck className="h-4 w-4 text-primary" aria-hidden />
                       {req.acceptedBy}
                     </div>
                   )}
                 </div>
 
-                <div className="mt-3.5 flex flex-wrap gap-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
+                <div className="mt-3.5 flex flex-wrap gap-4 border-t border-border pt-3.5 text-xs text-muted">
                   <span>
-                    <Activity className="inline h-3.5 w-3.5 text-slate-400 mr-1" aria-hidden /> Blood:{" "}
-                    <strong className="text-slate-700">{req.bloodGroup ?? "—"}</strong>
+                    <Activity className="inline h-3.5 w-3.5 text-primary mr-1" aria-hidden /> Blood:{" "}
+                    <strong className="text-foreground">{req.bloodGroup ?? "—"}</strong>
                   </span>
                   <span>
                     Allergies:{" "}
-                    <strong className="text-slate-700">
+                    <strong className="text-foreground">
                       {req.allergies?.join(", ") || "None"}
                     </strong>
                   </span>
                   <span>
                     Priority:{" "}
                     <strong className={cn(
-                      req.priority === "critical" ? "text-rose-600" :
-                      req.priority === "urgent" ? "text-amber-600" : "text-slate-600"
+                      req.priority === "critical" ? "text-emergency" :
+                      req.priority === "urgent" ? "text-amber-600" : "text-foreground"
                     )}>
                       {req.priority}
                     </strong>

@@ -55,11 +55,11 @@ export default function EmergenciesPage() {
   return (
     <div className="space-y-6">
       {active.length === 0 && resolved.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-slate-200 bg-white py-20 text-center">
-          <ShieldAlert className="h-10 w-10 text-slate-300" aria-hidden />
+        <div className="flex flex-col items-center gap-4 rounded-[2rem] border border-dashed border-border bg-white/70 py-20 text-center shadow-xs">
+          <ShieldAlert className="h-10 w-10 text-muted/60" aria-hidden />
           <div>
-            <p className="font-semibold text-slate-600">No emergency requests</p>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="font-semibold text-foreground">No emergency requests</p>
+            <p className="mt-1 text-sm text-muted">
               Trigger an SOS from the patient app to create a live demo request.
             </p>
           </div>
@@ -68,7 +68,7 @@ export default function EmergenciesPage() {
         <>
           {active.length > 0 && (
             <section>
-              <h2 className="mb-3.5 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-slate-500">
+              <h2 className="mb-3.5 flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-muted">
                 <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden />
                 Active Emergencies ({active.length})
               </h2>
@@ -76,49 +76,49 @@ export default function EmergenciesPage() {
                 {active.map((req) => (
                   <div
                     key={req.id}
-                    className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgb(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-300"
+                    className="rounded-[1.5rem] border border-border bg-white p-5 sm:p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <StatusDot status={req.status} />
                         <div>
-                          <p className="font-semibold text-[#0b1f2a]">{req.patientName}</p>
-                          <p className="mt-0.5 text-xs text-slate-400">
+                          <p className="font-semibold text-foreground">{req.patientName}</p>
+                          <p className="mt-0.5 text-xs text-muted">
                             {new Date(req.createdAt).toLocaleString()}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <PriorityBadge priority={req.priority} />
-                        <span className="rounded-full border border-slate-200/80 bg-slate-100/80 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-slate-600 shadow-2xs">
+                        <span className="rounded-full border border-border bg-slate-100 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide text-muted shadow-2xs">
                           {statusLabel(req.status)}
                         </span>
                       </div>
                     </div>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      <div className="flex items-start gap-2 rounded-xl bg-slate-50/80 p-3 text-sm text-slate-600">
-                        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
+                      <div className="flex items-start gap-2 rounded-[1.25rem] bg-slate-50/80 p-3.5 text-sm text-muted">
+                        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
                         {req.locationLabel}
                       </div>
                       {req.etaMinutes != null ? (
-                        <div className="flex items-center gap-2 rounded-xl border border-sky-200/80 bg-sky-50/80 p-3 text-sm font-semibold text-sky-700">
-                          <Clock3 className="h-4 w-4 text-sky-500" aria-hidden />
+                        <div className="flex items-center gap-2 rounded-[1.25rem] border border-accent/25 bg-accent-soft p-3.5 text-sm font-semibold text-accent">
+                          <Clock3 className="h-4 w-4 text-accent" aria-hidden />
                           ETA {req.etaMinutes} min · {req.acceptedBy}
                         </div>
                       ) : (
-                        <div className="flex items-center gap-2 rounded-xl bg-slate-50/80 p-3 text-sm text-slate-400">
-                          <Clock3 className="h-4 w-4 text-slate-400" aria-hidden />
+                        <div className="flex items-center gap-2 rounded-[1.25rem] bg-slate-50/80 p-3.5 text-sm text-muted">
+                          <Clock3 className="h-4 w-4 text-muted/60" aria-hidden />
                           Awaiting ambulance assignment
                         </div>
                       )}
                     </div>
-                    <div className="mt-3.5 flex flex-wrap gap-4 border-t border-slate-100 pt-3 text-xs text-slate-500">
+                    <div className="mt-3.5 flex flex-wrap gap-4 border-t border-border pt-3.5 text-xs text-muted">
                       <span>
-                        Blood group: <strong className="text-slate-700">{req.bloodGroup ?? "—"}</strong>
+                        Blood group: <strong className="text-foreground">{req.bloodGroup ?? "—"}</strong>
                       </span>
                       <span>
                         Allergies:{" "}
-                        <strong className="text-slate-700">
+                        <strong className="text-foreground">
                           {req.allergies?.join(", ") || "None"}
                         </strong>
                       </span>
@@ -131,21 +131,21 @@ export default function EmergenciesPage() {
 
           {resolved.length > 0 && (
             <section>
-              <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-slate-400">
+              <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-muted">
                 Resolved ({resolved.length})
               </h2>
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {resolved.map((req) => (
                   <div
                     key={req.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200/60 bg-white/90 px-4 py-3 text-sm shadow-2xs hover:shadow-xs hover:border-slate-300 hover:bg-white transition-all duration-200"
+                    className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-white/90 px-4 py-3.5 text-sm shadow-2xs hover:shadow-xs hover:border-primary/30 transition-all duration-200"
                   >
                     <div className="flex items-center gap-3">
                       <StatusDot status={req.status} />
-                      <span className="font-semibold text-slate-700">{req.patientName}</span>
-                      <span className="text-slate-400">{req.locationLabel}</span>
+                      <span className="font-semibold text-foreground">{req.patientName}</span>
+                      <span className="text-muted">{req.locationLabel}</span>
                     </div>
-                    <span className="text-xs font-semibold uppercase text-slate-400">
+                    <span className="text-xs font-semibold uppercase text-muted">
                       {statusLabel(req.status)}
                     </span>
                   </div>
