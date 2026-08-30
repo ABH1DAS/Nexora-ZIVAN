@@ -29,6 +29,7 @@ import {
   X,
 } from "lucide-react";
 import { hospitalAudio } from "@/lib/hospitalAudio";
+import { HospitalEmergencyBubble } from "@/components/hospital/HospitalEmergencyBubble";
 
 interface NavSection {
   label: string;
@@ -342,6 +343,18 @@ export function HospitalShell({
 
             {/* Header right */}
             <div className="flex items-center gap-2 sm:gap-2.5">
+              {/* Header SOS Active Pill */}
+              {notificationCount > 0 && (
+                <Link
+                  href="/hospital/live-tracking"
+                  className="hidden md:flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs font-black uppercase tracking-wider text-rose-700 hover:bg-rose-500/20 transition shadow-2xs animate-pulse"
+                >
+                  <span className="h-2 w-2 rounded-full bg-rose-600 animate-ping" />
+                  <ShieldAlert className="h-4 w-4 text-rose-600" />
+                  SOS Alert ({notificationCount})
+                </Link>
+              )}
+
               {/* Sound alert toggle */}
               <button
                 type="button"
@@ -351,7 +364,7 @@ export function HospitalShell({
                   if (next) hospitalAudio.playRadioBeep();
                   setMobileOpen((v) => v); // trigger re-render
                 }}
-                className="flex h-10 w-10 items-center justify-center rounded-2xl border-0 bg-white text-muted shadow-xs transition hover:bg-primary-soft hover:text-primary"
+                className="flex h-10 w-10 items-center justify-center rounded-2xl border-0 bg-white text-muted shadow-xs transition hover:bg-primary-soft hover:text-primary cursor-pointer"
                 title={hospitalAudio.isEnabled() ? "Sound alerts enabled" : "Sound alerts muted"}
               >
                 {hospitalAudio.isEnabled() ? (
@@ -386,6 +399,9 @@ export function HospitalShell({
           </main>
         </div>
       </div>
+
+      {/* Floating Emergency Bubble Notification for Hospital Portal */}
+      <HospitalEmergencyBubble />
     </div>
   );
 }
