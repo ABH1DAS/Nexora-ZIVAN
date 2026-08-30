@@ -11,7 +11,7 @@ import type { AmbulanceRequest } from "@/data/ambulanceRequests";
 import { GoogleAmbulanceMap } from "@/components/emergency/GoogleAmbulanceMap";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Activity,
   AlertTriangle,
@@ -22,6 +22,7 @@ import {
   Clock3,
   Droplet,
   Heart,
+  MapPin,
   Maximize2,
   Minimize2,
   Radio,
@@ -31,12 +32,21 @@ import {
   Wind,
 } from "lucide-react";
 
+const HOSPITAL_BASE_COORDS: Record<string, { lat: number; lng: number }> = {
+  "govt-gmch-trauma": { lat: 26.1557, lng: 91.7706 },
+  "govt-mmch-civil": { lat: 26.1882, lng: 91.7450 },
+  "pvt-hayat-hospital": { lat: 26.1512, lng: 91.7820 },
+  "pvt-gnrc-dispur": { lat: 26.1424, lng: 91.7905 },
+};
+
 export default function CommandCenterPage() {
   const { account } = useHospitalAuth();
   const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
+  const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
   const [time, setTime] = useState<Date | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundOn, setSoundOn] = useState(hospitalAudio.isEnabled());
+  const mapSectionRef = useRef<HTMLDivElement>(null);
 
   // Clinical tool modals
   const [selectedReq, setSelectedReq] = useState<AmbulanceRequest | null>(null);
@@ -69,6 +79,12 @@ export default function CommandCenterPage() {
     !["cancelled", "declined", "ARRIVED AT HOSPITAL"].includes(r.status),
   );
 
+  const trackedUnit =
+    activeUnits.find((u) => u.id === selectedUnitId) || activeUnits[0] || INITIAL_DEMO_REQUESTS[0];
+
+  const currentHospitalCoords =
+    (account?.hospitalId && HOSPITAL_BASE_COORDS[account.hospitalId]) || { lat: 26.1557, lng: 91.7706 };
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
@@ -85,6 +101,13 @@ export default function CommandCenterPage() {
     hospitalAudio.setEnabled(next);
     if (next) hospitalAudio.playRadioBeep();
   };
+
+  function selectAndScrollToMap(req: AmbulanceRequest) {
+    setSelectedUnitId(req.id);
+    if (mapSectionRef.current) {
+      mapSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -127,7 +150,7 @@ export default function CommandCenterPage() {
                 type="button"
                 onClick={toggleSound}
                 className={cn(
-                  "flex h-12 w-12 items-center justify-center rounded-2xl border-0 shadow-[0_6px_20px_rgba(15,61,53,0.1)] transition-all",
+                  "flex h-12 w-12 items-center justify-center rounded-2xl border-0 shadow-[0_6px_20px_rgba(15,61,53,0.1)] transition-all cursor-pointer",
                   soundOn
                     ? "bg-primary-soft text-primary shadow-[0_8px_24px_rgba(13,143,122,0.25)]"
                     : "bg-white text-muted"
@@ -140,7 +163,7 @@ export default function CommandCenterPage() {
               <button
                 type="button"
                 onClick={toggleFullscreen}
-                className="flex h-12 w-12 items-center justify-center rounded-2xl border-0 bg-white text-muted shadow-[0_6px_20px_rgba(15,61,53,0.1)] hover:bg-slate-100 hover:text-foreground transition"
+                className="flex h-12 w-12 items-center justify-center rounded-2xl border-0 bg-white text-muted shadow-[0_6px_20px_rgba(15,61,53,0.1)] hover:bg-slate-100 hover:text-foreground transition cursor-pointer"
                 title="Toggle Fullscreen"
               >
                 {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
@@ -151,36 +174,54 @@ export default function CommandCenterPage() {
       </section>
 
       {/* Live GPS Ambulance Dispatch Tracking Map */}
-      {activeUnits.length > 0 && (
-        <section className="rounded-[2rem] overflow-hidden border border-border shadow-md bg-white">
-          <div className="bg-slate-900 px-5 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-white border-b border-white/10">
-            <div className="flex items-center gap-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
-              <span className="font-bold text-teal-300 uppercase tracking-wider">
-                Command Center Live GPS Tracking · {activeUnits[0].vehicleNumber ?? "AS-01-EV-4892"}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-slate-300">
-                Patient: <strong className="text-white">{activeUnits[0].patientName}</strong> ({activeUnits[0].locationLabel})
-              </span>
-            </div>
+      <section ref={mapSectionRef} className="space-y-3">
+        {/* Multi-Unit Selector Bar */}
+        {activeUnits.length > 1 && (
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+            <span className="text-xs font-bold text-muted uppercase tracking-wider shrink-0">
+              Active Dispatches:
+            </span>
+            {activeUnits.map((u) => {
+              const isSelected = u.id === (trackedUnit?.id || activeUnits[0].id);
+              return (
+                <button
+                  key={u.id}
+                  type="button"
+                  onClick={() => setSelectedUnitId(u.id)}
+                  className={cn(
+                    "flex items-center gap-2 shrink-0 rounded-xl px-3 py-1.5 text-xs font-bold transition shadow-xs cursor-pointer",
+                    isSelected
+                      ? "bg-teal-600 text-white shadow-md shadow-teal-900/30"
+                      : "bg-white border border-border text-foreground hover:bg-slate-50"
+                  )}
+                >
+                  <Ambulance className="h-3.5 w-3.5" />
+                  <span>{u.vehicleNumber || u.id} ({u.patientName})</span>
+                  {isSelected && <span className="h-2 w-2 rounded-full bg-white animate-ping" />}
+                </button>
+              );
+            })}
           </div>
+        )}
+
+        {/* Embedded Leaflet Map */}
+        <div className="rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/10">
           <GoogleAmbulanceMap
-            patientCoords={activeUnits[0].coordinates ?? { lat: 26.1714, lng: 91.7586 }}
-            patientLabel={activeUnits[0].locationLabel ?? "GS Road, Ulubari / Bhangagarh, Guwahati"}
+            patientCoords={trackedUnit.coordinates ?? { lat: 26.1714, lng: 91.7586 }}
+            patientLabel={trackedUnit.locationLabel ?? "GS Road, Ulubari / Bhangagarh, Guwahati"}
             ambulanceCoords={{ lat: 26.1640, lng: 91.7670 }}
-            ambulanceId={activeUnits[0].ambulanceId ?? "AMB-01"}
-            ambulanceType={activeUnits[0].ambulanceType ?? "government"}
-            driverName={activeUnits[0].driverName ?? "Rajesh Kumar (Paramedic Leader)"}
-            vehicleNumber={activeUnits[0].vehicleNumber ?? "AS-01-EV-4892"}
-            hospitalName={activeUnits[0].hospitalName ?? account?.hospitalName ?? "GMCH Emergency Trauma Center"}
-            status={activeUnits[0].status}
-            etaMinutes={activeUnits[0].etaMinutes ?? 6}
+            ambulanceId={trackedUnit.ambulanceId ?? "AMB-01"}
+            ambulanceType={trackedUnit.ambulanceType ?? "government"}
+            driverName={trackedUnit.driverName ?? "Rajesh Kumar (Paramedic Leader)"}
+            vehicleNumber={trackedUnit.vehicleNumber ?? "AS-01-EV-4892"}
+            hospitalCoords={currentHospitalCoords}
+            hospitalName={trackedUnit.hospitalName ?? account?.hospitalName ?? "GMCH Emergency Trauma Center"}
+            status={trackedUnit.status}
+            etaMinutes={trackedUnit.etaMinutes ?? 6}
             singleHospitalOnly={true}
           />
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Main Grid: Incoming Emergency Units & Hospital Resources */}
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
@@ -205,6 +246,7 @@ export default function CommandCenterPage() {
               {activeUnits.map((req) => {
                 const isCritical = req.priority === "critical";
                 const isUrgent = req.priority === "urgent";
+                const isSelectedOnMap = req.id === trackedUnit.id;
                 const vitals = req.vitals ?? { hr: 108, bp: "138/88", spo2: 95, rr: 22, temp: 37.4 };
 
                 return (
@@ -212,6 +254,7 @@ export default function CommandCenterPage() {
                     key={req.id}
                     className={cn(
                       "rounded-[2rem] border-0 bg-[#eef6f4] p-6 transition-all duration-300",
+                      isSelectedOnMap && "ring-2 ring-teal-500 shadow-xl",
                       isCritical
                         ? "shadow-[0_16px_45px_rgba(217,53,74,0.2)] hover:shadow-[0_22px_55px_rgba(217,53,74,0.3)]"
                         : isUrgent
@@ -282,54 +325,70 @@ export default function CommandCenterPage() {
                     </div>
 
                     {/* Quick Tools */}
-                    <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t border-black/5 pt-3">
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-black/5 pt-3">
                       <button
                         type="button"
-                        onClick={() => {
-                          setSelectedReq(req);
-                          setTelemetryOpen(true);
-                        }}
-                        className="flex items-center gap-1.5 rounded-xl border-0 bg-white px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-50 transition shadow-[0_4px_14px_rgba(217,53,74,0.15)]"
+                        onClick={() => selectAndScrollToMap(req)}
+                        className={cn(
+                          "flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition shadow-xs cursor-pointer",
+                          isSelectedOnMap
+                            ? "bg-teal-600 text-white"
+                            : "bg-white border border-teal-500/30 text-teal-700 hover:bg-teal-50"
+                        )}
                       >
-                        <Activity className="h-3.5 w-3.5 text-rose-600 animate-pulse" />
-                        <span>Telemetry</span>
+                        <MapPin className="h-3.5 w-3.5" />
+                        <span>{isSelectedOnMap ? "Tracking on Map" : "Track on Map"}</span>
                       </button>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedReq(req);
-                          setBedOpen(true);
-                        }}
-                        className="flex items-center gap-1.5 rounded-xl border-0 bg-white px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-primary-soft hover:text-primary transition shadow-[0_4px_14px_rgba(15,61,53,0.08)]"
-                      >
-                        <Bed className="h-3.5 w-3.5 text-primary" />
-                        <span>{req.allocatedBed ? "Change Bay" : "Allocate Bay"}</span>
-                      </button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedReq(req);
+                            setTelemetryOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 rounded-xl border-0 bg-white px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-50 transition shadow-[0_4px_14px_rgba(217,53,74,0.15)] cursor-pointer"
+                        >
+                          <Activity className="h-3.5 w-3.5 text-rose-600 animate-pulse" />
+                          <span>Telemetry</span>
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedReq(req);
-                          setCommsOpen(true);
-                        }}
-                        className="flex items-center gap-1.5 rounded-xl border-0 bg-white px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-primary-soft hover:text-primary transition shadow-[0_4px_14px_rgba(15,61,53,0.08)]"
-                      >
-                        <Radio className="h-3.5 w-3.5 text-primary" />
-                        <span>Radio</span>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedReq(req);
+                            setBedOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 rounded-xl border-0 bg-white px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-primary-soft hover:text-primary transition shadow-[0_4px_14px_rgba(15,61,53,0.08)] cursor-pointer"
+                        >
+                          <Bed className="h-3.5 w-3.5 text-primary" />
+                          <span>{req.allocatedBed ? "Change Bay" : "Allocate Bay"}</span>
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedReq(req);
-                          setBloodOpen(true);
-                        }}
-                        className="flex items-center gap-1.5 rounded-xl border-0 bg-white px-3 py-1.5 text-xs font-semibold text-rose-900 hover:bg-rose-50 transition shadow-[0_4px_14px_rgba(217,53,74,0.15)]"
-                      >
-                        <Droplet className="h-3.5 w-3.5 text-rose-600" />
-                        <span>Blood</span>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedReq(req);
+                            setCommsOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 rounded-xl border-0 bg-white px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-primary-soft hover:text-primary transition shadow-[0_4px_14px_rgba(15,61,53,0.08)] cursor-pointer"
+                        >
+                          <Radio className="h-3.5 w-3.5 text-primary" />
+                          <span>Radio</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedReq(req);
+                            setBloodOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 rounded-xl border-0 bg-white px-3 py-1.5 text-xs font-semibold text-rose-900 hover:bg-rose-50 transition shadow-[0_4px_14px_rgba(217,53,74,0.15)] cursor-pointer"
+                        >
+                          <Droplet className="h-3.5 w-3.5 text-rose-600" />
+                          <span>Blood</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -398,29 +457,19 @@ export default function CommandCenterPage() {
                   >
                     <span
                       className={cn(
-                        "text-xs font-bold block",
-                        isLow ? "text-white" : "text-rose-600"
+                        "block font-display text-sm font-bold",
+                        isLow ? "text-white" : "text-foreground"
                       )}
                     >
                       {b.g}
                     </span>
                     <span
                       className={cn(
-                        "text-[11px] font-mono font-semibold block mt-0.5",
-                        isLow ? "text-white/90" : "text-rose-600"
+                        "font-mono text-xs font-semibold",
+                        isLow ? "text-rose-100" : "text-rose-600"
                       )}
                     >
-                      {b.u} {b.u === 1 ? "unit" : "units"}
-                    </span>
-                    <span
-                      className={cn(
-                        "mt-1 inline-block text-[8px] font-bold uppercase px-1.5 py-0.2 rounded-full",
-                        isLow
-                          ? "bg-white/20 text-white border border-white/30"
-                          : "bg-rose-50 text-rose-700 border border-rose-200"
-                      )}
-                    >
-                      {isLow ? "Low" : "Ready"}
+                      {b.u}u
                     </span>
                   </div>
                 );
@@ -430,30 +479,34 @@ export default function CommandCenterPage() {
         </div>
       </div>
 
-      {/* Modals */}
-      <LiveTelemetryModal
-        request={selectedReq}
-        isOpen={telemetryOpen}
-        onClose={() => setTelemetryOpen(false)}
-      />
-
-      <BedAllocationModal
-        request={selectedReq}
-        isOpen={bedOpen}
-        onClose={() => setBedOpen(false)}
-      />
-
-      <AmbulanceCommsDrawer
-        request={selectedReq}
-        isOpen={commsOpen}
-        onClose={() => setCommsOpen(false)}
-      />
-
-      <BloodBankMatcher
-        request={selectedReq}
-        isOpen={bloodOpen}
-        onClose={() => setBloodOpen(false)}
-      />
+      {/* Clinical Tool Modals */}
+      {selectedReq && (
+        <>
+          <LiveTelemetryModal
+            request={selectedReq}
+            isOpen={telemetryOpen}
+            onClose={() => setTelemetryOpen(false)}
+          />
+          <BedAllocationModal
+            request={selectedReq}
+            isOpen={bedOpen}
+            onClose={() => setBedOpen(false)}
+            onAllocated={() => {
+              setBedOpen(false);
+            }}
+          />
+          <AmbulanceCommsDrawer
+            request={selectedReq}
+            isOpen={commsOpen}
+            onClose={() => setCommsOpen(false)}
+          />
+          <BloodBankMatcher
+            request={selectedReq}
+            isOpen={bloodOpen}
+            onClose={() => setBloodOpen(false)}
+          />
+        </>
+      )}
     </div>
   );
 }
