@@ -1,8 +1,9 @@
 "use client";
 
-import { badges, challenges, gamification, leaderboard } from "@/data/challenges";
+import { badges, leaderboard } from "@/data/challenges";
+import { useUserData } from "@/lib/userDataStore";
 import { formatNumber } from "@/lib/utils";
-import { Droplets, Flame, Footprints, Moon } from "lucide-react";
+import { Droplets, Flame, Footprints, Moon, Trophy } from "lucide-react";
 
 const badgeIcons = {
   walk: Footprints,
@@ -12,14 +13,16 @@ const badgeIcons = {
 };
 
 export default function DashboardChallengesPage() {
+  const { metrics, challenges, isNewUser } = useUserData();
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-3xl font-semibold tracking-tight">
-          Challenges
+          Challenges &amp; Streaks
         </h1>
         <p className="mt-2 text-sm text-muted">
-          Positive, wellness-focused motivation with streaks and badges.
+          Positive, wellness-focused motivation with streaks, health goals, and badges.
         </p>
       </div>
 
@@ -27,36 +30,57 @@ export default function DashboardChallengesPage() {
         <div className="rounded-[1.5rem] border border-border bg-white p-5 shadow-sm">
           <p className="text-sm text-muted">Current streak</p>
           <p className="mt-2 font-display text-3xl font-bold">
-            🔥 {gamification.streak} days
+            🔥 {metrics.streakDays} days
           </p>
+          {isNewUser && (
+            <p className="mt-1 text-xs text-teal-600 font-semibold">
+              Log your daily water or workout to start your day 1 streak!
+            </p>
+          )}
         </div>
         <div className="rounded-[1.5rem] border border-border bg-white p-5 shadow-sm">
-          <p className="text-sm text-muted">Points</p>
+          <p className="text-sm text-muted">Total Wellness Points</p>
           <p className="mt-2 font-display text-3xl font-bold">
-            {formatNumber(gamification.points)} XP
+            {formatNumber(metrics.points)} XP
+          </p>
+          <p className="mt-1 text-xs text-muted">
+            Earned from completed health activities &amp; challenges
           </p>
         </div>
       </div>
 
       <section className="rounded-[2rem] border border-border bg-white p-6 shadow-sm">
-        <h2 className="font-display text-xl font-semibold">Active challenges</h2>
-        <ul className="mt-5 space-y-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-amber-500" />
+            <h2 className="font-display text-xl font-semibold">Active Challenges</h2>
+          </div>
+          <span className="text-xs font-bold text-primary">Live Progress</span>
+        </div>
+
+        <ul className="space-y-5">
           {challenges.map((challenge) => {
-            const pct = Math.round((challenge.progress / challenge.total) * 100);
+            const pct = Math.min(
+              Math.round((challenge.progress / Math.max(challenge.totalTarget, 1)) * 100),
+              100
+            );
             return (
-              <li key={challenge.id}>
+              <li key={challenge.id} className="rounded-2xl border border-border/70 p-4">
                 <div className="mb-2 flex justify-between gap-3">
                   <div>
                     <p className="font-semibold">{challenge.title}</p>
-                    <p className="text-xs text-muted">{challenge.category}</p>
+                    <p className="text-xs text-muted">{challenge.description || challenge.category}</p>
                   </div>
-                  <p className="text-sm font-semibold text-primary">
-                    {challenge.progress}/{challenge.total} {challenge.unit}
-                  </p>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-primary">
+                      {challenge.progress}/{challenge.totalTarget} {challenge.unit}
+                    </p>
+                    <span className="text-[11px] font-bold text-amber-600">+{challenge.pointsReward} XP</span>
+                  </div>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-primary-soft">
+                <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
                   <div
-                    className="h-full rounded-full bg-primary"
+                    className="h-full rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 transition-all duration-300"
                     style={{ width: `${pct}%` }}
                   />
                 </div>
@@ -72,18 +96,25 @@ export default function DashboardChallengesPage() {
           <div className="mt-4 grid grid-cols-2 gap-3">
             {badges.map((badge) => {
               const Icon = badgeIcons[badge.icon];
+              const unlocked = metrics.points >= 100 || !isNewUser;
               return (
                 <div
                   key={badge.id}
-                  className="rounded-2xl border border-border bg-[#fbfefd] p-4 text-center"
+                  className={`rounded-2xl border p-4 text-center transition ${
+                    unlocked
+                      ? "border-teal-200 bg-[#fbfefd]"
+                      : "border-border bg-slate-50 opacity-60"
+                  }`}
                 >
                   <Icon className="mx-auto mb-2 h-5 w-5 text-primary" aria-hidden />
                   <p className="text-sm font-semibold">{badge.name}</p>
+                  <p className="text-[10px] text-muted mt-0.5">{unlocked ? "Unlocked" : "100+ XP required"}</p>
                 </div>
               );
             })}
           </div>
         </section>
+
         <section className="rounded-[2rem] border border-border bg-[#0f2420] p-6 text-white shadow-sm">
           <h2 className="font-display text-xl font-semibold">Leaderboard</h2>
           <ol className="mt-4 space-y-3">
@@ -92,15 +123,15 @@ export default function DashboardChallengesPage() {
                 key={entry.rank}
                 className={
                   entry.isYou
-                    ? "flex justify-between rounded-2xl bg-teal-400/15 px-4 py-3 text-sm"
+                    ? "flex justify-between rounded-2xl bg-teal-400/15 px-4 py-3 text-sm border border-teal-400/30 font-bold"
                     : "flex justify-between rounded-2xl bg-white/5 px-4 py-3 text-sm"
                 }
               >
                 <span>
-                  #{entry.rank} {entry.name}
+                  #{entry.rank} {entry.isYou ? `${entry.name} (You)` : entry.name}
                 </span>
-                <span className="font-semibold">
-                  {formatNumber(entry.points)} XP
+                <span className="font-mono text-teal-300">
+                  {entry.isYou ? formatNumber(metrics.points) : formatNumber(entry.points)} XP
                 </span>
               </li>
             ))}
