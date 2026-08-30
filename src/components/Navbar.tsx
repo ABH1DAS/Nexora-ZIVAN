@@ -4,7 +4,7 @@ import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
-import { Menu, X } from "lucide-react";
+import { Building2, ExternalLink, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -66,12 +66,17 @@ export function Navbar() {
         </ul>
 
         <div className="hidden items-center gap-3 lg:flex">
+          {/* Hospital Portal Link Button */}
           <Link
-            href="/hospital"
-            className="inline-flex items-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50/80 px-3 py-1.5 text-xs font-bold text-teal-900 transition hover:bg-teal-100 hover:shadow-2xs"
+            href="/hospital/login"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-teal-600/30 bg-teal-50/80 px-3.5 py-2 text-xs font-bold text-teal-950 transition hover:bg-teal-100 hover:border-teal-500 shadow-2xs hover:scale-105 active:scale-95"
+            title="Access Hospital & Emergency Dispatch Portal"
           >
-            🏥 Hospital Portal
+            <Building2 className="h-3.5 w-3.5 text-teal-700" />
+            <span>Hospital Portal</span>
+            <ExternalLink className="h-3 w-3 text-teal-600 opacity-60" />
           </Link>
+
           {!loading && user ? (
             <>
               <Button variant="ghost" size="sm" href="/dashboard">
@@ -124,14 +129,23 @@ export function Navbar() {
               </Link>
             </li>
           ))}
-          <li className="mt-2 flex flex-col gap-2 border-t border-border pt-4">
+
+          {/* Hospital Portal Link Button on Mobile */}
+          <li className="mt-1">
             <Link
-              href="/hospital"
+              href="/hospital/login"
+              className="flex items-center justify-between rounded-xl border border-teal-500/30 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-950 hover:bg-teal-100"
               onClick={() => setOpen(false)}
-              className="flex items-center justify-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 py-2.5 text-sm font-bold text-teal-900 transition hover:bg-teal-100"
             >
-              🏥 Hospital Portal & Command Center
+              <span className="flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-teal-700" />
+                Hospital Portal
+              </span>
+              <ExternalLink className="h-3.5 w-3.5 text-teal-600" />
             </Link>
+          </li>
+
+          <li className="mt-2 flex flex-col gap-2 border-t border-border pt-4">
             {!loading && user ? (
               <>
                 <Button variant="secondary" href="/dashboard" onClick={() => setOpen(false)}>

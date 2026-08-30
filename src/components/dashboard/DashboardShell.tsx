@@ -1,14 +1,15 @@
 "use client";
 
-import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/Button";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import {
   Activity,
+  Bot,
   Brain,
+  Building2,
   CheckSquare,
-  Droplets,
+  ExternalLink,
   Gift,
   LayoutDashboard,
   LogOut,
@@ -27,18 +28,16 @@ import { useEffect, useState, type ReactNode } from "react";
 import { AutoEmergencyMonitor } from "@/components/dashboard/AutoEmergencyMonitor";
 
 const navItems = [
-  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
-  { href: "/dashboard/health", label: "Health", icon: Activity },
-  { href: "/dashboard/wellbeing", label: "Wellbeing", icon: Brain },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/health", label: "Health Tracking", icon: Activity },
+  { href: "/dashboard/wellbeing", label: "Mental Wellbeing", icon: Brain },
   { href: "/dashboard/habits", label: "Habits & Goals", icon: CheckSquare },
   { href: "/dashboard/ai", label: "AI Assistant", icon: Sparkles },
-  { href: "/dashboard/water", label: "Water", icon: Droplets },
+  { href: "/dashboard/emergency", label: "SOS Emergency", icon: ShieldAlert },
+  { href: "/dashboard/profile", label: "Health Profile", icon: UserRound },
   { href: "/dashboard/devices", label: "Devices", icon: Watch },
-  { href: "/dashboard/emergency", label: "Emergency", icon: ShieldAlert },
   { href: "/dashboard/challenges", label: "Challenges", icon: Trophy },
   { href: "/dashboard/rewards", label: "Rewards", icon: Gift },
-  { href: "/dashboard/profile", label: "Profile", icon: UserRound },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
 export function DashboardShell({ children }: { children: ReactNode }) {
@@ -100,8 +99,25 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-atmosphere">
       <div className="mx-auto flex min-h-screen max-w-[1440px]">
         <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-white/80 p-5 backdrop-blur lg:flex">
-          <Logo size="sm" subtitle="Health dashboard" />
-          <div className="mt-8 flex-1">{nav}</div>
+          <Link href="/" className="font-display text-2xl font-bold tracking-tight">
+            ZIVAN
+          </Link>
+          <p className="mt-1 text-xs text-muted">Your health dashboard</p>
+          <div className="mt-8 flex-1 overflow-y-auto pr-1">{nav}</div>
+
+          {/* Direct Hospital Portal Button */}
+          <Link
+            href="/hospital/login"
+            className="mb-3 flex items-center justify-between rounded-2xl border border-teal-500/30 bg-teal-50/80 px-3.5 py-2.5 text-xs font-bold text-teal-950 hover:bg-teal-100 hover:border-teal-500 transition shadow-2xs group"
+            title="Open Hospital & Emergency Dispatch Portal"
+          >
+            <span className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-teal-700" />
+              Hospital Portal
+            </span>
+            <ExternalLink className="h-3.5 w-3.5 text-teal-600 opacity-60 group-hover:opacity-100" />
+          </Link>
+
           <div className="rounded-2xl border border-border bg-[#f7fbfa] p-3">
             <p className="truncate text-sm font-semibold">{user.name}</p>
             <p className="truncate text-xs text-muted">{user.email}</p>
@@ -139,6 +155,16 @@ export function DashboardShell({ children }: { children: ReactNode }) {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Hospital Portal Link Button */}
+              <Link
+                href="/hospital/login"
+                className="hidden md:inline-flex items-center gap-1.5 rounded-xl border border-teal-600/30 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-950 transition hover:bg-teal-100 hover:border-teal-500 shadow-2xs"
+              >
+                <Building2 className="h-3.5 w-3.5 text-teal-700" />
+                <span>Hospital Portal</span>
+                <ExternalLink className="h-3 w-3 text-teal-600 opacity-60" />
+              </Link>
+
               <Button size="sm" variant="emergency" href="/dashboard/emergency">
                 SOS
               </Button>
@@ -149,11 +175,21 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           </header>
 
           {open && (
-            <div className="border-b border-border bg-white p-4 lg:hidden">
+            <div className="border-b border-border bg-white p-4 lg:hidden space-y-3">
               {nav}
+              <Link
+                href="/hospital/login"
+                className="flex items-center justify-between rounded-xl border border-teal-500/30 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-950 hover:bg-teal-100"
+              >
+                <span className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4 text-teal-700" />
+                  Hospital Portal
+                </span>
+                <ExternalLink className="h-3.5 w-3.5 text-teal-600" />
+              </Link>
               <Button
                 variant="secondary"
-                className="mt-3 w-full"
+                className="w-full"
                 onClick={handleLogout}
               >
                 <LogOut className="h-4 w-4" aria-hidden />
