@@ -1,218 +1,117 @@
 "use client";
 
 import { Button } from "@/components/ui/Button";
-import { FITNESS_BAND_OPTIONS, type FitnessBand, type LiveVitals } from "@/data/devices";
-import {
-  connectFitnessBand,
-  disconnectFitnessBand,
-  getLiveVitals,
-  subscribeBand,
-  subscribeVitals,
-  updateLiveVitals,
-} from "@/lib/healthMonitorStore";
-import { cn, formatNumber } from "@/lib/utils";
+import Link from "next/link";
 import {
   Activity,
-  Battery,
+  ArrowLeft,
+  Bell,
   Bluetooth,
+  CheckCircle2,
+  Cpu,
   Heart,
-  Link2Off,
+  Radio,
+  Shield,
+  Sparkles,
   Watch,
+  Zap,
 } from "lucide-react";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function DashboardDevicesPage() {
-  const [band, setBand] = useState<FitnessBand | null>(null);
-  const [vitals, setVitals] = useState<LiveVitals>(getLiveVitals());
-  const [selected, setSelected] = useState<string>(FITNESS_BAND_OPTIONS[0].id);
-  const [message, setMessage] = useState<string | null>(null);
-  const [simulating, setSimulating] = useState(false);
-
-  useEffect(() => subscribeBand(setBand), []);
-  useEffect(() => subscribeVitals(setVitals), []);
-
-  useEffect(() => {
-    if (!band?.connected || !simulating) return;
-    const id = setInterval(() => {
-      const current = getLiveVitals();
-      const drift = Math.round((Math.random() - 0.5) * 4);
-      updateLiveVitals({
-        heartRate: Math.max(48, Math.min(120, current.heartRate + drift)),
-        spo2: Math.max(92, Math.min(100, current.spo2 + Math.round((Math.random() - 0.5) * 2))),
-        steps: current.steps + Math.floor(Math.random() * 8),
-        source: "band",
-      });
-    }, 2500);
-    return () => clearInterval(id);
-  }, [band?.connected, simulating]);
+  const [notified, setNotified] = useState(false);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-3xl font-semibold tracking-tight">
-          Fitness band
-        </h1>
-        <p className="mt-2 text-sm text-muted">
-          Pair a demo wearable to monitor heart rate, SpO₂, steps and sleep.
-          Automatic emergency checks use these readings when enabled.
-        </p>
+    <div className="mx-auto max-w-4xl space-y-8 py-4 sm:py-8">
+      {/* Hero Coming Soon Card */}
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-teal-500/20 bg-gradient-to-br from-[#0f2420] via-[#12312b] to-[#0a1916] p-8 sm:p-12 text-white shadow-2xl">
+        {/* Ambient Glows */}
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-teal-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-emerald-500/20 blur-3xl" />
+
+        <div className="relative z-10 flex flex-col items-center text-center">
+          {/* Glowing Badge */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-500/10 px-4 py-1.5 text-xs font-extrabold uppercase tracking-widest text-teal-300 backdrop-blur-md shadow-lg shadow-teal-950/50">
+            <span className="h-2 w-2 rounded-full bg-teal-400 animate-ping" />
+            <Sparkles className="h-3.5 w-3.5" />
+            COMING SOON
+          </div>
+
+          {/* Central Animated Watch Icon */}
+          <div className="mt-6 flex h-24 w-24 items-center justify-center rounded-3xl border border-teal-400/30 bg-gradient-to-br from-teal-500/30 to-emerald-600/30 text-teal-200 shadow-2xl backdrop-blur-xl">
+            <Watch className="h-12 w-12 animate-pulse" />
+          </div>
+
+          <h1 className="mt-6 font-display text-3xl font-bold tracking-tight sm:text-5xl">
+            Smart Wearable & Device Sync
+          </h1>
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-teal-100/80 sm:text-base">
+            We are building next-generation direct Bluetooth &amp; cloud telemetry integration for Apple Watch, Samsung Galaxy Watch, Fitbit, WHOOP, and FDA-cleared biometric monitors.
+          </p>
+
+          {/* Actions */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setNotified(true)}
+              className="flex items-center gap-2 rounded-2xl bg-teal-500 px-6 py-3 text-sm font-bold text-slate-950 hover:bg-teal-400 transition-all shadow-lg shadow-teal-500/30 hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              {notified ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4" />
+                  You will be notified!
+                </>
+              ) : (
+                <>
+                  <Bell className="h-4 w-4" />
+                  Notify Me on Launch
+                </>
+              )}
+            </button>
+
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-6 py-3 text-sm font-bold text-white hover:bg-white/10 transition-all backdrop-blur-sm"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Link>
+          </div>
+        </div>
       </div>
 
-      {message && (
-        <p className="rounded-2xl bg-primary-soft px-4 py-3 text-sm text-primary-dark" role="status">
-          {message}
-        </p>
-      )}
-
-      <section className="rounded-[2rem] border border-border bg-white p-6 shadow-sm">
-        {band?.connected ? (
-          <div className="space-y-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex items-start gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-primary">
-                  <Watch className="h-7 w-7" aria-hidden />
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-success">
-                    Connected
-                  </p>
-                  <h2 className="font-display text-2xl font-semibold">{band.name}</h2>
-                  <p className="text-sm text-muted">
-                    {band.brand} · {band.model}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  variant="secondary"
-                  onClick={() => setSimulating((v) => !v)}
-                >
-                  {simulating ? "Pause live demo" : "Start live demo"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    disconnectFitnessBand();
-                    setSimulating(false);
-                    setMessage("Fitness band disconnected.");
-                  }}
-                >
-                  <Link2Off className="h-4 w-4" aria-hidden />
-                  Disconnect
-                </Button>
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl bg-[#f7fbfa] p-4 text-sm">
-                <p className="inline-flex items-center gap-2 text-muted">
-                  <Battery className="h-4 w-4" aria-hidden />
-                  Battery
-                </p>
-                <p className="mt-1 font-display text-xl font-semibold">
-                  {band.batteryPercent}%
-                </p>
-              </div>
-              <div className="rounded-2xl bg-[#f7fbfa] p-4 text-sm">
-                <p className="inline-flex items-center gap-2 text-muted">
-                  <Bluetooth className="h-4 w-4" aria-hidden />
-                  Last sync
-                </p>
-                <p className="mt-1 font-display text-xl font-semibold">
-                  {new Date(vitals.updatedAt).toLocaleTimeString()}
-                </p>
-              </div>
-              <div className="rounded-2xl bg-[#f7fbfa] p-4 text-sm">
-                <p className="text-muted">Monitoring</p>
-                <p className="mt-1 font-semibold">
-                  HR · SpO₂ · Steps · Sleep
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[1.5rem] border border-border p-4">
-                <p className="inline-flex items-center gap-2 text-sm text-muted">
-                  <Heart className="h-4 w-4 text-emergency" aria-hidden />
-                  Heart rate
-                </p>
-                <p className="mt-2 font-display text-3xl font-bold">
-                  {vitals.heartRate}{" "}
-                  <span className="text-base font-medium text-muted">BPM</span>
-                </p>
-              </div>
-              <div className="rounded-[1.5rem] border border-border p-4">
-                <p className="inline-flex items-center gap-2 text-sm text-muted">
-                  <Activity className="h-4 w-4 text-accent" aria-hidden />
-                  SpO₂
-                </p>
-                <p className="mt-2 font-display text-3xl font-bold">
-                  {vitals.spo2}
-                  <span className="text-base font-medium text-muted">%</span>
-                </p>
-              </div>
-              <div className="rounded-[1.5rem] border border-border p-4">
-                <p className="text-sm text-muted">Steps</p>
-                <p className="mt-2 font-display text-3xl font-bold">
-                  {formatNumber(vitals.steps)}
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
-              To test automatic ambulance assistance, simulate a heart-rate drop on
-              the{" "}
-              <Link href="/dashboard/emergency" className="font-semibold underline">
-                Emergency
-              </Link>{" "}
-              page. Demo only — never contacts real services.
-            </div>
+      {/* Sneak Peek Features Grid */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-[2rem] border border-border bg-white p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 shadow-xs">
+            <Heart className="h-6 w-6" />
           </div>
-        ) : (
-          <div>
-            <h2 className="font-display text-xl font-semibold">Add a fitness band</h2>
-            <p className="mt-2 text-sm text-muted">
-              Choose a demo wearable to stream heart rate and other vitals into
-              ZIVAN.
-            </p>
-            <div className="mt-5 grid gap-3">
-              {FITNESS_BAND_OPTIONS.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setSelected(option.id)}
-                  className={cn(
-                    "flex items-center gap-4 rounded-2xl border p-4 text-left transition",
-                    selected === option.id
-                      ? "border-primary bg-primary-soft"
-                      : "border-border hover:border-primary/30",
-                  )}
-                >
-                  <Watch className="h-5 w-5 text-primary" aria-hidden />
-                  <div>
-                    <p className="font-semibold">{option.name}</p>
-                    <p className="text-xs text-muted">
-                      {option.brand} · Heart rate, SpO₂, steps, sleep
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-            <Button
-              className="mt-5"
-              onClick={() => {
-                connectFitnessBand(selected);
-                setMessage("Fitness band connected. Live monitoring ready.");
-                setSimulating(true);
-              }}
-            >
-              <Bluetooth className="h-4 w-4" aria-hidden />
-              Pair selected band
-            </Button>
+          <h2 className="mt-4 font-display text-lg font-bold text-foreground">Continuous Vitals</h2>
+          <p className="mt-1.5 text-xs text-muted leading-relaxed">
+            Real-time optical heart rate tracking, SpO₂ blood oxygenation, and ECG rhythm anomaly detection streamed automatically.
+          </p>
+        </div>
+
+        <div className="rounded-[2rem] border border-border bg-white p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-600 shadow-xs">
+            <Radio className="h-6 w-6" />
           </div>
-        )}
-      </section>
+          <h2 className="mt-4 font-display text-lg font-bold text-foreground">Automatic Crash & Fall SOS</h2>
+          <p className="mt-1.5 text-xs text-muted leading-relaxed">
+            Instant ambulance dispatch trigger when sudden impact, severe tachycardia, or unconsciousness is detected.
+          </p>
+        </div>
+
+        <div className="rounded-[2rem] border border-border bg-white p-6 shadow-sm hover:shadow-md transition-all">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 shadow-xs">
+            <Bluetooth className="h-6 w-6" />
+          </div>
+          <h2 className="mt-4 font-display text-lg font-bold text-foreground">Universal Pairing</h2>
+          <p className="mt-1.5 text-xs text-muted leading-relaxed">
+            Seamless Bluetooth Low Energy (BLE) pairing with smartwatches, continuous glucose monitors (CGM), and BP cuffs.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
