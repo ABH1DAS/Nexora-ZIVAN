@@ -189,11 +189,11 @@ export function GoogleAmbulanceMap({
 
         leafletMapRef.current = map;
 
-        // Tile layer (Dark CartoDB by default)
-        const darkTileUrl = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
-        tileLayerRef.current = L.tileLayer(darkTileUrl, {
+        // Tile layer (Clean OpenStreetMap by default - No watermark / No API key needed)
+        const streetTileUrl = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+        tileLayerRef.current = L.tileLayer(streetTileUrl, {
           maxZoom: 19,
-          subdomains: "abcd",
+          subdomains: "abc",
         }).addTo(map);
         currentTileTypeRef.current = "roads";
       }
@@ -213,8 +213,8 @@ export function GoogleAmbulanceMap({
           ).addTo(map);
         } else {
           tileLayerRef.current = L.tileLayer(
-            "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-            { maxZoom: 19, subdomains: "abcd" }
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            { maxZoom: 19, subdomains: "abc" }
           ).addTo(map);
         }
         currentTileTypeRef.current = mapLayerType;
