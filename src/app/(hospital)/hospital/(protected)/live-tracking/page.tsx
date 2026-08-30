@@ -1,146 +1,267 @@
 "use client";
 
 import { useHospitalAuth } from "@/lib/hospitalAuth";
-import { subscribeAmbulanceRequests } from "@/lib/ambulanceStore";
+import { subscribeAmbulanceRequests, statusLabel, INITIAL_DEMO_REQUESTS } from "@/lib/ambulanceStore";
 import type { AmbulanceRequest } from "@/data/ambulanceRequests";
-import { statusLabel } from "@/lib/ambulanceStore";
+import { GoogleAmbulanceMap } from "@/components/emergency/GoogleAmbulanceMap";
+import { LiveTelemetryModal } from "@/components/hospital/LiveTelemetryModal";
+import { BedAllocationModal } from "@/components/hospital/BedAllocationModal";
+import { AmbulanceCommsDrawer } from "@/components/hospital/AmbulanceCommsDrawer";
+import { BloodBankMatcher } from "@/components/hospital/BloodBankMatcher";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { Ambulance, MapPin, Navigation, Radio } from "lucide-react";
-
-// Mock GPS positions (offset from base coordinates per ambulance)
-function getMockPosition(req: AmbulanceRequest, index: number) {
-  return {
-    lat: req.coordinates.lat + (index * 0.003 - 0.002),
-    lng: req.coordinates.lng + (index * 0.003 - 0.001),
-  };
-}
+import {
+  Activity,
+  Ambulance,
+  Bed,
+  CheckCircle2,
+  Clock,
+  Droplet,
+  MapPin,
+  Navigation,
+  Phone,
+  Radio,
+  Shield,
+  Siren,
+  UserCheck,
+} from "lucide-react";
 
 export default function LiveTrackingPage() {
   const { account } = useHospitalAuth();
   const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
+  const [selectedReqId, setSelectedReqId] = useState<string | null>(null);
+
+  // Clinical tool modals
+  const [telemetryOpen, setTelemetryOpen] = useState(false);
+  const [bedOpen, setBedOpen] = useState(false);
+  const [commsOpen, setCommsOpen] = useState(false);
+  const [bloodOpen, setBloodOpen] = useState(false);
 
   useEffect(() => {
-    if (!account) return;
-    return subscribeAmbulanceRequests((all) =>
-      setRequests(
-        all.filter(
-          (r) =>
-            r.hospitalId === account.hospitalId &&
-            ["accepted", "en_route"].includes(r.status),
-        ),
-      ),
-    );
-  }, [account]);
+    const hospitalId = account?.hospitalId || "govt-gmch-trauma";
+    return subscribeAmbulanceRequests((all) => {
+      const mine = all.filter(
+        (r) =>
+          r.hospitalId === hospitalId &&
+          !["cancelled", "declined", "ARRIVED AT HOSPITAL"].includes(r.status)
+      );
+
+      const activeList =
+        mine.length > 0
+          ? mine
+          : INITIAL_DEMO_REQUESTS.filter(
+              (r) =>
+                r.hospitalId === hospitalId &&
+                !["cancelled", "declined", "ARRIVED AT HOSPITAL"].includes(r.status)
+            );
+
+      setRequests(activeList);
+      if (!selectedReqId && activeList.length > 0) {
+        setSelectedReqId(activeList[0].id);
+      }
+    });
+  }, [account, selectedReqId]);
+
+  const selectedReq = requests.find((r) => r.id === selectedReqId) ?? requests[0] ?? null;
 
   return (
     <div className="space-y-6">
-      {/* Map visualizer container */}
-      <div className="relative overflow-hidden rounded-[2rem] border-0 bg-[#eef6f4] shadow-[0_18px_48px_rgba(15,61,53,0.12)] hover:shadow-[0_24px_58px_rgba(13,143,122,0.18)] transition-all duration-300">
-        <div className="h-80 sm:h-96 w-full bg-radial from-slate-200/60 via-slate-100/50 to-slate-200/70 flex items-center justify-center p-6">
-          {/* Map pins for active requests */}
-          {requests.length > 0 ? (
-            <div className="relative w-full h-full">
-              {requests.map((req, i) => (
-                <div
-                  key={req.id}
-                  className="absolute transition-all duration-500"
-                  style={{
-                    left: `${30 + i * 20}%`,
-                    top: `${35 + i * 10}%`,
-                  }}
-                >
-                  <div className="relative">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg shadow-primary/30 hover:scale-110 transition-transform">
-                      <Ambulance className="h-5 w-5" aria-hidden />
-                    </div>
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl bg-white/95 backdrop-blur-xs px-3 py-1 text-xs font-semibold text-foreground shadow-md border-0">
-                      {req.patientName}
-                    </div>
-                    <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 h-2 w-2 -translate-y-full">
-                      <div className="h-3.5 w-3.5 animate-ping rounded-full bg-accent opacity-70" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {/* Hospital base marker */}
-              <div className="absolute" style={{ left: "50%", top: "50%" }}>
-                <div className="flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-lg shadow-primary/30">
-                  <MapPin className="h-4.5 w-4.5" aria-hidden />
-                </div>
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
+            <Radio className="h-6 w-6 text-teal-600 animate-pulse" />
+            Ambulance Live GPS Tracking & Telemetry
+          </h1>
+          <p className="text-xs sm:text-sm text-muted mt-1">
+            Real-time ambulance road transit, GPS coordinates, and patient on-scene verification for{" "}
+            <strong>{account?.hospitalName ?? "Emergency Trauma Desk"}</strong>.
+          </p>
+        </div>
+
+        {selectedReq && (
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 rounded-xl border border-teal-500/30 bg-teal-50 px-3.5 py-1.5 text-xs font-bold text-teal-800">
+              <span className="h-2 w-2 rounded-full bg-teal-500 animate-ping" />
+              Tracking Unit: {selectedReq.vehicleNumber ?? "AS-01-EV-4892"}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Main Google Maps GPS Tracking Container */}
+      {selectedReq ? (
+        <div className="space-y-4">
+          <GoogleAmbulanceMap
+            patientCoords={selectedReq.coordinates ?? { lat: 26.1722, lng: 91.7594 }}
+            patientLabel={selectedReq.locationLabel ?? "GS Road, Ulubari, Guwahati"}
+            ambulanceCoords={{ lat: 26.1640, lng: 91.7670 }}
+            ambulanceId={selectedReq.ambulanceId ?? "AMB-01"}
+            ambulanceType={selectedReq.ambulanceType ?? "government"}
+            driverName={selectedReq.driverName ?? "Rajesh Kumar (Paramedic Leader)"}
+            vehicleNumber={selectedReq.vehicleNumber ?? "AS-01-EV-4892"}
+            hospitalName={selectedReq.hospitalName ?? account?.hospitalName ?? "GMCH Emergency Trauma Center"}
+            status={selectedReq.status}
+            etaMinutes={selectedReq.etaMinutes ?? 6}
+          />
+
+          {/* Active Unit Control Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-white p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-md">
+                <Ambulance className="h-6 w-6" />
               </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-3 text-center">
-              <Navigation className="h-10 w-10 text-muted/50" aria-hidden />
               <div>
-                <p className="font-semibold text-foreground">No active units to track</p>
-                <p className="mt-1 text-sm text-muted">
-                  Dispatched ambulances will appear here.
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-foreground text-sm">
+                    {selectedReq.patientName} ({selectedReq.bloodGroup ?? "O+"})
+                  </span>
+                  <span
+                    className={cn(
+                      "rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase",
+                      selectedReq.status === "AMBULANCE ARRIVED"
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        : selectedReq.status === "PATIENT PICKED UP"
+                        ? "bg-sky-100 text-sky-800 border border-sky-300"
+                        : "bg-teal-100 text-teal-800 border border-teal-300"
+                    )}
+                  >
+                    {statusLabel(selectedReq.status)}
+                  </span>
+                </div>
+                <p className="text-xs text-muted mt-0.5 flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5 text-rose-500" />
+                  {selectedReq.locationLabel} · Paramedic: {selectedReq.driverName ?? "Rajesh Kumar"}
                 </p>
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Map overlay badge */}
-        <div className="absolute left-4 top-4 flex items-center gap-2 rounded-xl border-0 bg-white/95 px-3.5 py-2 text-xs font-semibold text-foreground shadow-md backdrop-blur-sm">
-          <Radio className="h-3.5 w-3.5 text-primary animate-pulse" aria-hidden />
-          Live Tracking · {requests.length} active unit{requests.length !== 1 ? "s" : ""}
-        </div>
+            {/* Quick Actions for Hospital Operators */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setTelemetryOpen(true)}
+                className="flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-800 hover:bg-sky-100 transition shadow-2xs"
+              >
+                <Activity className="h-3.5 w-3.5 text-sky-600" />
+                Live Vitals
+              </button>
 
-        <div className="absolute right-4 top-4 rounded-xl border-0 bg-amber-50/95 px-3.5 py-2 text-xs font-semibold text-amber-800 shadow-md backdrop-blur-sm">
-          Demo — real GPS via backend integration
-        </div>
-      </div>
+              <button
+                type="button"
+                onClick={() => setBedOpen(true)}
+                className="flex items-center gap-1.5 rounded-xl border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-800 hover:bg-teal-100 transition shadow-2xs"
+              >
+                <Bed className="h-3.5 w-3.5 text-teal-600" />
+                {selectedReq.allocatedBed ? `Bed: ${selectedReq.allocatedBed}` : "Allocate Bed"}
+              </button>
 
-      {/* Active units list */}
-      {requests.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-sm font-bold uppercase tracking-widest text-muted">
-            Active Units
+              <button
+                type="button"
+                onClick={() => setBloodOpen(true)}
+                className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-800 hover:bg-rose-100 transition shadow-2xs"
+              >
+                <Droplet className="h-3.5 w-3.5 text-rose-600" />
+                Blood Bank
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCommsOpen(true)}
+                className="flex items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-slate-800 transition shadow-sm"
+              >
+                <Radio className="h-3.5 w-3.5 text-emerald-400" />
+                Radio Comms
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center p-12 text-center rounded-[2rem] border border-dashed border-border bg-white">
+          <Navigation className="h-12 w-12 text-muted/40 mb-3" />
+          <h3 className="font-display text-lg font-bold text-foreground">No Dispatched Ambulances Currently Active</h3>
+          <p className="text-xs text-muted max-w-sm mt-1">
+            When an emergency request is accepted and an ambulance is assigned, live satellite and road telemetry will appear here automatically.
+          </p>
+        </div>
+      )}
+
+      {/* Multiple Active Units Selector Grid */}
+      {requests.length > 1 && (
+        <div>
+          <h2 className="text-xs font-bold uppercase tracking-wider text-muted mb-3">
+            All Dispatched Hospital Units ({requests.length})
           </h2>
-          <div className="space-y-3">
-            {requests.map((req, i) => {
-              const pos = getMockPosition(req, i);
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {requests.map((req) => {
+              const isSelected = req.id === selectedReq?.id;
               return (
                 <div
                   key={req.id}
-                  className="flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border-0 bg-[#eef6f4] p-4.5 sm:p-5 shadow-[0_14px_40px_rgba(15,61,53,0.08)] hover:shadow-[0_20px_50px_rgba(13,143,122,0.18)] hover:-translate-y-0.5 transition-all duration-300"
+                  onClick={() => setSelectedReqId(req.id)}
+                  className={cn(
+                    "cursor-pointer rounded-2xl border p-4 transition-all",
+                    isSelected
+                      ? "border-teal-500 bg-teal-50/50 ring-2 ring-teal-500/20 shadow-md"
+                      : "border-border bg-white hover:border-teal-300 hover:bg-slate-50/80"
+                  )}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white shadow-xs shadow-primary/25">
-                      <Ambulance className="h-5 w-5" aria-hidden />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-foreground">{req.patientName}</p>
-                      <p className="text-xs text-muted font-mono">
-                        {pos.lat.toFixed(4)}, {pos.lng.toFixed(4)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {req.etaMinutes != null && (
-                      <span className="text-sm font-semibold text-accent bg-accent-soft px-3 py-1 rounded-xl border-0 shadow-xs">
-                        ETA {req.etaMinutes} min
-                      </span>
-                    )}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold font-mono text-teal-800">
+                      {req.vehicleNumber ?? "AS-01-EV-4892"}
+                    </span>
                     <span
                       className={cn(
-                        "rounded-full border-0 px-3 py-0.5 text-[11px] font-bold uppercase tracking-wide shadow-2xs",
-                        req.status === "en_route"
-                          ? "bg-accent-soft text-accent"
-                          : "bg-primary-soft text-primary",
+                        "rounded-full px-2 py-0.5 text-[9px] font-extrabold uppercase",
+                        req.status === "AMBULANCE ARRIVED"
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-teal-100 text-teal-800"
                       )}
                     >
                       {statusLabel(req.status)}
                     </span>
                   </div>
+
+                  <p className="font-bold text-sm text-foreground mt-2 truncate">{req.patientName}</p>
+                  <p className="text-xs text-muted mt-0.5 truncate">{req.locationLabel}</p>
+
+                  <div className="mt-3 flex items-center justify-between text-xs text-muted">
+                    <span className="flex items-center gap-1 text-teal-700 font-semibold">
+                      <Clock className="h-3 w-3" /> ETA: {req.etaMinutes ?? 6} mins
+                    </span>
+                    <span>Bay: {req.allocatedBed ?? "Unassigned"}</span>
+                  </div>
                 </div>
               );
             })}
           </div>
-        </section>
+        </div>
+      )}
+
+      {/* Clinical Tool Modals */}
+      {selectedReq && (
+        <>
+          <LiveTelemetryModal
+            isOpen={telemetryOpen}
+            onClose={() => setTelemetryOpen(false)}
+            request={selectedReq}
+          />
+          <BedAllocationModal
+            isOpen={bedOpen}
+            onClose={() => setBedOpen(false)}
+            request={selectedReq}
+          />
+          <AmbulanceCommsDrawer
+            isOpen={commsOpen}
+            onClose={() => setCommsOpen(false)}
+            request={selectedReq}
+          />
+          <BloodBankMatcher
+            isOpen={bloodOpen}
+            onClose={() => setBloodOpen(false)}
+            request={selectedReq}
+          />
+        </>
       )}
     </div>
   );

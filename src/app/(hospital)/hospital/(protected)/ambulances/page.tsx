@@ -1,8 +1,7 @@
 "use client";
 
 import { useHospitalAuth } from "@/lib/hospitalAuth";
-import { subscribeAmbulanceRequests } from "@/lib/ambulanceStore";
-import { statusLabel } from "@/lib/ambulanceStore";
+import { subscribeAmbulanceRequests, statusLabel, INITIAL_DEMO_REQUESTS } from "@/lib/ambulanceStore";
 import { cn } from "@/lib/utils";
 import type { AmbulanceRequest } from "@/data/ambulanceRequests";
 import { useEffect, useState } from "react";
@@ -24,10 +23,10 @@ interface MockAmbulance {
 }
 
 const MOCK_FLEET: MockAmbulance[] = [
-  { id: "amb-01", callSign: "ALPHA-1", driver: "Rajan Kumar", status: "available" },
-  { id: "amb-02", callSign: "BRAVO-2", driver: "Priya Singh", status: "available" },
-  { id: "amb-03", callSign: "CHARLIE-3", driver: "Arjun Mehta", status: "maintenance" },
-  { id: "amb-04", callSign: "DELTA-4", driver: "Sunita Rao", status: "returning" },
+  { id: "amb-01", callSign: "ALPHA-1 (AS-01-EV-4892)", driver: "Rajesh Kumar (Paramedic Leader)", status: "available" },
+  { id: "amb-02", callSign: "BRAVO-2 (AS-01-EV-2041)", driver: "Manjit Saikia", status: "available" },
+  { id: "amb-03", callSign: "CHARLIE-3 (AS-01-EV-9912)", driver: "Dipak Sharma", status: "maintenance" },
+  { id: "amb-04", callSign: "DELTA-4 (AS-01-EV-3304)", driver: "Bipul Nath", status: "returning" },
 ];
 
 const statusConfig = {
@@ -42,14 +41,15 @@ export default function AmbulancesPage() {
   const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
 
   useEffect(() => {
-    if (!account) return;
-    return subscribeAmbulanceRequests((all) =>
-      setRequests(all.filter((r) => r.hospitalId === account.hospitalId)),
-    );
+    const hospitalId = account?.hospitalId || "govt-gmch-trauma";
+    return subscribeAmbulanceRequests((all) => {
+      const mine = all.filter((r) => r.hospitalId === hospitalId);
+      setRequests(mine.length > 0 ? mine : INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === hospitalId));
+    });
   }, [account]);
 
   // Assign dispatched requests to ambulances
-  const activeRequests = requests.filter((r) => ["accepted", "en_route"].includes(r.status));
+  const activeRequests = requests.filter((r) => !["cancelled", "declined", "ARRIVED AT HOSPITAL"].includes(r.status));
   const fleet: MockAmbulance[] = MOCK_FLEET.map((amb, i) => {
     const req = activeRequests[i];
     if (req) return { ...amb, status: "dispatched" as const, currentRequest: req };
