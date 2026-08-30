@@ -84,6 +84,8 @@ export function GoogleAmbulanceMap({
   const hospitalMarkerRef = useRef<any>(null);
   const polylineLayerRef = useRef<any>(null);
   const tileLayerRef = useRef<any>(null);
+  const currentTileTypeRef = useRef<string>("roads");
+  const initialFitDoneRef = useRef(false);
 
   const [activePatientCoords, setActivePatientCoords] = useState<Coordinates>(patientCoords || DEFAULT_PATIENT_COORDS);
   const [activePatientLabel, setActivePatientLabel] = useState<string>(patientLabel || "GS Road, Ulubari / Bhangagarh, Guwahati, Assam 781007");
@@ -101,16 +103,19 @@ export function GoogleAmbulanceMap({
     { instruction: "Arrive at Patient SOS Origin Coordinates (GS Road, Ulubari)", distance: "0 m", duration: "0 min" },
   ];
 
-  // Sync props to state
+  // Sync props to state without re-creating objects
   useEffect(() => {
     if (patientCoords?.lat && patientCoords?.lng) {
-      setActivePatientCoords(patientCoords);
+      setActivePatientCoords((prev) => {
+        if (prev.lat === patientCoords.lat && prev.lng === patientCoords.lng) return prev;
+        return patientCoords;
+      });
     }
   }, [patientCoords?.lat, patientCoords?.lng]);
 
   useEffect(() => {
     if (patientLabel) {
-      setActivePatientLabel(patientLabel);
+      setActivePatientLabel((prev) => (prev === patientLabel ? prev : patientLabel));
     }
   }, [patientLabel]);
 
@@ -148,7 +153,7 @@ export function GoogleAmbulanceMap({
         if (onLocationDetected) onLocationDetected(detectedCoords, fallbackLabel);
 
         if (leafletMapRef.current) {
-          leafletMapRef.current.setView([detectedCoords.lat, detectedCoords.lng], 15);
+          leafletMapRef.current.setView([detectedCoords.lat, detectedCoords.lng], 15, { animate: true });
         }
         setGpsDetecting(false);
       },
@@ -160,7 +165,7 @@ export function GoogleAmbulanceMap({
     );
   }, [onLocationDetected]);
 
-  // Initialize Leaflet Map
+  // Initialize Leaflet Map ONCE
   useEffect(() => {
     if (typeof window === "undefined" || !mapContainerRef.current) return;
 
@@ -168,14 +173,6 @@ export function GoogleAmbulanceMap({
 
     import("leaflet").then((L) => {
       if (!isMounted || !mapContainerRef.current) return;
-
-      // Fix default icons if missing
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-        iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-        shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-      });
 
       if (!leafletMapRef.current) {
         const pLat = activePatientCoords.lat || DEFAULT_PATIENT_COORDS.lat;
@@ -192,31 +189,35 @@ export function GoogleAmbulanceMap({
 
         leafletMapRef.current = map;
 
-        // Tile layer (Dark CartoDB by default, or Esri Satellite)
+        // Tile layer (Dark CartoDB by default)
         const darkTileUrl = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
         tileLayerRef.current = L.tileLayer(darkTileUrl, {
           maxZoom: 19,
           subdomains: "abcd",
         }).addTo(map);
+        currentTileTypeRef.current = "roads";
       }
 
       const map = leafletMapRef.current;
 
-      // Update Tile Layer based on layer toggle
-      if (tileLayerRef.current) {
-        map.removeLayer(tileLayerRef.current);
-      }
+      // Only swap tile layer when layer type ACTUALLY changes
+      if (currentTileTypeRef.current !== mapLayerType) {
+        if (tileLayerRef.current) {
+          map.removeLayer(tileLayerRef.current);
+        }
 
-      if (mapLayerType === "satellite") {
-        tileLayerRef.current = L.tileLayer(
-          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-          { maxZoom: 19 }
-        ).addTo(map);
-      } else {
-        tileLayerRef.current = L.tileLayer(
-          "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-          { maxZoom: 19, subdomains: "abcd" }
-        ).addTo(map);
+        if (mapLayerType === "satellite") {
+          tileLayerRef.current = L.tileLayer(
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+            { maxZoom: 19 }
+          ).addTo(map);
+        } else {
+          tileLayerRef.current = L.tileLayer(
+            "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+            { maxZoom: 19, subdomains: "abcd" }
+          ).addTo(map);
+        }
+        currentTileTypeRef.current = mapLayerType;
       }
 
       // Custom HTML Icons
@@ -272,9 +273,9 @@ export function GoogleAmbulanceMap({
 
       const curPatientCoords = activePatientCoords || DEFAULT_PATIENT_COORDS;
       const curAmbulanceCoords = ambulanceCoords || DEFAULT_AMBULANCE_COORDS;
-      const curHospCoords = targetHospital?.coordinates || DEFAULT_HOSPITAL_COORDS;
+      const curHospCoords = hospitalCoords || targetHospital?.coordinates || DEFAULT_HOSPITAL_COORDS;
 
-      // 1. Patient Marker
+      // 1. Patient Marker - smooth setLatLng without blink
       if (patientMarkerRef.current) {
         patientMarkerRef.current.setLatLng([curPatientCoords.lat, curPatientCoords.lng]);
       } else {
@@ -283,7 +284,7 @@ export function GoogleAmbulanceMap({
           .bindPopup(`<b>🚨 Patient Location (SOS Origin)</b><br/>${activePatientLabel}`);
       }
 
-      // 2. Ambulance Marker
+      // 2. Ambulance Marker - smooth setLatLng without blink
       if (ambulanceMarkerRef.current) {
         ambulanceMarkerRef.current.setLatLng([curAmbulanceCoords.lat, curAmbulanceCoords.lng]);
       } else {
@@ -292,7 +293,7 @@ export function GoogleAmbulanceMap({
           .bindPopup(`<b>🚑 Ambulance Unit (${vehicleNumber})</b><br/>Paramedic: ${driverName}<br/>Status: ${status}`);
       }
 
-      // 3. Hospital Marker
+      // 3. Hospital Marker - smooth setLatLng without blink
       if (hospitalMarkerRef.current) {
         hospitalMarkerRef.current.setLatLng([curHospCoords.lat, curHospCoords.lng]);
       } else {
@@ -302,10 +303,6 @@ export function GoogleAmbulanceMap({
       }
 
       // 4. GS Road Corridor Snapped Polyline
-      if (polylineLayerRef.current) {
-        map.removeLayer(polylineLayerRef.current);
-      }
-
       const roadPoints: [number, number][] = [
         [curHospCoords.lat, curHospCoords.lng],
         [26.1585, 91.7695],
@@ -316,6 +313,10 @@ export function GoogleAmbulanceMap({
         [26.1704, 91.7610],
         [curPatientCoords.lat, curPatientCoords.lng],
       ];
+
+      if (polylineLayerRef.current) {
+        map.removeLayer(polylineLayerRef.current);
+      }
 
       const outerGlow = L.polyline(roadPoints, {
         color: "#083344",
@@ -334,13 +335,16 @@ export function GoogleAmbulanceMap({
 
       polylineLayerRef.current = L.layerGroup([outerGlow, innerPath]).addTo(map);
 
-      // Fit bounds nicely with padding
-      const group = L.featureGroup([
-        patientMarkerRef.current,
-        ambulanceMarkerRef.current,
-        hospitalMarkerRef.current,
-      ]);
-      map.fitBounds(group.getBounds().pad(0.2));
+      // Fit bounds ONCE on initial mount to avoid repetitive camera jumping / blinking
+      if (!initialFitDoneRef.current) {
+        const group = L.featureGroup([
+          patientMarkerRef.current,
+          ambulanceMarkerRef.current,
+          hospitalMarkerRef.current,
+        ]);
+        map.fitBounds(group.getBounds().pad(0.2));
+        initialFitDoneRef.current = true;
+      }
 
       const directDist = calculateDistanceKm(
         curAmbulanceCoords.lat,
@@ -356,9 +360,13 @@ export function GoogleAmbulanceMap({
       isMounted = false;
     };
   }, [
-    activePatientCoords,
+    activePatientCoords.lat,
+    activePatientCoords.lng,
     activePatientLabel,
-    ambulanceCoords,
+    ambulanceCoords?.lat,
+    ambulanceCoords?.lng,
+    hospitalCoords?.lat,
+    hospitalCoords?.lng,
     hospitalName,
     vehicleNumber,
     driverName,

@@ -39,11 +39,33 @@ const HOSPITAL_BASE_COORDS: Record<string, { lat: number; lng: number }> = {
   "pvt-gnrc-dispur": { lat: 26.1424, lng: 91.7905 },
 };
 
+function DigitalClock() {
+  const [time, setTime] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setTime(new Date());
+    const clockInterval = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(clockInterval);
+  }, []);
+
+  return (
+    <div className="rounded-[1.5rem] bg-[#0f2420] px-5 py-4 text-white shadow-[0_14px_35px_rgba(15,36,32,0.45)]">
+      <div className="text-right font-mono">
+        <p className="text-2xl sm:text-3xl font-bold tracking-wider text-emerald-400">
+          {time ? time.toLocaleTimeString() : "--:--:--"}
+        </p>
+        <p className="text-xs text-teal-200 font-medium">
+          {time ? time.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) : ""}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function CommandCenterPage() {
   const { account } = useHospitalAuth();
   const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
-  const [time, setTime] = useState<Date | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundOn, setSoundOn] = useState(hospitalAudio.isEnabled());
   const mapSectionRef = useRef<HTMLDivElement>(null);
@@ -54,12 +76,6 @@ export default function CommandCenterPage() {
   const [bedOpen, setBedOpen] = useState(false);
   const [commsOpen, setCommsOpen] = useState(false);
   const [bloodOpen, setBloodOpen] = useState(false);
-
-  useEffect(() => {
-    setTime(new Date());
-    const clockInterval = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(clockInterval);
-  }, []);
 
   useEffect(() => {
     return subscribeAmbulanceRequests((all) => {
@@ -134,16 +150,7 @@ export default function CommandCenterPage() {
 
           {/* Digital Clock & Audio / Fullscreen Controls */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="rounded-[1.5rem] bg-[#0f2420] px-5 py-4 text-white shadow-[0_14px_35px_rgba(15,36,32,0.45)]">
-              <div className="text-right font-mono">
-                <p className="text-2xl sm:text-3xl font-bold tracking-wider text-emerald-400">
-                  {time ? time.toLocaleTimeString() : "--:--:--"}
-                </p>
-                <p className="text-xs text-teal-200 font-medium">
-                  {time ? time.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) : ""}
-                </p>
-              </div>
-            </div>
+            <DigitalClock />
 
             <div className="flex items-center gap-2">
               <button
