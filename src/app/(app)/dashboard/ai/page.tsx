@@ -21,7 +21,7 @@ import {
   VolumeX,
   Zap,
 } from "lucide-react";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import React, { FormEvent, useEffect, useRef, useState } from "react";
 
 interface ChatMessage {
   id: string;
@@ -36,6 +36,145 @@ const SAMPLE_PROMPTS = [
   { label: "Stress & Anxiety", prompt: "Can you guide me through a 5-minute breathing technique for stress relief?", icon: Activity },
   { label: "Daily Hydration", prompt: "What is my optimal daily water intake during physical workouts?", icon: Zap },
 ];
+
+function renderFormattedLine(text: string, isUser: boolean) {
+  const parts: React.ReactNode[] = [];
+  let keyIndex = 0;
+  const regex = /(\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`)/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+
+    if (match[2]) {
+      // **bold**
+      parts.push(
+        <strong
+          key={`b-${keyIndex++}`}
+          className={cn("font-bold", isUser ? "text-white" : "text-slate-900")}
+        >
+          {match[2]}
+        </strong>
+      );
+    } else if (match[3]) {
+      // *italic*
+      parts.push(
+        <em key={`i-${keyIndex++}`} className="italic opacity-90">
+          {match[3]}
+        </em>
+      );
+    } else if (match[4]) {
+      // `code`
+      parts.push(
+        <code
+          key={`c-${keyIndex++}`}
+          className={cn(
+            "rounded px-1.5 py-0.5 font-mono text-xs",
+            isUser ? "bg-white/20 text-white" : "bg-slate-100 text-teal-800"
+          )}
+        >
+          {match[4]}
+        </code>
+      );
+    }
+
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : text;
+}
+
+function FormattedMessage({ content, isUser }: { content: string; isUser: boolean }) {
+  const lines = content.split("\n");
+
+  return (
+    <div className="space-y-2 text-sm leading-relaxed">
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+
+        if (!trimmed) {
+          return <div key={idx} className="h-1" />;
+        }
+
+        // Heading ### or ##
+        if (trimmed.startsWith("### ")) {
+          return (
+            <h4
+              key={idx}
+              className={cn(
+                "mt-2.5 mb-1 font-bold text-sm tracking-tight",
+                isUser ? "text-white" : "text-slate-900"
+              )}
+            >
+              {renderFormattedLine(trimmed.replace(/^###\s+/, ""), isUser)}
+            </h4>
+          );
+        }
+
+        if (trimmed.startsWith("## ")) {
+          return (
+            <h3
+              key={idx}
+              className={cn(
+                "mt-3 mb-1 font-bold text-base tracking-tight",
+                isUser ? "text-white" : "text-slate-900"
+              )}
+            >
+              {renderFormattedLine(trimmed.replace(/^##\s+/, ""), isUser)}
+            </h3>
+          );
+        }
+
+        // Bullet point • or - or *
+        if (trimmed.startsWith("• ") || trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+          const bulletContent = trimmed.replace(/^[•\-\*]\s+/, "");
+          return (
+            <div key={idx} className="flex items-start gap-2 pl-1 my-1">
+              <span
+                className={cn(
+                  "mt-2 h-1.5 w-1.5 shrink-0 rounded-full",
+                  isUser ? "bg-white" : "bg-teal-600"
+                )}
+              />
+              <span className="flex-1">{renderFormattedLine(bulletContent, isUser)}</span>
+            </div>
+          );
+        }
+
+        // Numbered list item "1. ", "2. "
+        const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+        if (numMatch) {
+          return (
+            <div key={idx} className="flex items-start gap-2 pl-1 my-1">
+              <span
+                className={cn(
+                  "font-bold text-xs shrink-0 mt-0.5",
+                  isUser ? "text-white/90" : "text-teal-700"
+                )}
+              >
+                {numMatch[1]}.
+              </span>
+              <span className="flex-1">{renderFormattedLine(numMatch[2], isUser)}</span>
+            </div>
+          );
+        }
+
+        return (
+          <p key={idx} className="m-0">
+            {renderFormattedLine(line, isUser)}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function DashboardAiAssistantPage() {
   const { user } = useAuth();
@@ -53,7 +192,7 @@ export default function DashboardAiAssistantPage() {
       {
         id: "msg_init_1",
         role: "assistant",
-        content: `Hello **${firstName}**! 👋 I am **ZIVAN AI**, your personal Gemini-powered clinical & wellness companion.\n\nAsk me anything about symptoms, nutrition plans, vitals analysis, sleep habits, or stress reduction. How can I assist your health journey today?`,
+        content: `Hello **${firstName}**! 👋 I am **ZIVAN AI**, your personal assistant.\n\nAsk me anything about symptoms, nutrition plans, vitals analysis, sleep habits, stress reduction, or any daily questions. How can I assist you today?`,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       },
     ]);
@@ -79,7 +218,6 @@ export default function DashboardAiAssistantPage() {
     setIsTyping(true);
 
     try {
-      // Build conversation history payload
       const historyPayload = messages.map((m) => ({
         role: m.role === "assistant" ? "model" : "user",
         content: m.content,
@@ -95,7 +233,7 @@ export default function DashboardAiAssistantPage() {
       });
 
       const data = await res.json();
-      const reply = data.reply || "I am here to support your wellness journey. How else can I help?";
+      const reply = data.reply || "I am here to support your journey. How else can I help?";
 
       const aiMsg: ChatMessage = {
         id: `msg_ai_${Date.now()}`,
@@ -111,7 +249,7 @@ export default function DashboardAiAssistantPage() {
         id: `msg_ai_err_${Date.now()}`,
         role: "assistant",
         content:
-          "I am focusing on your wellness. Key pillars of good health include getting 7–8 hours of restorative sleep, drinking 2.5L+ of water daily, balanced nutrition, and active movement. What specific health area would you like to explore?",
+          "I am here to assist you. Key pillars of good health include getting 7–8 hours of restorative sleep, drinking 2.5L+ of water daily, balanced nutrition, and active movement. What specific topic would you like to explore?",
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, fallbackMsg]);
@@ -160,10 +298,10 @@ export default function DashboardAiAssistantPage() {
             Powered by Google Gemini 1.5
           </div>
           <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            AI Health Assistant
+            AI Assistant
           </h1>
           <p className="mt-1 text-xs sm:text-sm text-muted">
-            Ask any questions regarding symptoms, nutrition, fitness, sleep, and preventative wellness.
+            Ask any questions regarding symptoms, nutrition, fitness, sleep, daily planning, or general assistance.
           </p>
         </div>
 
@@ -201,13 +339,13 @@ export default function DashboardAiAssistantPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <p className="font-display font-bold text-base text-white">ZIVAN Medical AI</p>
+                <p className="font-display font-bold text-base text-white">ZIVAN AI Assistant</p>
                 <span className="flex items-center gap-1 rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-extrabold text-emerald-300 border border-emerald-400/30">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
                   GEMINI ONLINE
                 </span>
               </div>
-              <p className="text-xs text-teal-200/70">Evidence-Based Health &amp; Preventative Medicine</p>
+              <p className="text-xs text-teal-200/70">Health, Wellness &amp; General Assistance</p>
             </div>
           </div>
         </div>
@@ -244,7 +382,7 @@ export default function DashboardAiAssistantPage() {
                         : "rounded-tl-xs bg-white text-slate-800 border border-border/80"
                     )}
                   >
-                    <div className="whitespace-pre-wrap font-sans">{msg.content}</div>
+                    <FormattedMessage content={msg.content} isUser={isUser} />
                   </div>
 
                   {/* Actions for AI messages */}
@@ -302,7 +440,7 @@ export default function DashboardAiAssistantPage() {
               </div>
               <div className="rounded-[1.5rem] rounded-tl-xs bg-white border border-border p-4 text-xs font-semibold text-muted shadow-sm flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-teal-500 animate-ping" />
-                ZIVAN AI is analyzing your medical query with Gemini...
+                ZIVAN AI is typing with Gemini...
               </div>
             </div>
           )}
@@ -338,7 +476,7 @@ export default function DashboardAiAssistantPage() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask ZIVAN AI anything about your health, vitals, nutrition, or symptoms..."
+            placeholder="Ask ZIVAN AI anything about your health, vitals, nutrition, or daily questions..."
             disabled={isTyping}
             className="flex-1 rounded-2xl border border-border bg-slate-50 px-4 py-3 text-sm text-foreground placeholder:text-muted focus:border-teal-500 focus:bg-white focus:outline-hidden transition"
           />
