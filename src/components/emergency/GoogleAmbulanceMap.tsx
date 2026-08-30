@@ -4,15 +4,7 @@ import { useEffect, useRef, useState, useMemo } from "react";
 import {
   Ambulance,
   MapPin,
-  Navigation,
-  Building2,
-  Phone,
   Layers,
-  Compass,
-  CheckCircle2,
-  Clock,
-  Shield,
-  Activity,
   LocateFixed,
   Route,
   ChevronDown,
@@ -154,9 +146,6 @@ export function GoogleAmbulanceMap({
     { instruction: "Arrive at Patient SOS Coordinates (GS Road, Ulubari)", distance: "0 m", duration: "0 min" },
   ]);
   const [showSteps, setShowSteps] = useState(false);
-
-  const [selectedHospital, setSelectedHospital] = useState<Hospital | null>(null);
-  const [filterCategory, setFilterCategory] = useState<"all" | "government" | "private">("all");
   const [mapType, setMapType] = useState<"roadmap" | "satellite">("roadmap");
 
   const apiKey =
@@ -181,17 +170,13 @@ export function GoogleAmbulanceMap({
   }, [nearbyHospitals, activePatientCoords]);
 
   const filteredHospitals = useMemo(() => {
-    if (singleHospitalOnly) {
-      const match = dynamicHospitals.filter(
-        (h) =>
-          h.name.toLowerCase().includes(hospitalName.toLowerCase()) ||
-          hospitalName.toLowerCase().includes(h.name.toLowerCase())
-      );
-      return match.length > 0 ? match : dynamicHospitals.slice(0, 1);
-    }
-    if (filterCategory === "all") return dynamicHospitals;
-    return dynamicHospitals.filter((h) => h.category === filterCategory);
-  }, [dynamicHospitals, filterCategory, singleHospitalOnly, hospitalName]);
+    const match = dynamicHospitals.filter(
+      (h) =>
+        h.name.toLowerCase().includes(hospitalName.toLowerCase()) ||
+        hospitalName.toLowerCase().includes(h.name.toLowerCase())
+    );
+    return match.length > 0 ? match : dynamicHospitals.slice(0, 1);
+  }, [dynamicHospitals, hospitalName]);
 
   function detectUserCurrentLocation() {
     if (typeof window === "undefined" || !navigator.geolocation) {
@@ -296,11 +281,13 @@ export function GoogleAmbulanceMap({
       { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f172a" }] },
     ];
 
+    const centerCoords = {
+      lat: (activePatientCoords.lat + ambulanceCoords.lat) / 2,
+      lng: (activePatientCoords.lng + ambulanceCoords.lng) / 2,
+    };
+
     const map = new google.maps.Map(mapRef.current, {
-      center: {
-        lat: (activePatientCoords.lat + ambulanceCoords.lat) / 2,
-        lng: (activePatientCoords.lng + ambulanceCoords.lng) / 2,
-      },
+      center: centerCoords,
       zoom: 14,
       mapTypeId: mapType,
       disableDefaultUI: false,
@@ -314,7 +301,7 @@ export function GoogleAmbulanceMap({
     mapInstanceRef.current = map;
     const bounds = new google.maps.LatLngBounds();
 
-    // 1. Patient Marker
+    // 1. Patient Marker (Guwahati 26.1714, 91.7586)
     const patientLatLng = new google.maps.LatLng(activePatientCoords.lat, activePatientCoords.lng);
     bounds.extend(patientLatLng);
 
@@ -344,7 +331,7 @@ export function GoogleAmbulanceMap({
       patientInfoWindow.open(map, patientMarker);
     });
 
-    // 2. Dispatched Ambulance Marker
+    // 2. Dispatched Ambulance Marker (GS Road, Guwahati)
     const ambulanceLatLng = new google.maps.LatLng(ambulanceCoords.lat, ambulanceCoords.lng);
     bounds.extend(ambulanceLatLng);
 
@@ -376,23 +363,21 @@ export function GoogleAmbulanceMap({
       ambulanceInfoWindow.open(map, ambulanceMarker);
     });
 
-    // 3. Hospital Marker (Only logged in / assigned hospital if singleHospitalOnly)
+    // 3. Hospital Marker (Only logged in / assigned hospital)
     filteredHospitals.forEach((hosp) => {
       if (!hosp.coordinates) return;
       const hospLatLng = new google.maps.LatLng(hosp.coordinates.lat, hosp.coordinates.lng);
       bounds.extend(hospLatLng);
 
-      const isSelected = hosp.name === hospitalName || hosp.id === selectedHospital?.id || singleHospitalOnly;
-
       const hospitalMarker = new google.maps.Marker({
         position: hosp.coordinates,
         map,
         title: hosp.name,
-        zIndex: isSelected ? 80 : 50,
+        zIndex: 80,
         icon: {
-          url: getHospitalIconSvg(hosp.category, isSelected),
-          scaledSize: new google.maps.Size(isSelected ? 38 : 32, isSelected ? 48 : 40),
-          anchor: new google.maps.Point(isSelected ? 19 : 16, isSelected ? 48 : 40),
+          url: getHospitalIconSvg(hosp.category, true),
+          scaledSize: new google.maps.Size(38, 48),
+          anchor: new google.maps.Point(19, 48),
         },
       });
 
@@ -418,13 +403,12 @@ export function GoogleAmbulanceMap({
       });
 
       hospitalMarker.addListener("click", () => {
-        setSelectedHospital(hosp);
         if (onSelectHospital) onSelectHospital(hosp);
         hospInfoWindow.open(map, hospitalMarker);
       });
     });
 
-    // 4. Proper Road Transport Route (DRIVING mode along road grid)
+    // 4. Road Transport Directions
     let fallbackOuterPolyline: any = null;
     let fallbackInnerPolyline: any = null;
 
@@ -432,7 +416,7 @@ export function GoogleAmbulanceMap({
     const directionsRenderer = new google.maps.DirectionsRenderer({
       map,
       suppressMarkers: true,
-      preserveViewport: false,
+      preserveViewport: true, // Prevent resetting view to Delhi / India center
       polylineOptions: {
         strokeColor: "#0284c7",
         strokeOpacity: 0.95,
@@ -522,7 +506,7 @@ export function GoogleAmbulanceMap({
       }
     );
 
-    map.fitBounds(bounds, { top: 60, bottom: 60, left: 60, right: 60 });
+    map.fitBounds(bounds, { top: 50, bottom: 50, left: 50, right: 50 });
   }, [
     mapsLoaded,
     activePatientCoords,
@@ -563,7 +547,7 @@ export function GoogleAmbulanceMap({
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
               <span className="text-[11px] font-extrabold uppercase tracking-wider text-teal-300">
-                {singleHospitalOnly ? hospitalName : `Road Transport Dispatch · ${filteredHospitals.length} Hospitals`}
+                {hospitalName}
               </span>
             </div>
             <p className="text-xs font-bold text-white flex items-center gap-1.5 truncate max-w-xs sm:max-w-md">
@@ -584,32 +568,6 @@ export function GoogleAmbulanceMap({
             <LocateFixed className={`h-3.5 w-3.5 ${gpsDetecting ? "animate-spin" : ""}`} />
             {gpsDetecting ? "Detecting GPS..." : "📍 Get My Location"}
           </button>
-
-          {!singleHospitalOnly && (
-            <div className="flex rounded-xl bg-slate-800/90 p-1 text-[11px] font-bold text-slate-300 border border-white/5">
-              <button
-                type="button"
-                onClick={() => setFilterCategory("all")}
-                className={`rounded-lg px-2.5 py-1 transition ${filterCategory === "all" ? "bg-primary text-white shadow" : "hover:text-white"}`}
-              >
-                All ({nearbyHospitals.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilterCategory("government")}
-                className={`rounded-lg px-2.5 py-1 transition ${filterCategory === "government" ? "bg-blue-600 text-white shadow" : "hover:text-white"}`}
-              >
-                Govt
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilterCategory("private")}
-                className={`rounded-lg px-2.5 py-1 transition ${filterCategory === "private" ? "bg-emerald-600 text-white shadow" : "hover:text-white"}`}
-              >
-                Pvt
-              </button>
-            </div>
-          )}
 
           <button
             type="button"
@@ -637,7 +595,7 @@ export function GoogleAmbulanceMap({
       </div>
 
       {/* Main Map Container */}
-      <div className="relative h-[430px] w-full bg-slate-950">
+      <div className="relative h-[460px] sm:h-[500px] w-full bg-slate-950">
         {apiKeyAvailable && mapsLoaded ? (
           <div ref={mapRef} className="h-full w-full" />
         ) : (
@@ -730,71 +688,6 @@ export function GoogleAmbulanceMap({
             ))}
           </div>
         )}
-      </div>
-
-      {/* Hospital Details Carousel / Single Hospital Panel */}
-      <div className="border-t border-white/10 bg-slate-900/95 p-4 backdrop-blur-md">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-            <Building2 className="h-3.5 w-3.5 text-teal-400" />
-            {singleHospitalOnly ? "Destination Emergency Facility" : "Nearby Hospitals Sorted by Road Travel Proximity"}
-          </span>
-          <span className="text-[10px] text-teal-400 font-semibold">
-            {singleHospitalOnly ? "Hospital Base Connection Verified" : "Click hospital pin to view routing"}
-          </span>
-        </div>
-
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {filteredHospitals.slice(0, singleHospitalOnly ? 1 : 4).map((hosp) => {
-            const isTarget = hosp.name === hospitalName || singleHospitalOnly;
-            return (
-              <div
-                key={hosp.id}
-                onClick={() => {
-                  setSelectedHospital(hosp);
-                  if (onSelectHospital) onSelectHospital(hosp);
-                  if (mapInstanceRef.current && hosp.coordinates) {
-                    mapInstanceRef.current.panTo(hosp.coordinates);
-                    mapInstanceRef.current.setZoom(14);
-                  }
-                }}
-                className={`cursor-pointer rounded-2xl border p-3 transition-all text-xs ${
-                  isTarget
-                    ? "border-teal-500 bg-teal-950/40 text-white ring-1 ring-teal-500/40 shadow-lg"
-                    : "border-white/5 bg-slate-800/50 text-slate-300 hover:border-white/20 hover:bg-slate-800"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`rounded px-1.5 py-0.5 text-[9px] font-extrabold uppercase ${
-                      hosp.category === "government"
-                        ? "bg-blue-500/20 text-blue-300"
-                        : "bg-emerald-500/20 text-emerald-300"
-                    }`}
-                  >
-                    {hosp.category}
-                  </span>
-                  <span className="text-[10px] font-mono text-amber-300 font-bold">
-                    {hosp.distanceKm} km · {hosp.estimatedTravelTime}
-                  </span>
-                </div>
-
-                <p className="mt-1.5 font-bold truncate text-white flex items-center gap-1">
-                  <span>🏥</span> {hosp.name}
-                </p>
-
-                <div className="mt-2 flex items-center justify-between text-[10px]">
-                  <span className="text-emerald-400 font-semibold">
-                    🟢 {hosp.availableBeds ?? 18} Beds Free
-                  </span>
-                  <span className="text-slate-400">
-                    ICU: <strong className={hosp.icuStatus === "Available" ? "text-emerald-400" : "text-amber-400"}>{hosp.icuStatus}</strong>
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
     </div>
   );
