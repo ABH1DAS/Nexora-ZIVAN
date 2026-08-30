@@ -22,13 +22,7 @@ import {
 
 export default function IncomingPatientsPage() {
   const { account } = useHospitalAuth();
-  const [requests, setRequests] = useState<AmbulanceRequest[]>(
-    INITIAL_DEMO_REQUESTS.filter(
-      (r) =>
-        r.hospitalId === "city-hospital" &&
-        !["declined", "cancelled"].includes(r.status)
-    )
-  );
+  const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
   const [selectedReq, setSelectedReq] = useState<AmbulanceRequest | null>(null);
 
   // Modals state
@@ -39,7 +33,7 @@ export default function IncomingPatientsPage() {
 
   useEffect(() => {
     return subscribeAmbulanceRequests((all) => {
-      const hospitalId = account?.hospitalId || "city-hospital";
+      const hospitalId = account?.hospitalId || "govt-gmch-trauma";
       const filtered = all
         .filter(
           (r) =>
@@ -55,7 +49,7 @@ export default function IncomingPatientsPage() {
           ? filtered
           : INITIAL_DEMO_REQUESTS.filter(
               (r) =>
-                r.hospitalId === "city-hospital" &&
+                r.hospitalId === hospitalId &&
                 !["declined", "cancelled"].includes(r.status)
             )
       );

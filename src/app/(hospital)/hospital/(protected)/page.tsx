@@ -143,9 +143,7 @@ function StatCard({
 
 export default function HospitalDashboardPage() {
   const { account } = useHospitalAuth();
-  const [requests, setRequests] = useState<AmbulanceRequest[]>(
-    INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === "city-hospital")
-  );
+  const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>("amb_sample_01");
   const [filter, setFilter] = useState<FilterTab>("all");
   const [notice, setNotice] = useState<{ msg: string; type: "success" | "info" } | null>(null);
@@ -159,12 +157,14 @@ export default function HospitalDashboardPage() {
 
   useEffect(() => {
     const unsub = subscribeAmbulanceRequests((all) => {
-      const hospitalId = account?.hospitalId || "city-hospital";
+      const hospitalId = account?.hospitalId || "govt-gmch-trauma";
       const mine = all.filter((r) => r.hospitalId === hospitalId);
       const activeList =
         mine.length > 0
           ? mine
-          : INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === "city-hospital");
+          : (INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === hospitalId).length > 0
+              ? INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === hospitalId)
+              : INITIAL_DEMO_REQUESTS);
       setRequests(activeList);
       if (!selectedId && activeList.length > 0) {
         setSelectedId(activeList[0].id);

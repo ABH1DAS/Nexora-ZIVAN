@@ -32,7 +32,7 @@ import {
 
 export default function CommandCenterPage() {
   const { account } = useHospitalAuth();
-  const [requests, setRequests] = useState<AmbulanceRequest[]>(INITIAL_DEMO_REQUESTS.filter(r => r.hospitalId === "city-hospital"));
+  const [requests, setRequests] = useState<AmbulanceRequest[]>([]);
   const [time, setTime] = useState<Date | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [soundOn, setSoundOn] = useState(hospitalAudio.isEnabled());
@@ -52,12 +52,14 @@ export default function CommandCenterPage() {
 
   useEffect(() => {
     return subscribeAmbulanceRequests((all) => {
-      const hospitalId = account?.hospitalId || "city-hospital";
+      const hospitalId = account?.hospitalId || "govt-gmch-trauma";
       const mine = all.filter((r) => r.hospitalId === hospitalId);
       setRequests(
         mine.length > 0
           ? mine
-          : INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === "city-hospital")
+          : (INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === hospitalId).length > 0
+              ? INITIAL_DEMO_REQUESTS.filter((r) => r.hospitalId === hospitalId)
+              : INITIAL_DEMO_REQUESTS)
       );
     });
   }, [account]);
