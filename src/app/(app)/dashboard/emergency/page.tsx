@@ -9,6 +9,7 @@ import {
   createAmbulanceRequest,
   statusLabel,
   subscribeAmbulanceRequests,
+  markAmbulanceArrived,
 } from "@/lib/ambulanceStore";
 import {
   evaluateEmergencyTriggers,
@@ -420,14 +421,23 @@ export default function DashboardEmergencyPage() {
               <Phone className="h-4 w-4" aria-hidden />
               Call emergency services
             </Button>
-            <Button
-              variant="ghost"
-              className="text-white hover:bg-white/10"
-              href="/hospital/login"
-            >
-              <ExternalLink className="h-4 w-4" aria-hidden />
-              Open hospital portal
-            </Button>
+            {active && request && request.status !== "AMBULANCE ARRIVED" && (
+              <Button
+                variant="secondary"
+                className="border-emerald-500/40 bg-emerald-600 text-white hover:bg-emerald-500"
+                onClick={() => {
+                  markAmbulanceArrived(request.id);
+                  setRequest((prev) => prev ? { ...prev, status: "AMBULANCE ARRIVED", etaMinutes: 0 } : null);
+                }}
+              >
+                Mark Ambulance Arrived
+              </Button>
+            )}
+            {active && request && request.status === "AMBULANCE ARRIVED" && (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/60 p-3 text-center text-xs font-bold text-emerald-300">
+                Ambulance Marked as Arrived
+              </div>
+            )}
             {active && (
               <Button
                 variant="ghost"
