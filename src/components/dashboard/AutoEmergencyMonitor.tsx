@@ -125,12 +125,6 @@ export function AutoEmergencyMonitor() {
             <Button size="sm" variant="secondary" href="/dashboard/emergency">
               Open emergency
             </Button>
-            <Link
-              href="/hospital/login"
-              className="inline-flex h-10 items-center rounded-xl px-3 text-sm font-semibold text-primary hover:underline"
-            >
-              Hospital portal
-            </Link>
           </div>
         </div>
       </div>

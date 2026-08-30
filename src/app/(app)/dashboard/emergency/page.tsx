@@ -189,12 +189,8 @@ export default function DashboardEmergencyPage() {
 
       <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
         Automatic calling is a product demonstration with a cancel countdown. It
-        does not contact real emergency services. Hospital staff can accept
-        requests in the{" "}
-        <Link href="/hospital/login" className="font-semibold underline">
-          Hospital Portal
-        </Link>
-        .
+        does not contact real emergency services. In a real emergency, please call your local
+        emergency helpline immediately.
       </div>
 
       {autoMessage && (

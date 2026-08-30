@@ -141,11 +141,7 @@ export function EmergencySection() {
         Real ambulance and hospital availability depends on connected services and
         regional infrastructure. This section is a product demonstration unless real
         emergency integrations are connected. In a real emergency, call your local
-        emergency services immediately. Hospitals can review demo requests in the{" "}
-        <Link href="/hospital/login" className="font-semibold underline">
-          Hospital Portal
-        </Link>
-        .
+        emergency services immediately.
       </div>
 
       <Reveal>
@@ -302,13 +298,6 @@ export function EmergencySection() {
               >
                 <Phone className="h-4 w-4" aria-hidden />
                 Call Emergency Services
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full text-white hover:bg-white/10"
-                href="/hospital/login"
-              >
-                Open Hospital Portal
               </Button>
               <Button
                 variant="ghost"

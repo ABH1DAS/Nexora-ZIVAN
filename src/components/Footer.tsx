@@ -34,7 +34,7 @@ const columns = [
     links: [
       { href: "/emergency", label: "Emergency Support" },
       { href: "/emergency#contacts", label: "Emergency Contacts" },
-      { href: "/hospital/login", label: "Hospital Portal" },
+      { href: "/dashboard/emergency", label: "Live SOS Dispatch" },
     ],
   },
 ];
