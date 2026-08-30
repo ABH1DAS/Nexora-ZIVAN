@@ -1,11 +1,107 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
---  ZIVAN HEALTH PLATFORM — COMPREHENSIVE ANALYTICS MOCK DATA SEED
+--  ZIVAN HEALTH PLATFORM — BULLETPROOF ANALYTICS MOCK DATA SEED
 --  Targets: GMCH, MMCH, Hayat, GNRC, AIIMS Central, City Hospital, Metro Cardiac, LifeCare
 --  Run in Supabase SQL Editor: https://supabase.com/dashboard/project/zfudmwskebzdcomwqgpv/sql/new
 -- ═══════════════════════════════════════════════════════════════════════════════
 
--- ─── 0. ENSURE SCHEMA CONSTRAINTS & COLUMNS EXIST ───────────────────────────
+-- ─── 0. AUTO-CREATE TABLES & ENSURE ALL COLUMNS EXIST ─────────────────────────
+
+-- 0.1 Hospitals table & columns
+CREATE TABLE IF NOT EXISTS public.hospitals (
+  id                  TEXT PRIMARY KEY,
+  name                TEXT NOT NULL,
+  type                TEXT DEFAULT 'hospital',
+  distance_km         NUMERIC(5,2) DEFAULT 0,
+  address             TEXT,
+  phone               TEXT,
+  rating              NUMERIC(3,1) DEFAULT 4.5,
+  accreditation       TEXT,
+  total_beds          INT DEFAULT 0,
+  available_beds      INT DEFAULT 0,
+  icu_beds            INT DEFAULT 0,
+  available_icu_beds  INT DEFAULT 0,
+  accepts_emergency   BOOLEAN DEFAULT true,
+  open                BOOLEAN DEFAULT true,
+  specializations     TEXT[],
+  created_at          TIMESTAMPTZ DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.hospitals
+  ADD COLUMN IF NOT EXISTS address TEXT,
+  ADD COLUMN IF NOT EXISTS phone TEXT,
+  ADD COLUMN IF NOT EXISTS rating NUMERIC(3,1) DEFAULT 4.5,
+  ADD COLUMN IF NOT EXISTS accreditation TEXT,
+  ADD COLUMN IF NOT EXISTS specializations TEXT[],
+  ADD COLUMN IF NOT EXISTS total_beds INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS available_beds INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS icu_beds INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS available_icu_beds INT DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS accepts_emergency BOOLEAN DEFAULT true,
+  ADD COLUMN IF NOT EXISTS open BOOLEAN DEFAULT true;
+
+-- 0.2 Ambulances table & columns
+CREATE TABLE IF NOT EXISTS public.ambulances (
+  id                TEXT PRIMARY KEY,
+  hospital_id       TEXT REFERENCES public.hospitals(id) ON DELETE CASCADE,
+  vehicle_number    TEXT NOT NULL,
+  driver_name       TEXT NOT NULL,
+  driver_phone      TEXT,
+  type              TEXT DEFAULT 'Advanced Life Support (ALS)',
+  status            TEXT DEFAULT 'available',
+  call_sign         TEXT,
+  current_latitude  DOUBLE PRECISION,
+  current_longitude DOUBLE PRECISION,
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.ambulances
+  ADD COLUMN IF NOT EXISTS call_sign TEXT,
+  ADD COLUMN IF NOT EXISTS driver_phone TEXT,
+  ADD COLUMN IF NOT EXISTS type TEXT DEFAULT 'Advanced Life Support (ALS)',
+  ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'available',
+  ADD COLUMN IF NOT EXISTS current_latitude DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS current_longitude DOUBLE PRECISION;
+
+-- 0.3 Emergencies table & columns
+CREATE TABLE IF NOT EXISTS public.emergencies (
+  id                      TEXT PRIMARY KEY,
+  patient_id              TEXT,
+  patient_name            TEXT,
+  patient_phone           TEXT,
+  blood_group             TEXT,
+  allergies               TEXT[],
+  medications             TEXT[],
+  location_label          TEXT,
+  latitude                DOUBLE PRECISION,
+  longitude               DOUBLE PRECISION,
+  hospital_id             TEXT,
+  hospital_name           TEXT,
+  status                  TEXT DEFAULT 'searching',
+  priority                TEXT DEFAULT 'standard',
+  ambulance_type          TEXT DEFAULT 'government',
+  doctor_specialization   TEXT DEFAULT 'Emergency & Trauma',
+  icu_requirement         BOOLEAN DEFAULT false,
+  estimated_private_fare  TEXT,
+  ambulance_id            TEXT,
+  driver_name             TEXT,
+  driver_phone            TEXT,
+  vehicle_number          TEXT,
+  estimated_arrival_time  INT,
+  eta_minutes             INT,
+  accepted_by             TEXT,
+  allocated_bed           TEXT,
+  blood_cross_matched     BOOLEAN DEFAULT false,
+  handover_notes          TEXT,
+  notes                   TEXT,
+  created_at              TIMESTAMPTZ DEFAULT NOW(),
+  updated_at              TIMESTAMPTZ DEFAULT NOW()
+);
+
 ALTER TABLE public.emergencies
+  ADD COLUMN IF NOT EXISTS patient_name TEXT,
+  ADD COLUMN IF NOT EXISTS patient_phone TEXT,
   ADD COLUMN IF NOT EXISTS blood_group TEXT,
   ADD COLUMN IF NOT EXISTS allergies TEXT[],
   ADD COLUMN IF NOT EXISTS medications TEXT[],
@@ -14,21 +110,65 @@ ALTER TABLE public.emergencies
   ADD COLUMN IF NOT EXISTS vitals_spo2 INT,
   ADD COLUMN IF NOT EXISTS vitals_rr INT,
   ADD COLUMN IF NOT EXISTS vitals_temp NUMERIC(4,1),
-  ADD COLUMN IF NOT EXISTS allocated_bed TEXT,
-  ADD COLUMN IF NOT EXISTS blood_cross_matched BOOLEAN DEFAULT false,
-  ADD COLUMN IF NOT EXISTS handover_notes TEXT,
-  ADD COLUMN IF NOT EXISTS eta_minutes INT,
-  ADD COLUMN IF NOT EXISTS accepted_by TEXT,
+  ADD COLUMN IF NOT EXISTS location_label TEXT,
+  ADD COLUMN IF NOT EXISTS latitude DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS longitude DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS hospital_id TEXT,
+  ADD COLUMN IF NOT EXISTS hospital_name TEXT,
+  ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'searching',
+  ADD COLUMN IF NOT EXISTS priority TEXT DEFAULT 'standard',
+  ADD COLUMN IF NOT EXISTS ambulance_type TEXT DEFAULT 'government',
+  ADD COLUMN IF NOT EXISTS doctor_specialization TEXT DEFAULT 'Emergency & Trauma',
+  ADD COLUMN IF NOT EXISTS icu_requirement BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS estimated_private_fare TEXT,
   ADD COLUMN IF NOT EXISTS ambulance_id TEXT,
   ADD COLUMN IF NOT EXISTS driver_name TEXT,
   ADD COLUMN IF NOT EXISTS driver_phone TEXT,
   ADD COLUMN IF NOT EXISTS vehicle_number TEXT,
   ADD COLUMN IF NOT EXISTS estimated_arrival_time INT,
+  ADD COLUMN IF NOT EXISTS eta_minutes INT,
+  ADD COLUMN IF NOT EXISTS accepted_by TEXT,
+  ADD COLUMN IF NOT EXISTS allocated_bed TEXT,
+  ADD COLUMN IF NOT EXISTS blood_cross_matched BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS handover_notes TEXT,
   ADD COLUMN IF NOT EXISTS notes TEXT,
-  ADD COLUMN IF NOT EXISTS ambulance_type TEXT DEFAULT 'government',
-  ADD COLUMN IF NOT EXISTS doctor_specialization TEXT DEFAULT 'Emergency & Trauma',
-  ADD COLUMN IF NOT EXISTS estimated_private_fare TEXT,
-  ADD COLUMN IF NOT EXISTS icu_requirement BOOLEAN DEFAULT false;
+  ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW(),
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+-- 0.4 Blood Bank Inventory table
+CREATE TABLE IF NOT EXISTS public.blood_bank_inventory (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  hospital_id     TEXT REFERENCES public.hospitals(id) ON DELETE CASCADE,
+  blood_group     TEXT NOT NULL,
+  units_available INT NOT NULL DEFAULT 0,
+  min_threshold   INT DEFAULT 3,
+  status          TEXT DEFAULT 'adequate',
+  last_updated    TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT unique_hospital_blood_group UNIQUE (hospital_id, blood_group)
+);
+
+-- 0.5 Hospital Staff table
+CREATE TABLE IF NOT EXISTS public.hospital_staff (
+  id          TEXT PRIMARY KEY,
+  hospital_id TEXT,
+  name        TEXT NOT NULL,
+  email       TEXT,
+  role        TEXT,
+  phone       TEXT,
+  department  TEXT,
+  shift       TEXT,
+  status      TEXT DEFAULT 'active',
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.hospital_staff
+  ADD COLUMN IF NOT EXISTS email TEXT,
+  ADD COLUMN IF NOT EXISTS role TEXT,
+  ADD COLUMN IF NOT EXISTS department TEXT,
+  ADD COLUMN IF NOT EXISTS phone TEXT,
+  ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active',
+  ADD COLUMN IF NOT EXISTS shift TEXT;
+
 
 -- ─── 1. SEED HOSPITALS MASTER DATA ──────────────────────────────────────────
 INSERT INTO public.hospitals
@@ -81,6 +221,7 @@ ON CONFLICT (id) DO UPDATE SET
   accepts_emergency = EXCLUDED.accepts_emergency,
   specializations = EXCLUDED.specializations;
 
+
 -- ─── 2. SEED ACTIVE AMBULANCE FLEETS FOR ALL HOSPITALS ───────────────────────
 INSERT INTO public.ambulances
   (id, hospital_id, vehicle_number, driver_name, driver_phone, type, status, current_latitude, current_longitude, created_at)
@@ -126,6 +267,7 @@ ON CONFLICT (id) DO UPDATE SET
   type = EXCLUDED.type,
   current_latitude = EXCLUDED.current_latitude,
   current_longitude = EXCLUDED.current_longitude;
+
 
 -- ─── 3. SEED BLOOD BANK INVENTORY FOR ALL HOSPITALS ─────────────────────────
 INSERT INTO public.blood_bank_inventory
@@ -185,8 +327,8 @@ ON CONFLICT (hospital_id, blood_group) DO UPDATE SET
   status = EXCLUDED.status,
   last_updated = EXCLUDED.last_updated;
 
+
 -- ─── 4. SEED HISTORICAL & LIVE DISPATCH EMERGENCIES FOR ALL HOSPITALS ─────────
--- Clean up existing demo emergency duplicates if needed (optional)
 DELETE FROM public.emergencies WHERE id LIKE 'mock-emg-%';
 
 INSERT INTO public.emergencies
@@ -196,7 +338,7 @@ INSERT INTO public.emergencies
    ambulance_id, driver_name, driver_phone, vehicle_number, estimated_arrival_time, eta_minutes,
    accepted_by, allocated_bed, blood_cross_matched, handover_notes, notes, created_at, updated_at)
 VALUES
-  -- ─── GMCH (10 Cases across 7 Days) ───
+  -- ─── GMCH Cases (10 Cases across past 7 days) ───
   ('mock-emg-gmch-01', 'pat-01', 'Rahul Sharma', '+91 98765 11001', 'O+', ARRAY['Penicillin'], ARRAY['Amlodipine 5mg'],
    'Ulubari Flyover Junction, Guwahati', 26.1690, 91.7610, 'govt-gmch', 'Gauhati Medical College & Hospital (GMCH)',
    'arrived', 'critical', 'government', 'Apex Trauma Center', true, '₹0 (Govt Free)',
@@ -251,7 +393,7 @@ VALUES
    NULL, NULL, NULL, NULL, NULL, NULL,
    'Dispatch Automated', NULL, false, 'Patient requested private hospital instead.', 'Mild ankle sprain.', NOW() - INTERVAL '3 days 18 hours', NOW() - INTERVAL '3 days 17 hours'),
 
-  -- ─── MMCH (8 Cases) ───
+  -- ─── MMCH Cases (5 Cases) ───
   ('mock-emg-mmch-01', 'pat-10', 'Dhruba Jyoti Nath', '+91 98765 22001', 'B+', ARRAY[]::TEXT[], ARRAY['Telmisartan 40mg'],
    'Fancy Bazaar Riverside, Guwahati', 26.1880, 91.7390, 'govt-mmch', 'Mahendra Mohan Choudhury Hospital (MMCH)',
    'arrived', 'critical', 'government', '24/7 Emergency Wing', true, '₹0 (Govt Free)',
@@ -262,7 +404,7 @@ VALUES
    'Machkhowa Bus Terminus', 26.1820, 91.7340, 'govt-mmch', 'Mahendra Mohan Choudhury Hospital (MMCH)',
    'arrived', 'urgent', 'government', 'General Surgery Trauma', false, '₹0 (Govt Free)',
    'amb-mmch-01', 'Kamal Nath', '+91 98641 22001', 'AS-01-MC-2001', 11, 0,
-   'Dr. B. Das', 'Surgical Ward Bed-06', false, 'Appendiceal rupture suspected. Ultrasound completed.', 'Severe acute RLQ abdominal pain with fever.', NOW() - INTERVAL '5 days 4 hours', NOW() - INTERVAL '5 days 3 hours'),
+   'Dr. B. Das', 'Surgical Ward Bed-06', false, 'Appendiceal rupture suspected.', 'Severe acute RLQ abdominal pain with fever.', NOW() - INTERVAL '5 days 4 hours', NOW() - INTERVAL '5 days 3 hours'),
 
   ('mock-emg-mmch-03', 'pat-12', 'Ashok Singhal', '+91 98765 22003', 'A+', ARRAY[]::TEXT[], ARRAY['Insulin Regular'],
    'Bharalumukh, Guwahati', 26.1750, 91.7280, 'govt-mmch', 'Mahendra Mohan Choudhury Hospital (MMCH)',
@@ -282,7 +424,7 @@ VALUES
    'amb-mmch-01', 'Kamal Nath', '+91 98641 22001', 'AS-01-MC-2001', 8, 6,
    'Dr. Pranab Sarma', 'Triage Bed-03', false, 'Unit dispatched to scene.', 'Deep forearm laceration with arterial bleed.', NOW() - INTERVAL '18 mins', NOW() - INTERVAL '3 mins'),
 
-  -- ─── HAYAT HOSPITAL (8 Cases) ───
+  -- ─── Hayat Super Specialty Cases (5 Cases) ───
   ('mock-emg-hayat-01', 'pat-15', 'Vikramaditya Agarwal', '+91 98765 33001', 'B+', ARRAY['NSAIDs'], ARRAY['Rosuvastatin 10mg'],
    'Beltola Tiniali, Guwahati', 26.1360, 91.7950, 'pvt-hayat', 'Hayat Hospital Super Specialty',
    'arrived', 'critical', 'private', 'Rapid Cardiac Resuscitation', true, '₹1,500 (Covered by TPA)',
@@ -313,7 +455,7 @@ VALUES
    'amb-hayat-02', 'Mukesh Goswami', '+91 98642 33002', 'AS-01-HY-3002', 6, 3,
    'Dr. Sanjeeb Kakati (Senior Interventional Cardiologist)', 'Cath Lab Suite-01', true, 'Telemetry transmitting real-time ECG.', 'Severe crushing retrosternal pain.', NOW() - INTERVAL '15 mins', NOW() - INTERVAL '3 mins'),
 
-  -- ─── GNRC SIXMILE (8 Cases) ───
+  -- ─── GNRC Sixmile Cases (4 Cases) ───
   ('mock-emg-gnrc-01', 'pat-20', 'Bhupen Hazarika Roy', '+91 98765 44001', 'O+', ARRAY[]::TEXT[], ARRAY['Ecosprin 75mg'],
    'Downtown Hospital Road, Dispur', 26.1400, 91.7990, 'pvt-gnrc', 'GNRC Super Specialty Hospital',
    'arrived', 'critical', 'private', 'Stroke & Neuro Emergency', true, '₹1,800',
@@ -336,31 +478,14 @@ VALUES
    'Survey, Beltola', 26.1380, 91.7880, 'pvt-gnrc', 'GNRC Super Specialty Hospital',
    'en_route', 'critical', 'private', 'Stroke & Neuro Emergency', true, '₹1,800',
    'amb-gnrc-03', 'Parag Lahkar', '+91 98643 44003', 'AS-01-GN-4003', 7, 3,
-   'Dr. N. C. Borah (Chief Neurologist)', 'Stroke Resus Bay 01', true, 'CT room alerted for immediate scan on arrival.', 'Acute loss of consciousness.', NOW() - INTERVAL '20 mins', NOW() - INTERVAL '4 mins'),
-
-  -- ─── AIIMS CENTRAL (5 Cases) ───
-  ('mock-emg-aiims-01', 'pat-24', 'Dipak Rajbongshi', '+91 98765 55001', 'O+', ARRAY[]::TEXT[], ARRAY[]::TEXT[],
-   'Changsari Chowk, NH-31', 26.2420, 91.7080, 'govt-aiims-central', 'AIIMS Central Super Specialty',
-   'arrived', 'critical', 'government', 'Comprehensive Emergency', true, '₹0 (AIIMS Govt)',
-   'amb-aiims-01', 'Sanjoy Mahanta', '+91 98644 55001', 'AS-01-AI-5001', 6, 0,
-   'Dr. Harsh Vardhan (AIIMS Triage)', 'Apex Resus Bay 01', true, 'Chest tube inserted for hemothorax.', 'Major industrial machinery injury.', NOW() - INTERVAL '4 days 8 hours', NOW() - INTERVAL '4 days 7 hours'),
-
-  ('mock-emg-aiims-02', 'pat-25', 'Nandita Kalita', '+91 98765 55002', 'A+', ARRAY['Sulfa'], ARRAY[]::TEXT[],
-   'Amingaon Railway Colony', 26.2080, 91.6850, 'govt-aiims-central', 'AIIMS Central Super Specialty',
-   'arrived', 'urgent', 'government', 'Transplant Care', false, '₹0 (AIIMS Govt)',
-   'amb-aiims-02', 'Utpal Dutta', '+91 98644 55002', 'AS-01-AI-5002', 14, 0,
-   'Dr. Priya Nair', 'Special Care Bed-08', false, 'Dialysis initiated.', 'Acute kidney failure exacerbation.', NOW() - INTERVAL '2 days 15 hours', NOW() - INTERVAL '2 days 14 hours')
+   'Dr. N. C. Borah (Chief Neurologist)', 'Stroke Resus Bay 01', true, 'CT room alerted for immediate scan on arrival.', 'Acute loss of consciousness.', NOW() - INTERVAL '20 mins', NOW() - INTERVAL '4 mins')
 ON CONFLICT (id) DO UPDATE SET
   status = EXCLUDED.status,
   priority = EXCLUDED.priority,
-  allocated_bed = EXCLUDED.allocated_bed,
-  accepted_by = EXCLUDED.accepted_by,
-  blood_cross_matched = EXCLUDED.blood_cross_matched,
-  handover_notes = EXCLUDED.handover_notes,
-  notes = EXCLUDED.notes,
-  updated_at = EXCLUDED.updated_at;
+  allocated_bed = EXCLUDED.allocated_bed;
 
--- ─── 5. SEED HOSPITAL STAFF ACCOUNTS ─────────────────────────────────────────
+
+-- ─── 5. SEED HOSPITAL STAFF ──────────────────────────────────────────────────
 INSERT INTO public.hospital_staff
   (id, hospital_id, name, email, role, phone, department, shift, status)
 VALUES
