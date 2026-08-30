@@ -8,6 +8,7 @@ import { BedAllocationModal } from "@/components/hospital/BedAllocationModal";
 import { AmbulanceCommsDrawer } from "@/components/hospital/AmbulanceCommsDrawer";
 import { BloodBankMatcher } from "@/components/hospital/BloodBankMatcher";
 import type { AmbulanceRequest } from "@/data/ambulanceRequests";
+import { GoogleAmbulanceMap } from "@/components/emergency/GoogleAmbulanceMap";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -148,6 +149,37 @@ export default function CommandCenterPage() {
           </div>
         </div>
       </section>
+
+      {/* Live GPS Ambulance Dispatch Tracking Map */}
+      {activeUnits.length > 0 && (
+        <section className="rounded-[2rem] overflow-hidden border border-border shadow-md bg-white">
+          <div className="bg-slate-900 px-5 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-white border-b border-white/10">
+            <div className="flex items-center gap-2.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
+              <span className="font-bold text-teal-300 uppercase tracking-wider">
+                Command Center Live GPS Tracking · {activeUnits[0].vehicleNumber ?? "AS-01-EV-4892"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-slate-300">
+                Patient: <strong className="text-white">{activeUnits[0].patientName}</strong> ({activeUnits[0].locationLabel})
+              </span>
+            </div>
+          </div>
+          <GoogleAmbulanceMap
+            patientCoords={activeUnits[0].coordinates ?? { lat: 26.1722, lng: 91.7594 }}
+            patientLabel={activeUnits[0].locationLabel ?? "GS Road, Ulubari / Bhangagarh, Guwahati"}
+            ambulanceCoords={{ lat: 26.1640, lng: 91.7670 }}
+            ambulanceId={activeUnits[0].ambulanceId ?? "AMB-01"}
+            ambulanceType={activeUnits[0].ambulanceType ?? "government"}
+            driverName={activeUnits[0].driverName ?? "Rajesh Kumar (Paramedic Leader)"}
+            vehicleNumber={activeUnits[0].vehicleNumber ?? "AS-01-EV-4892"}
+            hospitalName={activeUnits[0].hospitalName ?? account?.hospitalName ?? "GMCH Emergency Trauma Center"}
+            status={activeUnits[0].status}
+            etaMinutes={activeUnits[0].etaMinutes ?? 6}
+          />
+        </section>
+      )}
 
       {/* Main Grid: Incoming Emergency Units & Hospital Resources */}
       <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
