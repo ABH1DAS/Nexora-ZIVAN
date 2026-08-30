@@ -457,33 +457,6 @@ export default function HospitalDashboardPage() {
                 </div>
               )}
 
-              {/* Live GPS Ambulance Route Map */}
-              {selected.coordinates && (
-                <div className="rounded-[1.5rem] overflow-hidden border border-border shadow-md">
-                  <div className="bg-slate-900 px-4 py-2.5 flex items-center justify-between text-xs text-white">
-                    <span className="font-bold flex items-center gap-1.5 text-teal-300">
-                      <Radio className="h-3.5 w-3.5 animate-pulse text-teal-400" />
-                      Live Ambulance Tracking · {selected.vehicleNumber ?? "AS-01-EV-4892"}
-                    </span>
-                    <span className="text-[11px] text-slate-300 truncate max-w-xs">
-                      {selected.locationLabel}
-                    </span>
-                  </div>
-                  <GoogleAmbulanceMap
-                    patientCoords={selected.coordinates}
-                    patientLabel={selected.locationLabel}
-                    ambulanceCoords={{ lat: 26.1640, lng: 91.7670 }}
-                    ambulanceId={selected.ambulanceId ?? "AMB-01"}
-                    ambulanceType={selected.ambulanceType ?? "government"}
-                    driverName={selected.driverName ?? "Rajesh Kumar (Paramedic Leader)"}
-                    vehicleNumber={selected.vehicleNumber ?? "AS-01-EV-4892"}
-                    hospitalName={selected.hospitalName ?? activeAccount.hospitalName}
-                    status={selected.status}
-                    etaMinutes={selected.etaMinutes ?? 6}
-                  />
-                </div>
-              )}
-
               {/* Clinical Tools & Modals Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-2">
                 <button

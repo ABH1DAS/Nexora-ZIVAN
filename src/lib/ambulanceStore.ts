@@ -27,7 +27,7 @@ export const INITIAL_DEMO_REQUESTS: AmbulanceRequest[] = [
     patientName: "Rahul Sharma",
     patientPhone: "+91 98111 22334",
     locationLabel: "GS Road, Ulubari / Bhangagarh · Patient App SOS",
-    coordinates: { lat: 26.1722, lng: 91.7594 },
+    coordinates: { lat: 26.1714, lng: 91.7586 },
     hospitalId: "govt-gmch-trauma",
     hospitalName: "GMCH Emergency Trauma Center",
     hospitalCategory: "government",

@@ -93,8 +93,8 @@ export default function LiveTrackingPage() {
       {selectedReq ? (
         <div className="space-y-4">
           <GoogleAmbulanceMap
-            patientCoords={selectedReq.coordinates ?? { lat: 26.1722, lng: 91.7594 }}
-            patientLabel={selectedReq.locationLabel ?? "GS Road, Ulubari, Guwahati"}
+            patientCoords={selectedReq.coordinates ?? { lat: 26.1714, lng: 91.7586 }}
+            patientLabel={selectedReq.locationLabel ?? "GS Road, Ulubari / Bhangagarh, Guwahati"}
             ambulanceCoords={{ lat: 26.1640, lng: 91.7670 }}
             ambulanceId={selectedReq.ambulanceId ?? "AMB-01"}
             ambulanceType={selectedReq.ambulanceType ?? "government"}
@@ -103,6 +103,7 @@ export default function LiveTrackingPage() {
             hospitalName={selectedReq.hospitalName ?? account?.hospitalName ?? "GMCH Emergency Trauma Center"}
             status={selectedReq.status}
             etaMinutes={selectedReq.etaMinutes ?? 6}
+            singleHospitalOnly={true}
           />
 
           {/* Active Unit Control Bar */}

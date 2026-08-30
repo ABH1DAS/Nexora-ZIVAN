@@ -167,7 +167,7 @@ export default function CommandCenterPage() {
             </div>
           </div>
           <GoogleAmbulanceMap
-            patientCoords={activeUnits[0].coordinates ?? { lat: 26.1722, lng: 91.7594 }}
+            patientCoords={activeUnits[0].coordinates ?? { lat: 26.1714, lng: 91.7586 }}
             patientLabel={activeUnits[0].locationLabel ?? "GS Road, Ulubari / Bhangagarh, Guwahati"}
             ambulanceCoords={{ lat: 26.1640, lng: 91.7670 }}
             ambulanceId={activeUnits[0].ambulanceId ?? "AMB-01"}
@@ -177,6 +177,7 @@ export default function CommandCenterPage() {
             hospitalName={activeUnits[0].hospitalName ?? account?.hospitalName ?? "GMCH Emergency Trauma Center"}
             status={activeUnits[0].status}
             etaMinutes={activeUnits[0].etaMinutes ?? 6}
+            singleHospitalOnly={true}
           />
         </section>
       )}

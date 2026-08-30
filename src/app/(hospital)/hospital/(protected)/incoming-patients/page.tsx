@@ -211,39 +211,8 @@ export default function IncomingPatientsPage() {
     );
   }
 
-  const activeTrackingReq = enRoute[0] || incoming[0] || arrived[0] || null;
-
   return (
     <div className="space-y-8">
-      {/* Live GPS Route Map */}
-      {activeTrackingReq && (
-        <section className="rounded-[2rem] overflow-hidden border border-border shadow-md bg-white">
-          <div className="bg-slate-900 px-5 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-white border-b border-white/10">
-            <div className="flex items-center gap-2.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-teal-400 animate-ping" />
-              <span className="font-bold text-teal-300 uppercase tracking-wider">
-                Live Incoming Route · {activeTrackingReq.patientName} ({activeTrackingReq.vehicleNumber ?? "AS-01-EV-4892"})
-              </span>
-            </div>
-            <span className="text-[11px] text-slate-300">
-              ETA: <strong className="text-amber-300">{activeTrackingReq.etaMinutes ?? 6} mins</strong> · {activeTrackingReq.locationLabel}
-            </span>
-          </div>
-          <GoogleAmbulanceMap
-            patientCoords={activeTrackingReq.coordinates ?? { lat: 26.1722, lng: 91.7594 }}
-            patientLabel={activeTrackingReq.locationLabel ?? "GS Road, Ulubari, Guwahati"}
-            ambulanceCoords={{ lat: 26.1640, lng: 91.7670 }}
-            ambulanceId={activeTrackingReq.ambulanceId ?? "AMB-01"}
-            ambulanceType={activeTrackingReq.ambulanceType ?? "government"}
-            driverName={activeTrackingReq.driverName ?? "Rajesh Kumar (Paramedic Leader)"}
-            vehicleNumber={activeTrackingReq.vehicleNumber ?? "AS-01-EV-4892"}
-            hospitalName={activeTrackingReq.hospitalName ?? account?.hospitalName ?? "GMCH Emergency Trauma Center"}
-            status={activeTrackingReq.status}
-            etaMinutes={activeTrackingReq.etaMinutes ?? 6}
-          />
-        </section>
-      )}
-
       <Section
         title="Awaiting Dispatch"
         items={incoming}
