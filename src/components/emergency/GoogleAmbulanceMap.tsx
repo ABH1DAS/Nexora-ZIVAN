@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import {
   Ambulance,
   MapPin,
@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronUp,
   Car,
+  Navigation,
 } from "lucide-react";
 import { hospitals as defaultHospitals, type Hospital } from "@/data/hospitals";
 
@@ -59,7 +60,7 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
 }
 
 function getHospitalIconSvg(category: "government" | "private", isSelected: boolean) {
-  const bgColor = isSelected ? "#0284c7" : (category === "government" ? "#2563eb" : "#059669");
+  const bgColor = isSelected ? "#0284c7" : category === "government" ? "#2563eb" : "#059669";
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="38" height="48" viewBox="0 0 38 48">
       <defs>
@@ -112,8 +113,8 @@ function getAmbulanceIconSvg() {
 }
 
 export function GoogleAmbulanceMap({
-  patientCoords: initialPatientCoords = DEFAULT_PATIENT_COORDS,
-  patientLabel: initialPatientLabel = "GS Road, Ulubari / Bhangagarh, Guwahati, Assam 781007",
+  patientCoords = DEFAULT_PATIENT_COORDS,
+  patientLabel = "GS Road, Ulubari / Bhangagarh, Guwahati, Assam 781007",
   ambulanceCoords = DEFAULT_AMBULANCE_COORDS,
   ambulanceId = "AMB-01",
   ambulanceType = "government",
@@ -124,17 +125,23 @@ export function GoogleAmbulanceMap({
   status = "AMBULANCE EN ROUTE",
   etaMinutes = 6,
   nearbyHospitals = defaultHospitals,
-  singleHospitalOnly = false,
+  singleHospitalOnly = true,
   onSelectHospital,
   onLocationDetected,
 }: GoogleAmbulanceMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const patientMarkerRef = useRef<any>(null);
+  const ambulanceMarkerRef = useRef<any>(null);
+  const hospitalMarkersRef = useRef<any[]>([]);
+  const directionsRendererRef = useRef<any>(null);
+  const fallbackPolylinesRef = useRef<any[]>([]);
+
   const [mapsLoaded, setMapsLoaded] = useState(false);
   const [apiKeyAvailable, setApiKeyAvailable] = useState(false);
 
-  const [activePatientCoords, setActivePatientCoords] = useState<Coordinates>(initialPatientCoords);
-  const [activePatientLabel, setActivePatientLabel] = useState<string>(initialPatientLabel);
+  const [activePatientCoords, setActivePatientCoords] = useState<Coordinates>(patientCoords || DEFAULT_PATIENT_COORDS);
+  const [activePatientLabel, setActivePatientLabel] = useState<string>(patientLabel || "GS Road, Ulubari / Bhangagarh, Guwahati, Assam 781007");
   const [gpsDetecting, setGpsDetecting] = useState(false);
 
   const [etaText, setEtaText] = useState(`${etaMinutes} mins`);
@@ -147,6 +154,25 @@ export function GoogleAmbulanceMap({
   ]);
   const [showSteps, setShowSteps] = useState(false);
   const [mapType, setMapType] = useState<"roadmap" | "satellite">("roadmap");
+
+  // Sync props to internal state
+  useEffect(() => {
+    if (patientCoords && patientCoords.lat && patientCoords.lng) {
+      setActivePatientCoords(patientCoords);
+    }
+  }, [patientCoords?.lat, patientCoords?.lng]);
+
+  useEffect(() => {
+    if (patientLabel) {
+      setActivePatientLabel(patientLabel);
+    }
+  }, [patientLabel]);
+
+  useEffect(() => {
+    if (etaMinutes != null) {
+      setEtaText(`${etaMinutes} mins`);
+    }
+  }, [etaMinutes]);
 
   const apiKey =
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
@@ -178,7 +204,7 @@ export function GoogleAmbulanceMap({
     return match.length > 0 ? match : dynamicHospitals.slice(0, 1);
   }, [dynamicHospitals, hospitalName]);
 
-  function detectUserCurrentLocation() {
+  const detectUserCurrentLocation = useCallback(() => {
     if (typeof window === "undefined" || !navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
       return;
@@ -225,8 +251,9 @@ export function GoogleAmbulanceMap({
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-  }
+  }, [onLocationDetected]);
 
+  // Load Google Maps Script
   useEffect(() => {
     if (!apiKey) {
       setApiKeyAvailable(false);
@@ -257,6 +284,7 @@ export function GoogleAmbulanceMap({
     document.head.appendChild(script);
   }, [apiKey]);
 
+  // Initialize Map Instance ONCE
   useEffect(() => {
     if (!mapsLoaded || !mapRef.current || !(window as any).google?.maps) return;
 
@@ -281,89 +309,131 @@ export function GoogleAmbulanceMap({
       { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f172a" }] },
     ];
 
-    const centerCoords = {
-      lat: (activePatientCoords.lat + ambulanceCoords.lat) / 2,
-      lng: (activePatientCoords.lng + ambulanceCoords.lng) / 2,
-    };
+    if (!mapInstanceRef.current) {
+      const centerCoords = {
+        lat: (activePatientCoords.lat + (ambulanceCoords?.lat || DEFAULT_AMBULANCE_COORDS.lat)) / 2,
+        lng: (activePatientCoords.lng + (ambulanceCoords?.lng || DEFAULT_AMBULANCE_COORDS.lng)) / 2,
+      };
 
-    const map = new google.maps.Map(mapRef.current, {
-      center: centerCoords,
-      zoom: 14,
-      mapTypeId: mapType,
-      disableDefaultUI: false,
-      zoomControl: true,
-      fullscreenControl: true,
-      mapTypeControl: false,
-      streetViewControl: false,
-      styles: mapType === "roadmap" ? darkMapStyles : undefined,
-    });
+      const map = new google.maps.Map(mapRef.current, {
+        center: centerCoords,
+        zoom: 14,
+        mapTypeId: mapType,
+        disableDefaultUI: false,
+        zoomControl: true,
+        fullscreenControl: true,
+        mapTypeControl: false,
+        streetViewControl: false,
+        styles: mapType === "roadmap" ? darkMapStyles : undefined,
+      });
 
-    mapInstanceRef.current = map;
+      mapInstanceRef.current = map;
+
+      // Directions Renderer with preserveViewport strictly TRUE
+      directionsRendererRef.current = new google.maps.DirectionsRenderer({
+        map,
+        suppressMarkers: true,
+        preserveViewport: true,
+        polylineOptions: {
+          strokeColor: "#0284c7",
+          strokeOpacity: 0.95,
+          strokeWeight: 7,
+          zIndex: 85,
+        },
+      });
+    } else {
+      mapInstanceRef.current.setMapTypeId(mapType);
+      mapInstanceRef.current.setOptions({
+        styles: mapType === "roadmap" ? darkMapStyles : undefined,
+      });
+    }
+  }, [mapsLoaded, mapType, activePatientCoords.lat, activePatientCoords.lng, ambulanceCoords?.lat, ambulanceCoords?.lng]);
+
+  // Update Markers and Route on map
+  useEffect(() => {
+    if (!mapsLoaded || !mapInstanceRef.current || !(window as any).google?.maps) return;
+
+    const google = (window as any).google;
+    const map = mapInstanceRef.current;
     const bounds = new google.maps.LatLngBounds();
 
-    // 1. Patient Marker (Guwahati 26.1714, 91.7586)
-    const patientLatLng = new google.maps.LatLng(activePatientCoords.lat, activePatientCoords.lng);
+    const curPatientCoords = activePatientCoords || DEFAULT_PATIENT_COORDS;
+    const curAmbulanceCoords = ambulanceCoords || DEFAULT_AMBULANCE_COORDS;
+
+    // 1. Patient Marker
+    const patientLatLng = new google.maps.LatLng(curPatientCoords.lat, curPatientCoords.lng);
     bounds.extend(patientLatLng);
 
-    const patientMarker = new google.maps.Marker({
-      position: activePatientCoords,
-      map,
-      title: "Patient Location (SOS Origin)",
-      zIndex: 100,
-      icon: {
-        url: getPatientIconSvg(),
-        scaledSize: new google.maps.Size(36, 46),
-        anchor: new google.maps.Point(18, 46),
-      },
-    });
+    if (patientMarkerRef.current) {
+      patientMarkerRef.current.setPosition(patientLatLng);
+    } else {
+      patientMarkerRef.current = new google.maps.Marker({
+        position: patientLatLng,
+        map,
+        title: "Patient Location (SOS Origin)",
+        zIndex: 100,
+        icon: {
+          url: getPatientIconSvg(),
+          scaledSize: new google.maps.Size(36, 46),
+          anchor: new google.maps.Point(18, 46),
+        },
+      });
 
-    const patientInfoWindow = new google.maps.InfoWindow({
-      content: `
-        <div style="color: #0f172a; padding: 6px; font-family: sans-serif;">
-          <strong style="color: #dc2626; font-size: 13px;">🚨 Patient Location (SOS Origin)</strong>
-          <p style="margin: 4px 0 0; font-size: 11px;">${activePatientLabel}</p>
-          <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#fee2e2; color:#991b1b; padding: 2px 6px; border-radius: 4px;">CURRENT GPS PIN</span>
-        </div>
-      `,
-    });
+      const patientInfoWindow = new google.maps.InfoWindow({
+        content: `
+          <div style="color: #0f172a; padding: 6px; font-family: sans-serif;">
+            <strong style="color: #dc2626; font-size: 13px;">🚨 Patient Location (SOS Origin)</strong>
+            <p style="margin: 4px 0 0; font-size: 11px;">${activePatientLabel}</p>
+            <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#fee2e2; color:#991b1b; padding: 2px 6px; border-radius: 4px;">CURRENT GPS PIN</span>
+          </div>
+        `,
+      });
 
-    patientMarker.addListener("click", () => {
-      patientInfoWindow.open(map, patientMarker);
-    });
+      patientMarkerRef.current.addListener("click", () => {
+        patientInfoWindow.open(map, patientMarkerRef.current);
+      });
+    }
 
-    // 2. Dispatched Ambulance Marker (GS Road, Guwahati)
-    const ambulanceLatLng = new google.maps.LatLng(ambulanceCoords.lat, ambulanceCoords.lng);
+    // 2. Dispatched Ambulance Marker
+    const ambulanceLatLng = new google.maps.LatLng(curAmbulanceCoords.lat, curAmbulanceCoords.lng);
     bounds.extend(ambulanceLatLng);
 
-    const ambulanceMarker = new google.maps.Marker({
-      position: ambulanceCoords,
-      map,
-      title: `Ambulance: ${vehicleNumber}`,
-      zIndex: 90,
-      icon: {
-        url: getAmbulanceIconSvg(),
-        scaledSize: new google.maps.Size(42, 42),
-        anchor: new google.maps.Point(21, 21),
-      },
-    });
+    if (ambulanceMarkerRef.current) {
+      ambulanceMarkerRef.current.setPosition(ambulanceLatLng);
+    } else {
+      ambulanceMarkerRef.current = new google.maps.Marker({
+        position: ambulanceLatLng,
+        map,
+        title: `Ambulance: ${vehicleNumber}`,
+        zIndex: 90,
+        icon: {
+          url: getAmbulanceIconSvg(),
+          scaledSize: new google.maps.Size(42, 42),
+          anchor: new google.maps.Point(21, 21),
+        },
+      });
 
-    const ambulanceInfoWindow = new google.maps.InfoWindow({
-      content: `
-        <div style="color: #0f172a; padding: 6px; font-family: sans-serif;">
-          <strong style="color: #0f766e; font-size: 13px;">🚑 Ambulance Unit (${vehicleNumber})</strong>
-          <p style="margin: 4px 0 0; font-size: 11px;"><b>Transport Mode:</b> Emergency Road Transport (DRIVING)</p>
-          <p style="margin: 2px 0 0; font-size: 11px;"><b>Paramedic:</b> ${driverName}</p>
-          <p style="margin: 2px 0 0; font-size: 11px;"><b>Status:</b> ${status}</p>
-          <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#ccfbf1; color:#115e59; padding: 2px 6px; border-radius: 4px;">ROAD TRANSPORT DISPATCH</span>
-        </div>
-      `,
-    });
+      const ambulanceInfoWindow = new google.maps.InfoWindow({
+        content: `
+          <div style="color: #0f172a; padding: 6px; font-family: sans-serif;">
+            <strong style="color: #0f766e; font-size: 13px;">🚑 Ambulance Unit (${vehicleNumber})</strong>
+            <p style="margin: 4px 0 0; font-size: 11px;"><b>Transport Mode:</b> Emergency Road Transport (DRIVING)</p>
+            <p style="margin: 2px 0 0; font-size: 11px;"><b>Paramedic:</b> ${driverName}</p>
+            <p style="margin: 2px 0 0; font-size: 11px;"><b>Status:</b> ${status}</p>
+            <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#ccfbf1; color:#115e59; padding: 2px 6px; border-radius: 4px;">ROAD TRANSPORT DISPATCH</span>
+          </div>
+        `,
+      });
 
-    ambulanceMarker.addListener("click", () => {
-      ambulanceInfoWindow.open(map, ambulanceMarker);
-    });
+      ambulanceMarkerRef.current.addListener("click", () => {
+        ambulanceInfoWindow.open(map, ambulanceMarkerRef.current);
+      });
+    }
 
-    // 3. Hospital Marker (Only logged in / assigned hospital)
+    // 3. Hospital Markers
+    hospitalMarkersRef.current.forEach((m) => m.setMap(null));
+    hospitalMarkersRef.current = [];
+
     filteredHospitals.forEach((hosp) => {
       if (!hosp.coordinates) return;
       const hospLatLng = new google.maps.LatLng(hosp.coordinates.lat, hosp.coordinates.lng);
@@ -406,35 +476,26 @@ export function GoogleAmbulanceMap({
         if (onSelectHospital) onSelectHospital(hosp);
         hospInfoWindow.open(map, hospitalMarker);
       });
+
+      hospitalMarkersRef.current.push(hospitalMarker);
     });
 
-    // 4. Road Transport Directions
-    let fallbackOuterPolyline: any = null;
-    let fallbackInnerPolyline: any = null;
+    // 4. Directions Service
+    fallbackPolylinesRef.current.forEach((p) => p.setMap(null));
+    fallbackPolylinesRef.current = [];
 
     const directionsService = new google.maps.DirectionsService();
-    const directionsRenderer = new google.maps.DirectionsRenderer({
-      map,
-      suppressMarkers: true,
-      preserveViewport: true, // Prevent resetting view to Delhi / India center
-      polylineOptions: {
-        strokeColor: "#0284c7",
-        strokeOpacity: 0.95,
-        strokeWeight: 7,
-        zIndex: 85,
-      },
-    });
 
     directionsService.route(
       {
-        origin: new google.maps.LatLng(ambulanceCoords.lat, ambulanceCoords.lng),
-        destination: new google.maps.LatLng(activePatientCoords.lat, activePatientCoords.lng),
+        origin: ambulanceLatLng,
+        destination: patientLatLng,
         travelMode: google.maps.TravelMode.DRIVING,
         provideRouteAlternatives: false,
       },
       (result: any, statusResult: string) => {
-        if (statusResult === "OK" && result) {
-          directionsRenderer.setDirections(result);
+        if (statusResult === "OK" && result && directionsRendererRef.current) {
+          directionsRendererRef.current.setDirections(result);
           const leg = result.routes[0]?.legs[0];
           if (leg) {
             if (leg.duration?.text) setEtaText(leg.duration.text);
@@ -450,18 +511,19 @@ export function GoogleAmbulanceMap({
             }
           }
         } else {
+          // Road-snapped fallback polyline along GS Road corridor
           const roadSnappedCoordinates = [
             new google.maps.LatLng(26.1557, 91.7706),
             new google.maps.LatLng(26.1585, 91.7695),
             new google.maps.LatLng(26.1612, 91.7682),
-            new google.maps.LatLng(26.1640, 91.7670),
+            new google.maps.LatLng(curAmbulanceCoords.lat, curAmbulanceCoords.lng),
             new google.maps.LatLng(26.1663, 91.7648),
             new google.maps.LatLng(26.1685, 91.7628),
             new google.maps.LatLng(26.1704, 91.7610),
-            new google.maps.LatLng(activePatientCoords.lat, activePatientCoords.lng),
+            new google.maps.LatLng(curPatientCoords.lat, curPatientCoords.lng),
           ];
 
-          fallbackOuterPolyline = new google.maps.Polyline({
+          const outerLine = new google.maps.Polyline({
             path: roadSnappedCoordinates,
             geodesic: true,
             strokeColor: "#083344",
@@ -471,7 +533,7 @@ export function GoogleAmbulanceMap({
             map,
           });
 
-          fallbackInnerPolyline = new google.maps.Polyline({
+          const innerLine = new google.maps.Polyline({
             path: roadSnappedCoordinates,
             geodesic: true,
             strokeColor: "#0284c7",
@@ -494,11 +556,13 @@ export function GoogleAmbulanceMap({
             map,
           });
 
+          fallbackPolylinesRef.current = [outerLine, innerLine];
+
           const directDist = calculateDistanceKm(
-            ambulanceCoords.lat,
-            ambulanceCoords.lng,
-            activePatientCoords.lat,
-            activePatientCoords.lng
+            curAmbulanceCoords.lat,
+            curAmbulanceCoords.lng,
+            curPatientCoords.lat,
+            curPatientCoords.lng
           );
           setDistanceText(`${directDist} km`);
           setEtaText(`${Math.max(3, Math.round(directDist * 2.8))} mins`);
@@ -506,19 +570,21 @@ export function GoogleAmbulanceMap({
       }
     );
 
+    // Lock camera into bounds safely
     map.fitBounds(bounds, { top: 50, bottom: 50, left: 50, right: 50 });
   }, [
     mapsLoaded,
-    activePatientCoords,
+    activePatientCoords.lat,
+    activePatientCoords.lng,
     activePatientLabel,
-    ambulanceCoords,
-    hospitalCoords,
+    ambulanceCoords?.lat,
+    ambulanceCoords?.lng,
     hospitalName,
     vehicleNumber,
     driverName,
     status,
     filteredHospitals,
-    mapType,
+    onSelectHospital,
   ]);
 
   function centerOnAmbulance() {
@@ -563,7 +629,7 @@ export function GoogleAmbulanceMap({
             type="button"
             onClick={detectUserCurrentLocation}
             disabled={gpsDetecting}
-            className="flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-950/70 px-3 py-1.5 text-[11px] font-bold text-rose-300 hover:bg-rose-900 transition shadow-xs"
+            className="flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-950/70 px-3 py-1.5 text-[11px] font-bold text-rose-300 hover:bg-rose-900 transition shadow-xs cursor-pointer"
           >
             <LocateFixed className={`h-3.5 w-3.5 ${gpsDetecting ? "animate-spin" : ""}`} />
             {gpsDetecting ? "Detecting GPS..." : "📍 Get My Location"}
@@ -572,21 +638,21 @@ export function GoogleAmbulanceMap({
           <button
             type="button"
             onClick={centerOnAmbulance}
-            className="rounded-xl border border-teal-500/30 bg-teal-950/60 px-2.5 py-1 text-[11px] font-bold text-teal-300 hover:bg-teal-900 transition"
+            className="rounded-xl border border-teal-500/30 bg-teal-950/60 px-2.5 py-1 text-[11px] font-bold text-teal-300 hover:bg-teal-900 transition cursor-pointer"
           >
             🚑 Unit
           </button>
           <button
             type="button"
             onClick={centerOnPatient}
-            className="rounded-xl border border-rose-500/30 bg-rose-950/60 px-2.5 py-1 text-[11px] font-bold text-rose-300 hover:bg-rose-900 transition"
+            className="rounded-xl border border-rose-500/30 bg-rose-950/60 px-2.5 py-1 text-[11px] font-bold text-rose-300 hover:bg-rose-900 transition cursor-pointer"
           >
             📍 Patient
           </button>
           <button
             type="button"
             onClick={() => setMapType((t) => (t === "roadmap" ? "satellite" : "roadmap"))}
-            className="rounded-xl border border-white/10 bg-slate-800/80 px-2.5 py-1 text-[11px] font-bold text-slate-300 hover:text-white transition"
+            className="rounded-xl border border-white/10 bg-slate-800/80 px-2.5 py-1 text-[11px] font-bold text-slate-300 hover:text-white transition cursor-pointer"
           >
             <Layers className="inline h-3 w-3 mr-1" />
             {mapType === "roadmap" ? "Satellite" : "Roads"}
@@ -654,7 +720,7 @@ export function GoogleAmbulanceMap({
           <button
             type="button"
             onClick={() => setShowSteps((s) => !s)}
-            className="flex items-center justify-between gap-2 rounded-xl border border-sky-500/30 bg-sky-950/80 px-3 py-1.5 text-[11px] font-bold text-sky-300 hover:bg-sky-900 transition shadow-lg backdrop-blur-md"
+            className="flex items-center justify-between gap-2 rounded-xl border border-sky-500/30 bg-sky-950/80 px-3 py-1.5 text-[11px] font-bold text-sky-300 hover:bg-sky-900 transition shadow-lg backdrop-blur-md cursor-pointer"
           >
             <span className="flex items-center gap-1.5">
               <Route className="h-3.5 w-3.5" />
