@@ -14,6 +14,7 @@ import {
   Building2,
   ChevronRight,
   ClipboardList,
+  ExternalLink,
   History,
   LayoutDashboard,
   LogOut,
@@ -197,9 +198,23 @@ function Sidebar({
             <p className="truncate text-xs text-white/50">{account.email}</p>
           </div>
         )}
+
+        {/* Patient Portal & App Link */}
+        <a
+          href="https://nexora-zivan-patient.vercel.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mb-2 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-teal-200 transition hover:bg-white/10 hover:text-white"
+        >
+          <span className="flex items-center gap-2">
+            <span>👤 Patient Portal</span>
+          </span>
+          <ExternalLink className="h-3 w-3 text-teal-300 opacity-70" />
+        </a>
+
         <button
           onClick={onLogout}
-          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white/60 transition-all hover:bg-rose-500/20 hover:text-rose-200 hover:shadow-xs active:scale-[0.98]"
+          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white/60 transition-all hover:bg-rose-500/20 hover:text-rose-200 hover:shadow-xs active:scale-[0.98] cursor-pointer"
         >
           <LogOut className="h-4 w-4" aria-hidden />
           Sign out
@@ -343,6 +358,18 @@ export function HospitalShell({
 
             {/* Header right */}
             <div className="flex items-center gap-2 sm:gap-2.5">
+              {/* Return to Patient Portal Link */}
+              <a
+                href="https://nexora-zivan-patient.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-200/90 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-2xs transition hover:bg-slate-50 hover:text-primary hover:border-primary/40"
+                title="Open Patient Portal (ZIVAN)"
+              >
+                <span>👤 Patient App</span>
+                <ExternalLink className="h-3 w-3 text-slate-400" />
+              </a>
+
               {/* Header SOS Active Pill */}
               {notificationCount > 0 && (
                 <Link

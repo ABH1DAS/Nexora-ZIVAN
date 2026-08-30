@@ -141,12 +141,12 @@ export default function HospitalLoginPage() {
       {/* Top bar */}
       <header className="flex items-center justify-between px-6 py-4 sm:px-10">
         <Logo size="sm" subtitle="Hospital Portal" priority />
-        <Link
-          href="/"
-          className="text-sm font-semibold text-muted transition hover:text-primary"
+        <a
+          href="https://nexora-zivan-patient.vercel.app/"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-teal-600/30 bg-teal-50 px-3.5 py-1.5 text-xs font-bold text-teal-950 transition hover:bg-teal-100 hover:border-teal-500 shadow-2xs"
         >
-          ← Patient site
-        </Link>
+          <span>← Patient Portal &amp; Login</span>
+        </a>
       </header>
 
       {/* Main login card */}
