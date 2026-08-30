@@ -13,6 +13,7 @@ import {
   Navigation,
 } from "lucide-react";
 import { hospitals as defaultHospitals, type Hospital } from "@/data/hospitals";
+import "leaflet/dist/leaflet.css";
 
 export interface Coordinates {
   lat: number;
@@ -59,59 +60,6 @@ function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: num
   return Math.round(R * c * 10) / 10;
 }
 
-function getHospitalIconSvg(category: "government" | "private", isSelected: boolean) {
-  const bgColor = isSelected ? "#0284c7" : category === "government" ? "#2563eb" : "#059669";
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="38" height="48" viewBox="0 0 38 48">
-      <defs>
-        <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.4"/>
-        </filter>
-      </defs>
-      <path d="M19 0 C8.5 0 0 8.5 0 19 C0 31.5 19 48 19 48 C19 48 38 31.5 38 19 C38 8.5 29.5 0 19 0 Z" fill="${bgColor}" filter="url(#shadow)"/>
-      <circle cx="19" cy="18" r="12" fill="#ffffff"/>
-      <rect x="16.5" y="10" width="5" height="16" rx="1.5" fill="${bgColor}"/>
-      <rect x="11" y="15.5" width="16" height="5" rx="1.5" fill="${bgColor}"/>
-    </svg>
-  `;
-  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
-}
-
-function getPatientIconSvg() {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="38" height="48" viewBox="0 0 38 48">
-      <defs>
-        <filter id="patShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#dc2626" flood-opacity="0.6"/>
-        </filter>
-      </defs>
-      <path d="M19 0 C8.5 0 0 8.5 0 19 C0 31.5 19 48 19 48 C19 48 38 31.5 38 19 C38 8.5 29.5 0 19 0 Z" fill="#ef4444" filter="url(#patShadow)"/>
-      <circle cx="19" cy="18" r="12" fill="#ffffff"/>
-      <circle cx="19" cy="18" r="6" fill="#dc2626"/>
-    </svg>
-  `;
-  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
-}
-
-function getAmbulanceIconSvg() {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="46" height="46" viewBox="0 0 46 46">
-      <defs>
-        <filter id="ambShadow" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#0d9488" flood-opacity="0.7"/>
-        </filter>
-      </defs>
-      <circle cx="23" cy="23" r="19" fill="#0f766e" stroke="#ffffff" stroke-width="2.5" filter="url(#ambShadow)"/>
-      <path d="M13 26 L13 19 C13 17.5 14 16.5 15.5 16.5 L25 16.5 L30 21 L33 21 C33.8 21 34.5 21.7 34.5 22.5 L34.5 26" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-      <rect x="19" y="18.5" width="2" height="6" fill="#ef4444"/>
-      <rect x="17" y="20.5" width="6" height="2" fill="#ef4444"/>
-      <circle cx="18" cy="28" r="2.5" fill="#ffffff"/>
-      <circle cx="29" cy="28" r="2.5" fill="#ffffff"/>
-    </svg>
-  `;
-  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
-}
-
 export function GoogleAmbulanceMap({
   patientCoords = DEFAULT_PATIENT_COORDS,
   patientLabel = "GS Road, Ulubari / Bhangagarh, Guwahati, Assam 781007",
@@ -129,16 +77,13 @@ export function GoogleAmbulanceMap({
   onSelectHospital,
   onLocationDetected,
 }: GoogleAmbulanceMapProps) {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const leafletMapRef = useRef<any>(null);
   const patientMarkerRef = useRef<any>(null);
   const ambulanceMarkerRef = useRef<any>(null);
-  const hospitalMarkersRef = useRef<any[]>([]);
-  const directionsRendererRef = useRef<any>(null);
-  const fallbackPolylinesRef = useRef<any[]>([]);
-
-  const [mapsLoaded, setMapsLoaded] = useState(false);
-  const [apiKeyAvailable, setApiKeyAvailable] = useState(false);
+  const hospitalMarkerRef = useRef<any>(null);
+  const polylineLayerRef = useRef<any>(null);
+  const tileLayerRef = useRef<any>(null);
 
   const [activePatientCoords, setActivePatientCoords] = useState<Coordinates>(patientCoords || DEFAULT_PATIENT_COORDS);
   const [activePatientLabel, setActivePatientLabel] = useState<string>(patientLabel || "GS Road, Ulubari / Bhangagarh, Guwahati, Assam 781007");
@@ -146,18 +91,19 @@ export function GoogleAmbulanceMap({
 
   const [etaText, setEtaText] = useState(`${etaMinutes} mins`);
   const [distanceText, setDistanceText] = useState("1.2 km");
-  const [routeSteps, setRouteSteps] = useState<RouteStep[]>([
-    { instruction: "Head north on GS Road from Bhangagarh Base", distance: "400 m", duration: "1 min" },
-    { instruction: "Continue straight across Bhangagarh Flyover on GS Road", distance: "500 m", duration: "1 min" },
-    { instruction: "Pass ABC Bus Stop & merge left towards Ulubari Point", distance: "300 m", duration: "1 min" },
-    { instruction: "Arrive at Patient SOS Coordinates (GS Road, Ulubari)", distance: "0 m", duration: "0 min" },
-  ]);
   const [showSteps, setShowSteps] = useState(false);
-  const [mapType, setMapType] = useState<"roadmap" | "satellite">("roadmap");
+  const [mapLayerType, setMapLayerType] = useState<"roads" | "satellite">("roads");
 
-  // Sync props to internal state
+  const routeSteps: RouteStep[] = [
+    { instruction: "Head north on GS Road from Bhangagarh Station", distance: "400 m", duration: "1 min" },
+    { instruction: "Proceed across Bhangagarh Flyover Corridor", distance: "500 m", duration: "1 min" },
+    { instruction: "Pass ABC Point and turn slightly left towards Ulubari", distance: "300 m", duration: "1 min" },
+    { instruction: "Arrive at Patient SOS Origin Coordinates (GS Road, Ulubari)", distance: "0 m", duration: "0 min" },
+  ];
+
+  // Sync props to state
   useEffect(() => {
-    if (patientCoords && patientCoords.lat && patientCoords.lng) {
+    if (patientCoords?.lat && patientCoords?.lng) {
       setActivePatientCoords(patientCoords);
     }
   }, [patientCoords?.lat, patientCoords?.lng]);
@@ -174,35 +120,14 @@ export function GoogleAmbulanceMap({
     }
   }, [etaMinutes]);
 
-  const apiKey =
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
-    "AIzaSyCdU5-QL9eWfz71iJE4INZYwqkF1SzM8l0";
-
-  const dynamicHospitals = useMemo(() => {
-    return nearbyHospitals.map((hosp) => {
-      if (!hosp.coordinates) return hosp;
-      const realDist = calculateDistanceKm(
-        activePatientCoords.lat,
-        activePatientCoords.lng,
-        hosp.coordinates.lat,
-        hosp.coordinates.lng
-      );
-      return {
-        ...hosp,
-        distanceKm: realDist,
-        estimatedTravelTime: `${Math.max(3, Math.round(realDist * 2.2))}–${Math.max(6, Math.round(realDist * 3.1))} mins`,
-      };
-    }).sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
-  }, [nearbyHospitals, activePatientCoords]);
-
-  const filteredHospitals = useMemo(() => {
-    const match = dynamicHospitals.filter(
+  const targetHospital = useMemo(() => {
+    const match = nearbyHospitals.find(
       (h) =>
         h.name.toLowerCase().includes(hospitalName.toLowerCase()) ||
         hospitalName.toLowerCase().includes(h.name.toLowerCase())
     );
-    return match.length > 0 ? match : dynamicHospitals.slice(0, 1);
-  }, [dynamicHospitals, hospitalName]);
+    return match || nearbyHospitals[0];
+  }, [nearbyHospitals, hospitalName]);
 
   const detectUserCurrentLocation = useCallback(() => {
     if (typeof window === "undefined" || !navigator.geolocation) {
@@ -218,393 +143,246 @@ export function GoogleAmbulanceMap({
           lng: position.coords.longitude,
         };
         setActivePatientCoords(detectedCoords);
+        const fallbackLabel = `GPS (${detectedCoords.lat.toFixed(4)}, ${detectedCoords.lng.toFixed(4)})`;
+        setActivePatientLabel(fallbackLabel);
+        if (onLocationDetected) onLocationDetected(detectedCoords, fallbackLabel);
 
-        if ((window as any).google?.maps?.Geocoder) {
-          const geocoder = new (window as any).google.maps.Geocoder();
-          geocoder.geocode({ location: detectedCoords }, (results: any, statusResult: string) => {
-            if (statusResult === "OK" && results && results[0]) {
-              const formatted = results[0].formatted_address;
-              setActivePatientLabel(formatted);
-              if (onLocationDetected) onLocationDetected(detectedCoords, formatted);
-            } else {
-              const fallbackLabel = `GPS (${detectedCoords.lat.toFixed(4)}, ${detectedCoords.lng.toFixed(4)})`;
-              setActivePatientLabel(fallbackLabel);
-              if (onLocationDetected) onLocationDetected(detectedCoords, fallbackLabel);
-            }
-          });
-        } else {
-          const fallbackLabel = `GPS (${detectedCoords.lat.toFixed(4)}, ${detectedCoords.lng.toFixed(4)})`;
-          setActivePatientLabel(fallbackLabel);
-          if (onLocationDetected) onLocationDetected(detectedCoords, fallbackLabel);
+        if (leafletMapRef.current) {
+          leafletMapRef.current.setView([detectedCoords.lat, detectedCoords.lng], 15);
         }
-
-        if (mapInstanceRef.current) {
-          mapInstanceRef.current.panTo(detectedCoords);
-          mapInstanceRef.current.setZoom(15);
-        }
-
         setGpsDetecting(false);
       },
       (error) => {
-        console.warn("Geolocation detection error:", error.message);
+        console.warn("Geolocation error:", error.message);
         setGpsDetecting(false);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   }, [onLocationDetected]);
 
-  // Load Google Maps Script
+  // Initialize Leaflet Map
   useEffect(() => {
-    if (!apiKey) {
-      setApiKeyAvailable(false);
-      return;
-    }
+    if (typeof window === "undefined" || !mapContainerRef.current) return;
 
-    setApiKeyAvailable(true);
+    let isMounted = true;
 
-    if (typeof window !== "undefined" && (window as any).google?.maps) {
-      setMapsLoaded(true);
-      return;
-    }
+    import("leaflet").then((L) => {
+      if (!isMounted || !mapContainerRef.current) return;
 
-    const scriptId = "google-maps-script";
-    if (document.getElementById(scriptId)) {
-      setMapsLoaded(true);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,geometry`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      setMapsLoaded(true);
-    };
-    document.head.appendChild(script);
-  }, [apiKey]);
-
-  // Initialize Map Instance ONCE
-  useEffect(() => {
-    if (!mapsLoaded || !mapRef.current || !(window as any).google?.maps) return;
-
-    const google = (window as any).google;
-
-    const darkMapStyles = [
-      { elementType: "geometry", stylers: [{ color: "#1e293b" }] },
-      { elementType: "labels.text.stroke", stylers: [{ color: "#0f172a" }] },
-      { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
-      { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
-      { featureType: "poi", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-      { featureType: "poi.business", stylers: [{ visibility: "off" }] },
-      { featureType: "poi.attraction", stylers: [{ visibility: "off" }] },
-      { featureType: "poi.place_of_worship", stylers: [{ visibility: "off" }] },
-      { featureType: "poi.school", stylers: [{ visibility: "off" }] },
-      { featureType: "poi.sports_complex", stylers: [{ visibility: "off" }] },
-      { featureType: "transit.station.bus", stylers: [{ visibility: "off" }] },
-      { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#f8fafc" }] },
-      { featureType: "road", elementType: "geometry", stylers: [{ color: "#334155" }] },
-      { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1e293b" }] },
-      { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#475569" }] },
-      { featureType: "water", elementType: "geometry", stylers: [{ color: "#0f172a" }] },
-    ];
-
-    if (!mapInstanceRef.current) {
-      const centerCoords = {
-        lat: (activePatientCoords.lat + (ambulanceCoords?.lat || DEFAULT_AMBULANCE_COORDS.lat)) / 2,
-        lng: (activePatientCoords.lng + (ambulanceCoords?.lng || DEFAULT_AMBULANCE_COORDS.lng)) / 2,
-      };
-
-      const map = new google.maps.Map(mapRef.current, {
-        center: centerCoords,
-        zoom: 14,
-        mapTypeId: mapType,
-        disableDefaultUI: false,
-        zoomControl: true,
-        fullscreenControl: true,
-        mapTypeControl: false,
-        streetViewControl: false,
-        styles: mapType === "roadmap" ? darkMapStyles : undefined,
+      // Fix default icons if missing
+      delete (L.Icon.Default.prototype as any)._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
+        iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+        shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
       });
 
-      mapInstanceRef.current = map;
+      if (!leafletMapRef.current) {
+        const pLat = activePatientCoords.lat || DEFAULT_PATIENT_COORDS.lat;
+        const pLng = activePatientCoords.lng || DEFAULT_PATIENT_COORDS.lng;
+        const aLat = ambulanceCoords?.lat || DEFAULT_AMBULANCE_COORDS.lat;
+        const aLng = ambulanceCoords?.lng || DEFAULT_AMBULANCE_COORDS.lng;
 
-      // Directions Renderer with preserveViewport strictly TRUE
-      directionsRendererRef.current = new google.maps.DirectionsRenderer({
-        map,
-        suppressMarkers: true,
-        preserveViewport: true,
-        polylineOptions: {
-          strokeColor: "#0284c7",
-          strokeOpacity: 0.95,
-          strokeWeight: 7,
-          zIndex: 85,
-        },
-      });
-    } else {
-      mapInstanceRef.current.setMapTypeId(mapType);
-      mapInstanceRef.current.setOptions({
-        styles: mapType === "roadmap" ? darkMapStyles : undefined,
-      });
-    }
-  }, [mapsLoaded, mapType, activePatientCoords.lat, activePatientCoords.lng, ambulanceCoords?.lat, ambulanceCoords?.lng]);
+        const map = L.map(mapContainerRef.current, {
+          center: [(pLat + aLat) / 2, (pLng + aLng) / 2],
+          zoom: 14,
+          zoomControl: true,
+          attributionControl: false,
+        });
 
-  // Update Markers and Route on map
-  useEffect(() => {
-    if (!mapsLoaded || !mapInstanceRef.current || !(window as any).google?.maps) return;
+        leafletMapRef.current = map;
 
-    const google = (window as any).google;
-    const map = mapInstanceRef.current;
-    const bounds = new google.maps.LatLngBounds();
+        // Tile layer (Dark CartoDB by default, or Esri Satellite)
+        const darkTileUrl = "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+        tileLayerRef.current = L.tileLayer(darkTileUrl, {
+          maxZoom: 19,
+          subdomains: "abcd",
+        }).addTo(map);
+      }
 
-    const curPatientCoords = activePatientCoords || DEFAULT_PATIENT_COORDS;
-    const curAmbulanceCoords = ambulanceCoords || DEFAULT_AMBULANCE_COORDS;
+      const map = leafletMapRef.current;
 
-    // 1. Patient Marker
-    const patientLatLng = new google.maps.LatLng(curPatientCoords.lat, curPatientCoords.lng);
-    bounds.extend(patientLatLng);
+      // Update Tile Layer based on layer toggle
+      if (tileLayerRef.current) {
+        map.removeLayer(tileLayerRef.current);
+      }
 
-    if (patientMarkerRef.current) {
-      patientMarkerRef.current.setPosition(patientLatLng);
-    } else {
-      patientMarkerRef.current = new google.maps.Marker({
-        position: patientLatLng,
-        map,
-        title: "Patient Location (SOS Origin)",
-        zIndex: 100,
-        icon: {
-          url: getPatientIconSvg(),
-          scaledSize: new google.maps.Size(36, 46),
-          anchor: new google.maps.Point(18, 46),
-        },
-      });
+      if (mapLayerType === "satellite") {
+        tileLayerRef.current = L.tileLayer(
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          { maxZoom: 19 }
+        ).addTo(map);
+      } else {
+        tileLayerRef.current = L.tileLayer(
+          "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+          { maxZoom: 19, subdomains: "abcd" }
+        ).addTo(map);
+      }
 
-      const patientInfoWindow = new google.maps.InfoWindow({
-        content: `
-          <div style="color: #0f172a; padding: 6px; font-family: sans-serif;">
-            <strong style="color: #dc2626; font-size: 13px;">🚨 Patient Location (SOS Origin)</strong>
-            <p style="margin: 4px 0 0; font-size: 11px;">${activePatientLabel}</p>
-            <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#fee2e2; color:#991b1b; padding: 2px 6px; border-radius: 4px;">CURRENT GPS PIN</span>
-          </div>
-        `,
-      });
-
-      patientMarkerRef.current.addListener("click", () => {
-        patientInfoWindow.open(map, patientMarkerRef.current);
-      });
-    }
-
-    // 2. Dispatched Ambulance Marker
-    const ambulanceLatLng = new google.maps.LatLng(curAmbulanceCoords.lat, curAmbulanceCoords.lng);
-    bounds.extend(ambulanceLatLng);
-
-    if (ambulanceMarkerRef.current) {
-      ambulanceMarkerRef.current.setPosition(ambulanceLatLng);
-    } else {
-      ambulanceMarkerRef.current = new google.maps.Marker({
-        position: ambulanceLatLng,
-        map,
-        title: `Ambulance: ${vehicleNumber}`,
-        zIndex: 90,
-        icon: {
-          url: getAmbulanceIconSvg(),
-          scaledSize: new google.maps.Size(42, 42),
-          anchor: new google.maps.Point(21, 21),
-        },
-      });
-
-      const ambulanceInfoWindow = new google.maps.InfoWindow({
-        content: `
-          <div style="color: #0f172a; padding: 6px; font-family: sans-serif;">
-            <strong style="color: #0f766e; font-size: 13px;">🚑 Ambulance Unit (${vehicleNumber})</strong>
-            <p style="margin: 4px 0 0; font-size: 11px;"><b>Transport Mode:</b> Emergency Road Transport (DRIVING)</p>
-            <p style="margin: 2px 0 0; font-size: 11px;"><b>Paramedic:</b> ${driverName}</p>
-            <p style="margin: 2px 0 0; font-size: 11px;"><b>Status:</b> ${status}</p>
-            <span style="display:inline-block; margin-top: 4px; font-size: 10px; font-weight:bold; background:#ccfbf1; color:#115e59; padding: 2px 6px; border-radius: 4px;">ROAD TRANSPORT DISPATCH</span>
-          </div>
-        `,
-      });
-
-      ambulanceMarkerRef.current.addListener("click", () => {
-        ambulanceInfoWindow.open(map, ambulanceMarkerRef.current);
-      });
-    }
-
-    // 3. Hospital Markers
-    hospitalMarkersRef.current.forEach((m) => m.setMap(null));
-    hospitalMarkersRef.current = [];
-
-    filteredHospitals.forEach((hosp) => {
-      if (!hosp.coordinates) return;
-      const hospLatLng = new google.maps.LatLng(hosp.coordinates.lat, hosp.coordinates.lng);
-      bounds.extend(hospLatLng);
-
-      const hospitalMarker = new google.maps.Marker({
-        position: hosp.coordinates,
-        map,
-        title: hosp.name,
-        zIndex: 80,
-        icon: {
-          url: getHospitalIconSvg(hosp.category, true),
-          scaledSize: new google.maps.Size(38, 48),
-          anchor: new google.maps.Point(19, 48),
-        },
-      });
-
-      const hospInfoWindow = new google.maps.InfoWindow({
-        content: `
-          <div style="color: #0f172a; padding: 8px; max-width: 230px; font-family: sans-serif;">
-            <div style="font-weight: bold; font-size: 13px; color: #1e293b;">🏥 ${hosp.name}</div>
-            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">${hosp.address}</div>
-            <div style="margin-top: 6px; font-size: 11px; display: flex; gap: 4px; flex-wrap: wrap;">
-              <span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: bold;">
-                🟢 ${hosp.availableBeds ?? 18} ER Beds Free
-              </span>
-              <span style="background: #f1f5f9; color: #334155; padding: 2px 6px; border-radius: 4px; font-weight: bold;">
-                ${hosp.distanceKm} km (${hosp.estimatedTravelTime})
-              </span>
+      // Custom HTML Icons
+      const patientIcon = L.divIcon({
+        className: "custom-patient-pin",
+        html: `
+          <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
+            <div style="position:absolute; width:34px; height:34px; border-radius:50%; background:rgba(239,68,68,0.4); animation:ping 1.5s cubic-bezier(0,0,0.2,1) infinite;"></div>
+            <div style="width:34px; height:34px; border-radius:50%; background:#ef4444; border:2.5px solid #ffffff; box-shadow:0 6px 16px rgba(220,38,38,0.6); display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:16px;">
+              📍
             </div>
-            <div style="margin-top: 6px; font-size: 11px;">
-              <b>ICU:</b> <span style="color: ${hosp.icuStatus === 'Available' ? '#16a34a' : '#d97706'}; font-weight: bold;">${hosp.icuStatus}</span>
+            <div style="background:#0f172a; color:#f87171; font-weight:800; font-size:10px; padding:2px 6px; border-radius:6px; margin-top:3px; white-space:nowrap; border:1px solid rgba(239,68,68,0.4); box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+              Patient SOS Pin
             </div>
-            ${hosp.phone ? `<div style="margin-top: 4px; font-size: 11px; color: #2563eb; font-weight: bold;">📞 ${hosp.phone}</div>` : ''}
           </div>
         `,
+        iconSize: [34, 52],
+        iconAnchor: [17, 34],
       });
 
-      hospitalMarker.addListener("click", () => {
-        if (onSelectHospital) onSelectHospital(hosp);
-        hospInfoWindow.open(map, hospitalMarker);
+      const ambulanceIcon = L.divIcon({
+        className: "custom-ambulance-pin",
+        html: `
+          <div style="position:relative; display:flex; flex-direction:column; align-items:center;">
+            <div style="position:absolute; width:40px; height:40px; border-radius:50%; background:rgba(13,148,136,0.4); animation:ping 1.2s cubic-bezier(0,0,0.2,1) infinite;"></div>
+            <div style="width:40px; height:40px; border-radius:14px; background:#0d9488; border:2.5px solid #ffffff; box-shadow:0 8px 20px rgba(13,148,136,0.7); display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:18px;">
+              🚑
+            </div>
+            <div style="background:#0f172a; color:#2dd4bf; font-weight:800; font-size:10px; padding:2px 6px; border-radius:6px; margin-top:3px; white-space:nowrap; border:1px solid rgba(45,212,191,0.4); box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+              ${vehicleNumber}
+            </div>
+          </div>
+        `,
+        iconSize: [40, 58],
+        iconAnchor: [20, 40],
       });
 
-      hospitalMarkersRef.current.push(hospitalMarker);
+      const hospitalIcon = L.divIcon({
+        className: "custom-hospital-pin",
+        html: `
+          <div style="display:flex; flex-direction:column; align-items:center;">
+            <div style="width:36px; height:36px; border-radius:12px; background:#2563eb; border:2.5px solid #ffffff; box-shadow:0 6px 16px rgba(37,99,235,0.6); display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:16px;">
+              🏥
+            </div>
+            <div style="background:#0f172a; color:#93c5fd; font-weight:800; font-size:10px; padding:2px 6px; border-radius:6px; margin-top:3px; white-space:nowrap; border:1px solid rgba(59,130,246,0.4); box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+              ${hospitalName}
+            </div>
+          </div>
+        `,
+        iconSize: [36, 54],
+        iconAnchor: [18, 36],
+      });
+
+      const curPatientCoords = activePatientCoords || DEFAULT_PATIENT_COORDS;
+      const curAmbulanceCoords = ambulanceCoords || DEFAULT_AMBULANCE_COORDS;
+      const curHospCoords = targetHospital?.coordinates || DEFAULT_HOSPITAL_COORDS;
+
+      // 1. Patient Marker
+      if (patientMarkerRef.current) {
+        patientMarkerRef.current.setLatLng([curPatientCoords.lat, curPatientCoords.lng]);
+      } else {
+        patientMarkerRef.current = L.marker([curPatientCoords.lat, curPatientCoords.lng], { icon: patientIcon })
+          .addTo(map)
+          .bindPopup(`<b>🚨 Patient Location (SOS Origin)</b><br/>${activePatientLabel}`);
+      }
+
+      // 2. Ambulance Marker
+      if (ambulanceMarkerRef.current) {
+        ambulanceMarkerRef.current.setLatLng([curAmbulanceCoords.lat, curAmbulanceCoords.lng]);
+      } else {
+        ambulanceMarkerRef.current = L.marker([curAmbulanceCoords.lat, curAmbulanceCoords.lng], { icon: ambulanceIcon })
+          .addTo(map)
+          .bindPopup(`<b>🚑 Ambulance Unit (${vehicleNumber})</b><br/>Paramedic: ${driverName}<br/>Status: ${status}`);
+      }
+
+      // 3. Hospital Marker
+      if (hospitalMarkerRef.current) {
+        hospitalMarkerRef.current.setLatLng([curHospCoords.lat, curHospCoords.lng]);
+      } else {
+        hospitalMarkerRef.current = L.marker([curHospCoords.lat, curHospCoords.lng], { icon: hospitalIcon })
+          .addTo(map)
+          .bindPopup(`<b>🏥 ${hospitalName}</b><br/>${targetHospital.address}`);
+      }
+
+      // 4. GS Road Corridor Snapped Polyline
+      if (polylineLayerRef.current) {
+        map.removeLayer(polylineLayerRef.current);
+      }
+
+      const roadPoints: [number, number][] = [
+        [curHospCoords.lat, curHospCoords.lng],
+        [26.1585, 91.7695],
+        [26.1612, 91.7682],
+        [curAmbulanceCoords.lat, curAmbulanceCoords.lng],
+        [26.1663, 91.7648],
+        [26.1685, 91.7628],
+        [26.1704, 91.7610],
+        [curPatientCoords.lat, curPatientCoords.lng],
+      ];
+
+      const outerGlow = L.polyline(roadPoints, {
+        color: "#083344",
+        weight: 9,
+        opacity: 0.8,
+        lineCap: "round",
+      });
+
+      const innerPath = L.polyline(roadPoints, {
+        color: "#0284c7",
+        weight: 5,
+        opacity: 0.95,
+        dashArray: "8, 6",
+        lineCap: "round",
+      });
+
+      polylineLayerRef.current = L.layerGroup([outerGlow, innerPath]).addTo(map);
+
+      // Fit bounds nicely with padding
+      const group = L.featureGroup([
+        patientMarkerRef.current,
+        ambulanceMarkerRef.current,
+        hospitalMarkerRef.current,
+      ]);
+      map.fitBounds(group.getBounds().pad(0.2));
+
+      const directDist = calculateDistanceKm(
+        curAmbulanceCoords.lat,
+        curAmbulanceCoords.lng,
+        curPatientCoords.lat,
+        curPatientCoords.lng
+      );
+      setDistanceText(`${directDist} km`);
+      setEtaText(`${Math.max(3, Math.round(directDist * 2.8))} mins`);
     });
 
-    // 4. Directions Service
-    fallbackPolylinesRef.current.forEach((p) => p.setMap(null));
-    fallbackPolylinesRef.current = [];
-
-    const directionsService = new google.maps.DirectionsService();
-
-    directionsService.route(
-      {
-        origin: ambulanceLatLng,
-        destination: patientLatLng,
-        travelMode: google.maps.TravelMode.DRIVING,
-        provideRouteAlternatives: false,
-      },
-      (result: any, statusResult: string) => {
-        if (statusResult === "OK" && result && directionsRendererRef.current) {
-          directionsRendererRef.current.setDirections(result);
-          const leg = result.routes[0]?.legs[0];
-          if (leg) {
-            if (leg.duration?.text) setEtaText(leg.duration.text);
-            if (leg.distance?.text) setDistanceText(leg.distance.text);
-
-            if (leg.steps && leg.steps.length > 0) {
-              const formattedSteps: RouteStep[] = leg.steps.map((s: any) => ({
-                instruction: s.instructions ? s.instructions.replace(/<[^>]*>?/gm, "") : "Follow road route",
-                distance: s.distance?.text || "",
-                duration: s.duration?.text || "",
-              }));
-              setRouteSteps(formattedSteps);
-            }
-          }
-        } else {
-          // Road-snapped fallback polyline along GS Road corridor
-          const roadSnappedCoordinates = [
-            new google.maps.LatLng(26.1557, 91.7706),
-            new google.maps.LatLng(26.1585, 91.7695),
-            new google.maps.LatLng(26.1612, 91.7682),
-            new google.maps.LatLng(curAmbulanceCoords.lat, curAmbulanceCoords.lng),
-            new google.maps.LatLng(26.1663, 91.7648),
-            new google.maps.LatLng(26.1685, 91.7628),
-            new google.maps.LatLng(26.1704, 91.7610),
-            new google.maps.LatLng(curPatientCoords.lat, curPatientCoords.lng),
-          ];
-
-          const outerLine = new google.maps.Polyline({
-            path: roadSnappedCoordinates,
-            geodesic: true,
-            strokeColor: "#083344",
-            strokeOpacity: 0.8,
-            strokeWeight: 9,
-            zIndex: 80,
-            map,
-          });
-
-          const innerLine = new google.maps.Polyline({
-            path: roadSnappedCoordinates,
-            geodesic: true,
-            strokeColor: "#0284c7",
-            strokeOpacity: 0.95,
-            strokeWeight: 6,
-            zIndex: 85,
-            icons: [
-              {
-                icon: {
-                  path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                  scale: 3,
-                  strokeColor: "#ffffff",
-                  fillColor: "#38bdf8",
-                  fillOpacity: 1,
-                },
-                offset: "50%",
-                repeat: "90px",
-              },
-            ],
-            map,
-          });
-
-          fallbackPolylinesRef.current = [outerLine, innerLine];
-
-          const directDist = calculateDistanceKm(
-            curAmbulanceCoords.lat,
-            curAmbulanceCoords.lng,
-            curPatientCoords.lat,
-            curPatientCoords.lng
-          );
-          setDistanceText(`${directDist} km`);
-          setEtaText(`${Math.max(3, Math.round(directDist * 2.8))} mins`);
-        }
-      }
-    );
-
-    // Lock camera into bounds safely
-    map.fitBounds(bounds, { top: 50, bottom: 50, left: 50, right: 50 });
+    return () => {
+      isMounted = false;
+    };
   }, [
-    mapsLoaded,
-    activePatientCoords.lat,
-    activePatientCoords.lng,
+    activePatientCoords,
     activePatientLabel,
-    ambulanceCoords?.lat,
-    ambulanceCoords?.lng,
+    ambulanceCoords,
     hospitalName,
     vehicleNumber,
     driverName,
     status,
-    filteredHospitals,
-    onSelectHospital,
+    mapLayerType,
+    targetHospital,
   ]);
 
   function centerOnAmbulance() {
-    if (mapInstanceRef.current && ambulanceCoords) {
-      mapInstanceRef.current.panTo(ambulanceCoords);
-      mapInstanceRef.current.setZoom(15);
+    if (leafletMapRef.current && ambulanceCoords) {
+      leafletMapRef.current.setView([ambulanceCoords.lat, ambulanceCoords.lng], 15, { animate: true });
     }
   }
 
   function centerOnPatient() {
-    if (mapInstanceRef.current && activePatientCoords) {
-      mapInstanceRef.current.panTo(activePatientCoords);
-      mapInstanceRef.current.setZoom(15);
+    if (leafletMapRef.current && activePatientCoords) {
+      leafletMapRef.current.setView([activePatientCoords.lat, activePatientCoords.lng], 15, { animate: true });
     }
   }
 
   return (
     <div className="relative flex flex-col w-full overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-950 shadow-2xl">
       {/* Top Map Header & Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-slate-900/90 px-5 py-3.5 backdrop-blur-md">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-slate-900/95 px-5 py-3.5 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-teal-500/20 text-teal-300 shadow-xs">
             <Ambulance className="h-5 w-5" />
@@ -651,64 +429,21 @@ export function GoogleAmbulanceMap({
           </button>
           <button
             type="button"
-            onClick={() => setMapType((t) => (t === "roadmap" ? "satellite" : "roadmap"))}
+            onClick={() => setMapLayerType((t) => (t === "roads" ? "satellite" : "roads"))}
             className="rounded-xl border border-white/10 bg-slate-800/80 px-2.5 py-1 text-[11px] font-bold text-slate-300 hover:text-white transition cursor-pointer"
           >
             <Layers className="inline h-3 w-3 mr-1" />
-            {mapType === "roadmap" ? "Satellite" : "Roads"}
+            {mapLayerType === "roads" ? "🛰️ Satellite" : "🛣️ Roads"}
           </button>
         </div>
       </div>
 
       {/* Main Map Container */}
-      <div className="relative h-[460px] sm:h-[500px] w-full bg-slate-950">
-        {apiKeyAvailable && mapsLoaded ? (
-          <div ref={mapRef} className="h-full w-full" />
-        ) : (
-          <div className="relative h-full w-full bg-[#0a1120] p-6 flex flex-col justify-between overflow-hidden">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-40" />
-
-            <svg className="absolute inset-0 h-full w-full pointer-events-none opacity-60">
-              <line x1="22%" y1="72%" x2="54%" y2="46%" stroke="#0284c7" strokeWidth="5" strokeDasharray="6 6" />
-            </svg>
-
-            <div className="absolute left-[22%] top-[72%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-10">
-              <div className="relative flex items-center justify-center">
-                <span className="absolute h-10 w-10 rounded-full bg-rose-500/40 animate-ping" />
-                <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-600 text-white shadow-[0_0_20px_rgba(239,68,68,0.8)]">
-                  <MapPin className="h-5 w-5 animate-bounce" />
-                </div>
-              </div>
-              <span className="mt-1.5 rounded-md bg-slate-900/90 px-2 py-0.5 text-[10px] font-bold text-rose-300 border border-rose-500/40 shadow">
-                Patient (26.1714, 91.7586)
-              </span>
-            </div>
-
-            <div className="absolute left-[54%] top-[46%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-10">
-              <div className="relative flex items-center justify-center">
-                <span className="absolute h-12 w-12 rounded-full bg-teal-500/40 animate-ping" />
-                <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-500 text-slate-950 font-bold shadow-[0_0_25px_rgba(20,184,166,0.9)]">
-                  <Ambulance className="h-6 w-6 animate-pulse" />
-                </div>
-              </div>
-              <span className="mt-1.5 rounded-md bg-slate-900/90 px-2 py-0.5 text-[10px] font-bold text-teal-300 border border-teal-500/40 shadow">
-                {vehicleNumber} (Emergency Transport)
-              </span>
-            </div>
-
-            <div className="absolute left-[62%] top-[18%] flex -translate-x-1/2 -translate-y-1/2 flex-col items-center z-10">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white font-bold shadow-[0_0_15px_rgba(37,99,235,0.8)] border border-white/20">
-                🏥
-              </div>
-              <span className="mt-1 rounded-md bg-slate-900/90 px-2 py-0.5 text-[9px] font-bold text-blue-300 border border-blue-500/30">
-                {hospitalName}
-              </span>
-            </div>
-          </div>
-        )}
+      <div className="relative h-[460px] sm:h-[500px] w-full bg-slate-950 z-0">
+        <div ref={mapContainerRef} className="h-full w-full z-0" />
 
         {/* Live Traffic & ETA Floating Badge with Road Transport Mode */}
-        <div className="absolute top-4 left-4 z-20 flex flex-col gap-1.5">
+        <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
           <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-900/95 px-4 py-2 backdrop-blur-md shadow-xl">
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
             <div className="flex items-center gap-2 text-xs font-bold text-white">
@@ -732,7 +467,7 @@ export function GoogleAmbulanceMap({
 
         {/* Turn-by-Turn Navigation Steps Drawer */}
         {showSteps && (
-          <div className="absolute top-24 left-4 z-30 max-w-sm rounded-2xl border border-white/15 bg-slate-900/95 p-3.5 shadow-2xl backdrop-blur-md text-xs text-white max-h-56 overflow-y-auto space-y-2">
+          <div className="absolute top-24 left-4 z-20 max-w-sm rounded-2xl border border-white/15 bg-slate-900/95 p-3.5 shadow-2xl backdrop-blur-md text-xs text-white max-h-56 overflow-y-auto space-y-2">
             <div className="flex items-center justify-between border-b border-white/10 pb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-teal-300">
               <span>🛣️ Road Transport Route Guidance</span>
               <span>Fast Corridor</span>
