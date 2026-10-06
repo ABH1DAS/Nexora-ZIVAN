@@ -17,6 +17,8 @@ export interface AuthUser {
   name: string;
   email: string;
   plan: "Free" | "Plus" | "Family";
+  points?: number;
+  streak?: number;
 }
 
 interface AuthContextValue {
@@ -79,6 +81,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: false as const, error: "Password must be at least 4 characters." };
       }
 
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: normalized, password }),
+        });
+        const data = await res.json();
+
+        if (res.ok && data.ok && data.user) {
+          persist({
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            plan: data.user.plan || "Plus",
+            points: data.user.points,
+            streak: data.user.streak,
+          });
+          return { ok: true as const };
+        } else if (res.status === 401 || res.status === 404 || res.status === 400) {
+          return { ok: false as const, error: data.error || "Invalid credentials." };
+        }
+      } catch {
+        // Fallback to client demo mode if MongoDB is offline
+      }
+
       const existing = readStoredUser();
       const name =
         existing?.email === normalized
@@ -112,6 +139,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       if (password.length < 4) {
         return { ok: false as const, error: "Password must be at least 4 characters." };
+      }
+
+      try {
+        const res = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: trimmedName, email: normalized, password, plan: "Free" }),
+        });
+        const data = await res.json();
+
+        if (res.ok && data.ok && data.user) {
+          persist({
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            plan: data.user.plan,
+            points: data.user.points,
+            streak: data.user.streak,
+          });
+          return { ok: true as const };
+        } else if (!res.ok && data.error) {
+          return { ok: false as const, error: data.error };
+        }
+      } catch {
+        // Fallback to client demo mode
       }
 
       persist({

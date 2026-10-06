@@ -524,6 +524,11 @@ export function loginHospitalStaff(
   return { ok: true, account };
 }
 
+export function setHospitalSession(account: HospitalAccount) {
+  if (!canUseStorage()) return;
+  localStorage.setItem(HOSPITAL_SESSION_KEY, JSON.stringify(account));
+}
+
 export function getHospitalSession(): HospitalAccount | null {
   if (!canUseStorage()) return null;
   try {

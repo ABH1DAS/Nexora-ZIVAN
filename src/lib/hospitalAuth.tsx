@@ -13,6 +13,7 @@ import {
   getHospitalSession,
   loginHospitalStaff,
   logoutHospitalStaff,
+  setHospitalSession,
 } from "@/lib/ambulanceStore";
 import type { HospitalAccount } from "@/data/ambulanceRequests";
 
@@ -38,6 +39,22 @@ export function HospitalAuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
+    try {
+      const res = await fetch("/api/hospital/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.account) {
+        setAccount(data.account);
+        setHospitalSession(data.account);
+        return { ok: true as const };
+      }
+    } catch {
+      // Fallback to local store logic
+    }
+
     const result = loginHospitalStaff(email, password);
     if (result.ok) {
       setAccount(result.account);
